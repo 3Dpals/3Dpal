@@ -1,0 +1,19 @@
+<% layout('layout') -%>
+
+
+<h2>Authentification</h2>
+<form class="well form-vertical" action="/auth" method="post">
+	<p>
+	<% if (next != null) { %>
+		<input type="hidden" name="next" value="<%= next %>" />
+	<% } %>
+	
+	<% if (error != null) { %>
+		<p><%= error %></p>
+	<% } %>
+	<input type="text" class="input-medium" name="login" required="required" placeholder="Login"/><br />
+	<input type="password" class="input-medium" name="password" required="required" placeholder="Password"/><br />
+	<button type="submit" class="btn-primary">Login</button><br />
+	<p><a href="/signin" title="Sign in!" style="text-decoration: underline;">Not a member yet? Sign in!</a></p>
+	</p>
+</form>

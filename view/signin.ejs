@@ -1,0 +1,69 @@
+<% layout('layout') -%>
+
+<div id="userCreation">
+	<h2>Welcome!</h2>
+	<form class="well form-vertical">
+		<p>
+		<span id="errorMsg"></span><br />
+		<input type="text" class="input-medium" name="username" id="username" required="required" placeholder="Username"/></span><br />
+		<input type="password" class="input-medium" name="password" id="password" required="required" placeholder="Password"/></span><br />
+		<input type="password" class="input-medium" name="password2" id="password2" required="required" placeholder="Password Confirmation"/><br />
+		<button type="submit" class="btn-primary">Sign</button>
+		</p>
+	</form>
+</div>
+
+<script>
+	$(function() { //shorthand document.ready function
+		$('form').on('submit', function(e) { //use on if jQuery 1.7+
+			e.preventDefault();  //prevent form from submitting
+			createUser();
+		});
+	});
+	function createUser() {
+		var username = $('#username').val();
+		var password = $('#password').val();
+		var password2 = $('#password2').val();
+		
+		if (!username) {
+			$('#errorMsg').text('Empty Username!');
+			return;
+		}
+		if (!password) {
+			$('#errorMsg').text('Empty Password!');
+			return;
+		}
+		if (!password2) {
+			$('#errorMsg').text('Empty Confirmation!');
+			return;
+		}
+		if (password != password2) {
+			$('#errorMsg').text('Passwords don\'t match!');
+			return;
+		}
+		
+		$('#userCreation').append('<div class="modalDialog"><p>Processing...</p></div>');
+		$('.modalDialog').css('opacity', 1);
+		
+		$.ajax({
+			type: 'POST',
+			url: rest+'/createUser',
+			data: {username: username, password: password},
+			success: function(data) {
+				if (data.success) {
+					$('.modalDialog > p').text('Success! Welcome aboard!');
+					 setTimeout(function(){window.location.href = '/login'}, 1000);
+				}
+				else {
+					$('.modalDialog').css('opacity', 0);
+					 setTimeout(function(){$('.modalDialog').remove()}, 400);
+					 $('#errorLogin').text('Already used, sorry.');
+					 $('#username').focus();
+					 $('#username').select();
+				}
+			},
+			dataType: 'json',
+			async:true
+		});     
+	}
+</script>
