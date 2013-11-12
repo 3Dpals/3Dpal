@@ -62,12 +62,12 @@ function twoDigits(nb) {
 
 function viewNotfound(req, res) {
 	logger.warn("<View> View not found : " + req.url);
-	res.render('404', {title: "Page non trouvée", rest: rest});
+	res.render('404', {title: "Page not found", rest: rest});
 }
 
 function viewHelp(req, res) {
 	logger.info("<View> Viewing help page.");
-	res.render('help', {title: "Aide", rest: rest});
+	res.render('help', {title: "Help", rest: rest});
 }
 
 exports.index = viewIndex;
