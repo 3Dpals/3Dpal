@@ -311,7 +311,7 @@ Full-Width Styles
 
 #downloads {
   position: absolute;
-  width: 300px;
+  width: 286px;
   z-index: 10;
   bottom: -40px;
   right: 0;
@@ -332,8 +332,8 @@ Full-Width Styles
 .rss_feed {
   display: block;
   float: right;
-  width: 90px;
-  height:70px;
+  width: 66px;
+  height:66px;
   text-indent: -5000px;
   overflow: hidden;
   background: url(../images/rss.png) no-repeat bottom left;
