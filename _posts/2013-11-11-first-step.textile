@@ -7,8 +7,8 @@ h1. {{ page.title }}
 
 p(meta). 11 Nov 2011 - Luleå
 
-Here starts the ***3Dpal*** project.
+Here starts the *3Dpal* project.
 
-This blog will be updated at the end of each of our small dev sprints. It is generated thanks to *(Jekyll)[http://jekyllrb.com]* & *(Github Pages)[http://pages.github.com/]*.
+This blog will be updated at the end of each of our small dev sprints. It is generated thanks to "Jekyll":http://jekyllrb.com & "Github Pages":http://pages.github.com.
 
 A detailed post to introduce the project is coming soon, so subscribe to our Atom feed and see you soon!
