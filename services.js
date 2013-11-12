@@ -49,45 +49,43 @@ module.exports = function(mongoose, modelUser /* TODO: add other needed models *
 
 	/*
 	 * ------------------------------------------
-	 * USER - CRUD Services
+	 * ModelExample - CRUD Services
 	 * ------------------------------------------
 	 */
 	 
 	/**
-	 * createUser
+	 * createModelExample
 	 * ====
-	 * Create a user (only if her/his username is unique).
+	 * Create a ModelExample.
 	 * Parameters:
-	 *	- username (String): 		User name
-	 *	- password (String): 		Password
+	 *	- my1stField (String): 		Whatever
+	 *	- my2ndField (Int): 		Whatever
 	 *	- cb (Function(bool)):		Callback
 	 */
-	function createUser(username, password, cb) {
+	function createModelExample(my1stField, my2ndField, cb) {
 		modelUser.findOne({ username: username }, function(err, user) {
-			if (err || user) return cb(false); // User already exists
-			
-			var user = new modelUser({username: username, password: password});
-			user.save(function(err) {
+			var example = new ModelExample({my1stField: my1stField, my2ndField: my2ndField});
+			example.save(function(err) {
 				if (err) cb(false);
 				else cb (true);
 			});
 		});
 	}
-	function serviceCreateUser(req, resp) {
-		logger.info("<Service> CreateUser.");
-		var userData = parseRequest(req, ['username', 'password']);
+	function serviceCreateModelExample(req, resp) {
+		logger.info("<Service> CreateModelExample.");
+		var exData = parseRequest(req, ['my1stField', 'my2ndField']);
 		
 		writeHeaders(resp);
-		createUser(userData.username, userData.password, function(success) { resp.end(JSON.stringify({ success: success })); });
+		createModelExample(exData.my1stField, exData.my2ndField, function(success) { resp.end(JSON.stringify({ success: success })); });
 	}
 
 	/* TODO: implement other services */
 	
 	
 	this.rest = {};
-	this.rest.createUser = serviceCreateUser;
+	this.rest.createModelExample = serviceCreateModelExample;
 
 	this.local = {};
-	this.local.createUser = createUser;
+	this.local.createModelExample = createModelExample;
 	return this;
 };

@@ -5,7 +5,7 @@
  * App launcher
  */
 
- var	express = require("express"),
+var	express = require("express"),
 	mongoose = require('mongoose'),
 	http = require('http'),
 	fs = require("fs"),
@@ -36,11 +36,10 @@ mongoose.connect(config.getProperty("db.uri"), function(err) {
   if (err) { logger.error(err); }
 });
 
-var modelUser = require("./model/user")(mongoose).model;
+var modelExample = require("./model/modelExample")(mongoose).model;
 
 var	services = require("./services")(mongoose, modelUser, modelOperation, modelNote, modelSnapshot),
-	views = require("./views"),
-	authModule = require("./auth")(modelUser);
+	views = require("./views");
 
 /* ------------------------
  * REST Server config
@@ -60,9 +59,9 @@ rest.configure(function() {
 	rest.use(rest.router); // manually defines the routes
 });
 
-// Service:
+// Service: (TO IMPROVE WITH PROPER REST ROUTING)
 serviceHandler = {};
-serviceHandler["/createUser"] = services.rest.createUser;
+serviceHandler["/createModelExample"] = services.rest.createModelExample;
 //serviceHandler["/xxx"] = services.xxx;
 
 for (var url in serviceHandler) {
@@ -113,18 +112,12 @@ viewHandler["/login"] = views.login;
 viewHandler["/signin"] = views.signin;
 viewHandler["/help"] = views.help;
 
-// Need to be put before * otherwise the star rule catches all the
-// requests !
-html.post("/auth", authModule.auth);
-html.get("/logout", authModule.logout);
-
 viewHandler["*"] = views.notfound;
 
-// handler, user, password
-authModule.init(viewHandler);
+
 
 for (var url in viewHandler) {
-	(securityActivated) ? html.get(url, authModule.checkAuth(url))
+	(securityActivated) ? /* TO DO */0
 						: html.get(url, viewHandler[url]);
 }
 
