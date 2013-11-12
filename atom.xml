@@ -14,7 +14,7 @@ layout: nil
  <updated>{{ site.time | date_to_xmlschema }}</updated>
  <id>http://3Dpals.github.io/3Dpal/</id>
  <author>
-   <name>3Dpals - Johannes Baldinger & Benjamin Bill Planche</name>
+   <name>3Dpals - Johannes Baldinger and Benjamin Bill Planche</name>
    <uri>http://github.com/3Dpals/</uri>
  </author>
 
