@@ -11,8 +11,6 @@ var	express = require("express"),
 	fs = require("fs"),
 	engine = require('ejs-locals'),
 	connect = require('connect'),
-	io = require('socket.io'),
-	sessionSockets = require('session.socket.io'),
 	config = require("./config"),
 	logger = require("./logger");
 

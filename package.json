@@ -6,12 +6,9 @@
     "start": "node start.js"
   },
   "dependencies": {
-    "express": "3.4.0",
-    "socket.io": "*",
+    "express": "3.4.0"
     "mongoose": "*",
     "ejs-locals": "~1.0.2",
-    "connect": "~2.9.1",
-    "bcrypt": "~0.7.7",
-    "session.socket.io": "~0.1.6"
+    "connect": "~2.9.1"
   }
 }
