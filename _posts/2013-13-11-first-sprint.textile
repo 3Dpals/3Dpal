@@ -1,0 +1,31 @@
+---
+layout: post
+title: First Sprint
+---
+
+h1. {{ page.title }}
+
+p(meta). 13 Nov 2011 - Luleå
+
+
+We had our first meetings and started to work on the project. So here are the current results:
+
+Use cases are in work and will be posted here when they are ready. But the general scope is set and just needs to be documented and worked out in detail. Register, login/logout, edit/read user profile, gallery of 3D objects, search/edit/delete 3D objects, …
+
+We decided to manage the project with a kind of *Scrum*. So we created a backlog with all the known relevant tasks and set the workload for the first sprint. A lot of administrative stuff in the beginning but next week we will finally start with high sophisticated coding. Next Sprint will start next Wednesday as we are on a trip this weekend.
+
+Let’s start talking about the technologies. We decided to use *node.js* for the server, as it keeps the projects language limited to JavaScript for front-end and back-end. Node.js is a modern and scalable server technology with a broad offer of additional libraries. 
+In addition, we use *express*, a flexible node.js web application framework, providing a robust set of features for building web applications.
+
+For permanent storage we followed the current trend of using node.js with *mongoDB* to get a slim but scalable back-end. To access mongoDB we will use *mongoose* offering a comfortable extended access to the database. 
+
+For a dynamic front-end we are currently experimenting with *EJS*, offering the possibility to generate html on the server per request.
+
+We also found a library for generating the javadoc for JavaScript.
+
+For the current scope we defined the data model that can be seen in the following picture.
+!images/DataModel.png(DataModel.)!
+Currently we struggle with a performant way to store the rights to be able to use them later when filtering the entries for a gallery. But we already have some basic ideas.
+
+That’s for the administrative stuff. At the moment, we are setting up the web server with some basic functionalities to get our hands on some real code. 
+That’s it for the moment. Stay tuned.
