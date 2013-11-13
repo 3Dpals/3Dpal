@@ -24,7 +24,7 @@ For a dynamic front-end we are currently experimenting with *EJS*, offering the 
 We also found a library for generating the javadoc for JavaScript.
 
 For the current scope we defined the data model that can be seen in the following picture.
-!../images/DataModel.png(DataModel.)!
+!../../../images/DataModel.png(DataModel.)!
 Currently we struggle with a performant way to store the rights to be able to use them later when filtering the entries for a gallery. But we already have some basic ideas.
 
 That’s for the administrative stuff. At the moment, we are setting up the web server with some basic functionalities to get our hands on some real code. 
