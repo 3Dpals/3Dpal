@@ -7,7 +7,7 @@
 
  var logger = require("./logger");
 
-module.exports = function(mongoose, modelUser /* TODO: add other needed models */) {
+module.exports = function(mongoose, ModelExample /* TODO: add other needed models */) {
 
 	function error(code, resp) {
 		var result = {};
@@ -63,7 +63,7 @@ module.exports = function(mongoose, modelUser /* TODO: add other needed models *
 	 *	- cb (Function(bool)):		Callback
 	 */
 	function createModelExample(my1stField, my2ndField, cb) {
-		modelUser.findOne({ username: username }, function(err, user) {
+		ModelExample.findOne({ username: username }, function(err, user) {
 			var example = new ModelExample({my1stField: my1stField, my2ndField: my2ndField});
 			example.save(function(err) {
 				if (err) cb(false);
