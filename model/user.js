@@ -45,6 +45,10 @@ module.exports = function(mongoose) {
 		});
 	};
 
+	UserSchema.methods.toString = function() {
+		return '{name:'+this.name+',password:'+this.password+',email:'+this.email+'}';
+	};
+
 	this.model = mongoose.model('User', UserSchema);
 
 	return this;
