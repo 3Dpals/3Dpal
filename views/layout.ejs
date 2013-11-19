@@ -15,6 +15,8 @@
         <link rel="stylesheet" href="css/normalize.css">
 		<link rel="stylesheet" type="text/css" href="css/main.css" />
 		
+		<link rel="stylesheet" type="text/css" href="css/screen.css" />
+		
         <script src="script/lib/modernizr-2.6.2.min.js"></script>
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.10.2.min.js"><\/script>')</script>
@@ -28,16 +30,53 @@
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
 
+		
+		
+<div id="header">
+	<p>
 		<header class="header" role="banner">
 			<h1><a href="/">3Dpal</a></h1>
 		</header>
+		
+	</p>
+</div>
+<div class="colmask leftmenu">
+	<div class="colleft">
+		<div class="col1">
+	<!-- Column 1 start -->
+	<div class="container">
 
-		<div class="container">
+		<%- body %>
 
-			<%- body %>
-
+	</div>
+	<!-- Column 1 end -->
 		</div>
-		<footer>&copy; Johannes Baldinger (<a href="http://github.com/johannes-baldinger" title="Johannes Baldinger's Github Account">git:johannes-baldinger</a>) & Benjamin Bill Planche (<a href="http://github.com/Aldream" title="Benjamin Bill Planche's Github Account">git:Aldream</a>)</footer>
+		<div class="col2">
+	<!-- Column 2 start -->
+	<div class="navigation">
+			<ul>
+				<li><a href="index" class="active">Home</a></li>
+				<li><a href="index">Gallery</a></li>
+				<li><a href="index">My Models</a></li>
+				<li><a href="index">Profile</a></li>
+				<li><a href="help">Help</a></li>
+				<li><a href="logout">Log Out</a></li>			
+			</ul>
+		</div>
+	<!-- Column 2 end -->
+		</div>
+	</div>
+</div>
+<div id="footer">
+	<p><footer>&copy; Johannes Baldinger (<a href="http://github.com/johannes-baldinger" title="Johannes Baldinger's Github Account">git:johannes-baldinger</a>) & Benjamin Bill Planche (<a href="http://github.com/Aldream" title="Benjamin Bill Planche's Github Account">git:Aldream</a>)</footer></p>
+</div>
+
+	<div class="user">
+		Hello Username <a href="logout">Log Out</a>
+		</div>
+		<div class="user">
+		<a href="login">Log in</a> | <a href="/signin" title="Sign in!" style="text-decoration: underline;">Not a member yet? Sign in!</a>
+		</div>
 
         <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
         <script>
