@@ -1,0 +1,56 @@
+<% layout('layout') -%>
+
+<form id="restTest">
+	<select name="action" id="action">
+	  <option value="GET" selected>GET</option> 
+	  <option value="POST">POST</option> 
+	  <option value="PUT">PUT</option> 
+	  <option value="DELETE">DELETE</option>
+	</select>
+	<input type="text" class="input-medium" name="domain" id="domain" required="required" value="http://localhost:1337"/>/
+	<input type="text" class="input-medium" name="uri" id="uri" required="required" placeholder="URL"/><br />
+	<textarea class="input-medium" name="param" placeholder="Parameters (optional)" id="param"></textarea><br />
+	<button type="submit" class="btn-primary">Try</button>
+</form>
+<div id="response"></div>
+
+<script>
+	$(document).ready(function(){
+		
+		$('#restTest').submit(function(){
+			var param = ($('#param').val()?JSON.parse($('#param').val()):'');
+			$.ajax({
+				type: $('#action').val(),
+				url: $('#domain').val()+'/'+$('#uri').val(),
+				contentType: 'application/json',
+				data: param,
+				})
+				.done(function( msg ) {
+					$('#response').html(syntaxHighlight(msg));
+				});
+			return false;
+		});
+	});
+	
+	function syntaxHighlight(json) {
+		if (typeof json != 'string') {
+			 json = JSON.stringify(json, undefined, 2);
+		}
+		json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+		return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+			var cls = 'number';
+			if (/^"/.test(match)) {
+				if (/:$/.test(match)) {
+					cls = 'key';
+				} else {
+					cls = 'string';
+				}
+			} else if (/true|false/.test(match)) {
+				cls = 'boolean';
+			} else if (/null/.test(match)) {
+				cls = 'null';
+			}
+			return '<span class="' + cls + '">' + match + '</span>';
+		});
+	}
+</script>
