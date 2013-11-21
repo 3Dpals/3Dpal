@@ -1,0 +1,33 @@
+---
+layout: post
+title: Second Sprint
+---
+
+h1. {{ page.title }}
+
+p(meta). 21 Nov 2011 - Luleå
+
+First productive week (sprint) over and we already had our pitch, presenting the current project state to the class.
+We also have an architecture overview:
+!../../../images/Architecture.png(Architecture.)!
+
+
+*Our results from the first sprint:*
+-Models and Tool defined
+-Plain Node.js Server running
+-REST API defined, halfway implemented
+-First front-end sites ready
+
+*Open Problems:*
+-REST API structure (file handling)
+-Rights management (solved?)
+
+*ToDos for the second sprint:*
+-Finishing the implement of the API (REST)
+-Implement the API for 3d object
+-Finish the front-end framework and layout
+-Create html gallery with mockup data
+
+We are on a good way and if we manage all of our tasks in this sprint, we can present a working alpha version soon.
+
+
