@@ -1,0 +1,17 @@
+<% layout('layout') -%>
+
+
+<section>
+<div class="GalleryContainer">
+<% for(var i=0; i<rest.length; i++) { %>
+        <div class="GalleryModel">
+		
+            <a href='model/<%= rest[i].id %>'>
+                <img src='thumbnail/<%= rest[i].id %>.png'>
+				<%= rest[i].name %>
+            </a>
+        </div>
+    <% } %>
+
+</div>
+</section>

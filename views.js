@@ -70,8 +70,19 @@ function viewHelp(req, res) {
 	res.render('help', {title: "Help", rest: rest});
 }
 
+/*
+ * VIEW Gallery
+ */
+function viewGallery(req, res) {
+	logger.info("<View> Viewing gallery.");
+
+//	res.render('gallery', {title: "Gallery", rest: rest});
+	res.render('gallery', {title: "Gallery", rest: [{id:"00",name:"name0"},{id:"01",name:"name01"}]});
+}
+
 exports.index = viewIndex;
 exports.signin = viewSignin;
 exports.login = viewLogin;
 exports.notfound = viewNotfound;
 exports.help = viewHelp;
+exports.gallery = viewGallery;
