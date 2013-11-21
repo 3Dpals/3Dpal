@@ -28,7 +28,7 @@ module.exports = function(mongoose, modelUser /* TODO: add other needed models *
 				result.error.msg = "Unknow error";
 		}
 
-		logger.error("Error function with message : " + result.error.msg);
+		logger.error("Error function with message : " + result.error.msg)
 		var jsonResult = JSON.stringify(result);
 			resp.end(jsonResult);
 	}
@@ -66,12 +66,12 @@ module.exports = function(mongoose, modelUser /* TODO: add other needed models *
 	 */
 	function createUser(name, password, email, cb) {
 		modelUser.findOne({ name: name }, function(err, user) {
-			if (err || user) return cb(false); // User already exists
+			if (err || user) return cb(err, user); // User already exists
 			
 			var user = new modelUser({name: name, password: password, email: email});
 			user.save(function(err) {
-				if (err) cb(false);
-				else cb (true);
+				logger.debug(err);
+				cb (err, user);
 			});
 		});
 	}
@@ -90,7 +90,10 @@ module.exports = function(mongoose, modelUser /* TODO: add other needed models *
 		var userData = parseRequest(req, ['name', 'password', 'email']);
 		
 		writeHeaders(resp);
-		createUser(userData.name, userData.password, userData.email, function(success) { resp.end(JSON.stringify({ success: success })); });
+		createUser(userData.name, userData.password, userData.email, function(err, user) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ status: 1 }));
+		});
 	}
 	 
 	/**
@@ -126,7 +129,7 @@ module.exports = function(mongoose, modelUser /* TODO: add other needed models *
 		
 		writeHeaders(resp);
 		getUsers(getData.limit, getData.offset, function (err, users) {
-			if (err) error(2, err);
+			if (err) error(2, resp);
 			else resp.end(JSON.stringify({ users: users })); 
 		});
 	}
@@ -164,12 +167,88 @@ module.exports = function(mongoose, modelUser /* TODO: add other needed models *
 		
 		writeHeaders(resp);
 		getUser(getData.name, function (err, user) {
-			if (err) error(2, err);
+			if (err) error(2, resp);
 			else resp.end(JSON.stringify({ user: user })); 
 		});
 	}
 	 
-	 
+	/**
+	 * deleteUser
+	 * ====
+	 * Delete the User corresponding to the given username
+	 * Parameters:
+	 *	- name (String): 				Username
+	 *	- cb (Function(err, User[])):	Callback
+	 */
+	function deleteUser(name, cb) {
+		modelUser.findById(name, function (err, item) {
+              if (err){
+					cb(err, null);
+              }
+              else {
+					modelUser.remove(item, function (err, result) {
+						cb(err, result);
+					});
+              }
+       });
+	}
+	/**
+	 * serviceDeleteUser
+	 * ====
+	 * Request Var:
+	 * 		- name (string)		Username
+	 * Request Parameters:
+	 *		-none
+	 */
+	function serviceDeleteUser(req, resp) {
+		logger.info("<Service> DeleteUser.");
+		var getData = parseRequest(req, ['name']);
+		
+		writeHeaders(resp);
+		deleteUser(getData.name, function (err, user) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ status: 1 })); 
+		});
+	}
+	
+	
+	/**
+	 * updateUser
+	 * ====
+	 * Update the User corresponding to the given username
+	 * Parameters:
+	 *	- name (String): 				Username
+	 *	- password (String): 		Password
+	 *	- email (String): 			Email
+	 *	- cb (Function(err, User[])):	Callback
+	 */ 
+	function updateUser(name, password, email, cb) {
+			var note = new modelNote(noteData);
+			note.timestampLastOp = new Date();
+			modelUser.update({ name: name }, {password: password, email: email}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+					if (err) { logger.error(err); return cb(err, raw); }
+					else { return cb(err, 1); }
+			});
+	}
+	/**
+	 * serviceUpdateUser
+	 * ====
+	 * Request Var:
+	 * 		- name (string)		Username
+	 * Request Parameters:
+	 *		- password (String): 	Password 	- required
+	 *		- email (String): 		Email 		- required
+	 */
+	function serviceUpdateUser(req, resp) {
+		logger.info("<Service> UpdateUser.");
+		var userData = parseRequest(req, ['name', 'password', 'email']);
+		
+		writeHeaders(resp);
+		updateUser(userData.name, userData.password, userData.email, function(err, success) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ status: 1 })); 
+		});
+	}
 	 
 
 	/*
@@ -179,9 +258,15 @@ module.exports = function(mongoose, modelUser /* TODO: add other needed models *
 	 */
 	 
 	this.rest = {};
-	this.rest['users']['POST'] = serviceGetUsers;
-	this.rest['users']['GET'] = serviceCreateUser;
-	this.rest['user/:name']['GET'] = serviceGetUser;
+	this.rest['users'] = {
+		'POST'	: serviceCreateUser,
+		'GET'	: serviceGetUsers
+	};
+	this.rest['user/:name'] = {
+		'GET'	: serviceGetUser,
+		'DELETE': serviceDeleteUser,
+		'PUT'	: serviceUpdateUser
+	}
 	 
 
 	/*

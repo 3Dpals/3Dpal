@@ -15,10 +15,6 @@ var config = {
 		"ssl" : false,
 		"auth" : true
 	},
-	"rest" : {
-		"url" : "localhost", // TO CHANGE BEFORE DEPLOYING!
-		"port" : 1337
-	},
 	"http" : {
 		"port" : 8080
 	},

@@ -34,9 +34,9 @@ mongoose.connect(config.getProperty("db.uri"), function(err) {
   if (err) { logger.error(err); }
 });
 
-var modelExample = require("./model/modelExample")(mongoose).model;
+var modelUser = require("./model/user")(mongoose).model;
 
-var	services = require("./services")(mongoose, modelExample),
+var	services = require("./services")(mongoose, modelUser),
 	views = require("./views");
 
 /* ------------------------
@@ -56,30 +56,6 @@ rest.configure(function() {
 	rest.use(express.bodyParser()); // retrieves automatically req bodies
 	rest.use(rest.router); // manually defines the routes
 });
-
-// Services:
-for (var url in services.rest) {
-	for (var action in services.rest[url]) {
-		if (action == 'POST') {
-			rest.post(url, services.rest[url]);
-		}
-		else if (action == 'GET') {
-			rest.get(url, services.rest[url]);
-		}
-		else if (action == 'PUT') {
-			rest.put(url, services.rest[url]);
-		}
-		else if (action == 'DELETE') {
-			rest.delete(url, services.rest[url]);
-		}
-		else logger.error('Unknown HTTP action "'+action'+" for the URL '+url);
-}
-
-logger.warn("REST routes activated.");
-var serverRest = http.createServer(rest);
-serverRest.listen(config.getProperty("rest.port"));
-logger.warn("REST server is listening.");
-
 
 /* ------------------------
  * HTML Server config
@@ -112,19 +88,46 @@ html.configure(function() {
 	html.use(express.session({ store: sessionStore }));
 });
 
+// Services:
+for (var url in services.rest) {
+	for (var action in services.rest[url]) {
+		if (action == 'POST') {
+			html.post('/api/'+url, services.rest[url][action]);
+			logger.debug('REST routing - '+url+' / POST defined');
+		}
+		else if (action == 'GET') {
+			html.get('/api/'+url, services.rest[url][action]);
+			logger.debug('REST routing - '+url+' / GET defined');
+		}
+		else if (action == 'PUT') {
+			html.put('/api/'+url, services.rest[url][action]);
+			logger.debug('REST routing - '+url+' / PUT defined');
+		}
+		else if (action == 'DELETE') {
+			html.delete('/api/'+url, services.rest[url][action]);
+			logger.debug('REST routing - '+url+' / DELETE defined');
+		}
+		else {
+			logger.error('Unknown HTTP action "'+action+'" for the URL '+url);
+		}
+	}
+}
+
+logger.warn("REST routes activated.");
+
+
 // Different views of the HTML server :
 viewHandler = {};
 viewHandler["/(index)?"] = views.index;
 viewHandler["/login"] = views.login;
 viewHandler["/signin"] = views.signin;
 viewHandler["/help"] = views.help;
+viewHandler["/api"] = views.api;
 
 viewHandler["*"] = views.notfound;
 
-
-
 for (var url in viewHandler) {
-	(securityActivated) ? /* TO DO */0
+	(securityActivated) ? /* TO DO */ html.get(url, viewHandler[url])
 						: html.get(url, viewHandler[url]);
 }
 
