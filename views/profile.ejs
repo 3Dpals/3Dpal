@@ -1,0 +1,10 @@
+<% layout('layout') -%>
+
+
+<section>
+<div class="ProfileContainer">
+        <img src="http://www.gravatar.com/avatar/<%= rest.emailHash %>" class="profileImg"/>
+        <p class="profileName"><%= rest.name %></p>
+        <p class="profileMail"><%= rest.email %></p>
+</div>
+</section>

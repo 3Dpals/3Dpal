@@ -4,6 +4,7 @@
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
     <head>
+
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">     
 		<title>3Dpal - <%= title %></title>
@@ -24,68 +25,156 @@
 			// ---- GLOBAL VAR
 			var rest = "<%= rest %>";
 		</script>
-    </head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<!-- Bootstrap -->
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+	</head>
     <body>
         <!--[if lt IE 7]>
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
 
-		
-		
-<div id="header">
-	<p>
-		<header class="header" role="banner">
-			<h1><a href="/">3Dpal</a></h1>
-		</header>
-		
-	</p>
-</div>
-<div class="colmask leftmenu">
-	<div class="colleft">
-		<div class="col1">
-	<!-- Column 1 start -->
-	<div class="container">
-
+      
+      <div class="container">
+        
+        <!-- Static navbar -->
+        <div class="navbar navbar-default" role="navigation">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="sr-only">
+                Toggle navigation
+              </span>
+              <span class="icon-bar">
+              </span>
+              <span class="icon-bar">
+              </span>
+              <span class="icon-bar">
+              </span>
+            </button>
+            <a class="navbar-brand" href="#">
+              3Dpal - 
+              <%= title %>
+              </a>
+            </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">
+                
+				<li class="active">
+                  <a href="index" class="active">
+                    Home
+                  </a>
+            </li>
+            <li>
+              <a href="gallery">
+                Gallery
+              </a>
+            </li>
+            <li>
+              <a href="gallery">
+                My Models
+              </a>
+            </li>
+            <li>
+              <a href="profile">
+                Profile
+              </a>
+            </li>
+            <li>
+              <a href="help">
+                Help
+              </a>
+            </li>
+            <li>
+              <a href="logout">
+                Log Out
+              </a>
+            </li>
+			
+          </ul>
+          </div>
+          <div class="navbar-collapse collapse">
+            <form class="navbar-form navbar-right">
+              <div class="form-group">
+                <input type="text" placeholder="Email" class="form-control">
+              </div>
+              <div class="form-group">
+                <input type="password" placeholder="Password" class="form-control">
+              </div>
+              <button type="submit" class="btn btn-success">
+                Sign in
+              </button>
+            </form>
+          </div>
+          <!--/.navbar-collapse -->
+        </div>
+      </div>
+      
+      
+      
+      <div class="container">
+        
 		<%- body %>
-
-	</div>
-	<!-- Column 1 end -->
-		</div>
-		<div class="col2">
-	<!-- Column 2 start -->
-	<div class="navigation">
-			<ul>
-				<li><a href="index" class="active">Home</a></li>
-				<li><a href="gallery">Gallery</a></li>
-				<li><a href="index">My Models</a></li>
-				<li><a href="index">Profile</a></li>
-				<li><a href="help">Help</a></li>
-				<li><a href="logout">Log Out</a></li>			
-			</ul>
-		</div>
-	<!-- Column 2 end -->
-		</div>
-	</div>
-</div>
-<div id="footer">
-	<p><footer>&copy; Johannes Baldinger (<a href="http://github.com/johannes-baldinger" title="Johannes Baldinger's Github Account">git:johannes-baldinger</a>) & Benjamin Bill Planche (<a href="http://github.com/Aldream" title="Benjamin Bill Planche's Github Account">git:Aldream</a>)</footer></p>
-</div>
-
-	<div class="user">
-		Hello Username <a href="logout">Log Out</a>
-		</div>
-		<div class="user">
-		<a href="login">Log in</a> | <a href="/signin" title="Sign in!" style="text-decoration: underline;">Not a member yet? Sign in!</a>
-		</div>
-
-        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
-        <script>
-            (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
-            function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
-            e=o.createElement(i);r=o.getElementsByTagName(i)[0];
-            e.src='//www.google-analytics.com/analytics.js';
-            r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
-            ga('create','UA-XXXXX-X');ga('send','pageview');
-        </script>
-    </body>
-</html>
+          
+      </div>
+      
+      
+      <div id="footer">
+        <p>
+          <footer>
+            &copy; Johannes Baldinger (
+            <a href="http://github.com/johannes-baldinger" title="Johannes Baldinger's Github Account">
+              git:johannes-baldinger
+            </a>
+            ) & Benjamin Bill Planche (
+            <a href="http://github.com/Aldream" title="Benjamin Bill Planche's Github Account">
+              git:Aldream
+            </a>
+            )
+        </footer>
+      </p>
+      </div>
+      
+      <div class="user">
+		Hello Username 
+      <a href="logout">
+        Log Out
+      </a>
+      
+      <a href="profile">
+        Profile
+      </a>
+      </div>
+      <div class="user">
+		<a href="login">
+          Log in
+          </a>
+          | 
+          <a href="/signin" title="Sign in!" style="text-decoration: underline;">
+            Not a member yet? Sign in!
+          </a>
+      </div>
+      
+      <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+      <script>
+        (function(b,o,i,l,e,r){
+          b.GoogleAnalyticsObject=l;
+          b[l]||(b[l]=
+                 function(){
+                   (b[l].q=b[l].q||[]).push(arguments)}
+                );
+          b[l].l=+new Date;
+          e=o.createElement(i);
+          r=o.getElementsByTagName(i)[0];
+          e.src='//www.google-analytics.com/analytics.js';
+          r.parentNode.insertBefore(e,r)}
+         (window,document,'script','ga'));
+        ga('create','UA-XXXXX-X');
+        ga('send','pageview');
+      </script>
+      
+      <!-- Include all compiled plugins (below), or include individual files as needed -->
+      <script src="script/lib/bootstrap.min.js">
+      </script>
+      </body>
+      </html>
+      

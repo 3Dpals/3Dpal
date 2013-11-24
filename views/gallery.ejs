@@ -2,16 +2,15 @@
 
 
 <section>
-<div class="GalleryContainer">
+      <div class="row">
 <% for(var i=0; i<rest.length; i++) { %>
-        <div class="GalleryModel">
-		
-            <a href='model/<%= rest[i].id %>'>
-                <img src='thumbnail/<%= rest[i].id %>.png'>
-				<%= rest[i].name %>
-            </a>
-        </div>
-    <% } %>
-
-</div>
+		  <div class="col-md-4">
+			  <h2><%= rest[i].name %></h2>
+			  <p><img src='thumbnail/<%= rest[i].id %>.png'> </p>
+			  <p><a class="btn btn-default" href="model/<%= rest[i].id %>" role="button">View details &raquo;</a></p>
+			</div>
+<% } %>
+        
+            
+	</div>
 </section>

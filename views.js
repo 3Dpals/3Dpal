@@ -80,9 +80,23 @@ function viewGallery(req, res) {
 	res.render('gallery', {title: "Gallery", rest: [{id:"00",name:"name0"},{id:"01",name:"name01"}]});
 }
 
+/*
+ * VIEW User Profile
+ */
+function viewProfile(req, res) {
+	logger.info("<View> Viewing User Profile.");
+	var email = "johannes.baldinger@googlemail.com";
+	email = email.trim();
+	email = email.toLowerCase();
+	var emailHash = require('crypto').createHash('md5').update(email).digest("hex");
+//	res.render('profile', {title: "Profile", rest: rest});
+	res.render('profile', {title: "Profile", rest: {id:"00",name:"Johannes Baldinger",email:email,emailHash :emailHash }});
+}
+
 exports.index = viewIndex;
 exports.signin = viewSignin;
 exports.login = viewLogin;
 exports.notfound = viewNotfound;
 exports.help = viewHelp;
 exports.gallery = viewGallery;
+exports.profile = viewProfile;
