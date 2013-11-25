@@ -13,7 +13,7 @@ module.exports = function(mongoose) {
 	var Schema = mongoose.Schema;
 	var UserSchema = new Schema({
 		name: { type: String, required: true, index: { unique: true } },	// Unique username
-		password: { type: String, required: true, select: false },							// Protected password
+		password: { type: String, required: true, select: false },			// Protected password
 		email: { type: String, required: true }
 	});
 
