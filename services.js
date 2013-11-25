@@ -108,10 +108,10 @@ module.exports = function(mongoose, modelUser /* TODO: add other needed models *
 	function getUsers(limit, offset, cb) {
 		if (!offset) offset = 0;
 		if (limit) {
-			modelUser.find().sort({name: 1}).skip(offset).limit(limit).lean().exec(cb);
+			modelUser.find({}, {__v:0, _id:0}).sort({name: 1}).skip(offset).limit(limit).lean().exec(cb);
 		}
 		else {
-			modelUser.find().sort({name: 1}).skip(offset).lean().exec(cb);
+			modelUser.find({}, {__v:0, _id:0}).sort({name: 1}).skip(offset).lean().exec(cb);
 		}
 	}
 	/**
@@ -151,7 +151,7 @@ module.exports = function(mongoose, modelUser /* TODO: add other needed models *
 	 *	- cb (Function(err, User[])):	Callback
 	 */
 	function getUser(name, cb) {
-		modelUser.findOne().where('name').equals(name).lean().exec(cb);
+		modelUser.findOne({name: name}, {__v:0, _id:0}).lean().exec(cb);
 	}
 	/**
 	 * serviceGetUser
@@ -181,10 +181,10 @@ module.exports = function(mongoose, modelUser /* TODO: add other needed models *
 	 *	- cb (Function(err, User[])):	Callback
 	 */
 	function deleteUser(name, cb) {
-		modelUser.findById(name, function (err, item) {
-              if (err){
-					cb(err, null);
-              }
+		modelUser.findOne({name: name}, {__v:0, _id:0}).lean().exec(function (err, item) {
+			if (err){
+				cb(err, null);
+			}
               else {
 					modelUser.remove(item, function (err, result) {
 						cb(err, result);
@@ -217,14 +217,12 @@ module.exports = function(mongoose, modelUser /* TODO: add other needed models *
 	 * ====
 	 * Update the User corresponding to the given username
 	 * Parameters:
-	 *	- name (String): 				Username
+	 *	- name (String): 			Username
 	 *	- password (String): 		Password
 	 *	- email (String): 			Email
 	 *	- cb (Function(err, User[])):	Callback
 	 */ 
 	function updateUser(name, password, email, cb) {
-			var note = new modelNote(noteData);
-			note.timestampLastOp = new Date();
 			modelUser.update({ name: name }, {password: password, email: email}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
 					else { return cb(err, 1); }

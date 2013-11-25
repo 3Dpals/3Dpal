@@ -7,7 +7,7 @@
 	  <option value="PUT">PUT</option> 
 	  <option value="DELETE">DELETE</option>
 	</select>
-	<input type="text" class="input-medium" name="domain" id="domain" required="required" value="http://localhost:1337"/>/
+	<input type="text" class="input-medium" name="domain" id="domain" required="required" value="http://localhost:8080/api"/>/
 	<input type="text" class="input-medium" name="uri" id="uri" required="required" placeholder="URL"/><br />
 	<textarea class="input-medium" name="param" placeholder="Parameters (optional)" id="param"></textarea><br />
 	<button type="submit" class="btn-primary">Try</button>
@@ -18,7 +18,7 @@
 	$(document).ready(function(){
 		
 		$('#restTest').submit(function(){
-			var param = ($('#param').val()?JSON.parse($('#param').val()):'');
+			var param = ($('#param').val());
 			$.ajax({
 				type: $('#action').val(),
 				url: $('#domain').val()+'/'+$('#uri').val(),
