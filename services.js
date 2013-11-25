@@ -9,7 +9,7 @@ var	logger = require("./logger");
 var	bcrypt = require('bcrypt'),
 	SALT_WORK_FACTOR = 10;
 
-module.exports = function(mongoose, modelUser /* TODO: add other needed models */) {
+module.exports = function(mongoose, modelUser, modelModel) {
 
 	function error(code, resp) {
 		var result = {};
@@ -170,7 +170,7 @@ module.exports = function(mongoose, modelUser /* TODO: add other needed models *
 		writeHeaders(resp);
 		getUser(getData.name, function (err, user) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ user: user })); 
+			else resp.end(JSON.stringify(user)); 
 		});
 	}
 	 
@@ -400,6 +400,650 @@ module.exports = function(mongoose, modelUser /* TODO: add other needed models *
 		});
 	}
 	 
+	 
+	/*
+	 * ------------------------------------------
+	 * 3DObjects Services
+	 * ------------------------------------------
+	 */
+	 
+	/**
+	 * createModel
+	 * ====
+	 * Create a Model (only if her/his name is unique).
+	 * Parameters:
+	 *	- name (String): 			Model name
+	 *	- file (String): 			Filename
+	 *  - creator (String):			Username of the Creator
+	 *	- creationDate (Date): 		Date of creation
+	 *  - thumbnail (String):		Filename of the thumbnail
+	 *	- tags (String[]): 			Tags (optional)
+	 *	- cb (Function(bool)):		Callback
+	 */
+	function createModel(name, file, creator, creationDate, thumbnail, tags, cb) {
+		var obj = new modelModel({name: name, file: file, creator: creator,  creationDate: creationDate,  thumbnail: thumbnail,  tags: tags});
+		obj.save(function(err) {
+			logger.debug(err);
+			cb (err, obj);
+		});
+	}
+	/**
+	 * serviceCreateModel
+	 * ====
+	 * Request Var:
+	 * 		none
+	 * Request Parameters:
+	 *	- name (String): 			Model name					- required
+	 *	- file (String): 			Filename					- required
+	 *  - creator (String):			Username of the Creator		- required
+	 *	- creationDate (Date): 		Date of creation			- required
+	 *  - thumbnail (String):		Filename of the thumbnail	- required
+	 *	- tags (String[]): 			Tags (optional)				- optional
+	 */
+	function serviceCreateModel(req, resp) {
+		logger.info("<Service> CreateModel.");
+		var objectsData = parseRequest(req, ['name', 'file', 'creator', 'creationDate', 'thumbnail', 'tags', ]);
+		
+		writeHeaders(resp);
+		createModel(objectsData.name, objectsData.file, objectsData.creator, objectsData.creationDate, objectsData.thumbnail, objectsData.tags, function(err, user) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ status: 1 }));
+		});
+	}
+	 
+	/**
+	 * getModels
+	 * ====
+	 * Returns a list of models, ordered by name.
+	 * Parameters:
+	 *	- limit (int): 					Number max of Model to return
+	 *	- offset (int): 				Number of the Model to start with
+	 *	- cb (Function(err, Model[])):	Callback
+	 */
+	function getModels(limit, offset, cb) {
+		if (!offset) offset = 0;
+		if (limit) {
+			modelModel.find({}, {__v:0}).sort({name: 1}).skip(offset).limit(limit).lean().exec(cb);
+		}
+		else {
+			modelModel.find({}, {__v:0}).sort({name: 1}).skip(offset).lean().exec(cb);
+		}
+	}
+	/**
+	 * serviceGetModels
+	 * ====
+	 * Request Var:
+	 * 		none
+	 * Request Parameters:
+	 *		- limit (int): 		Number max to return					- optional
+	 *		- offset (int): 	Number of the Model to start with	- optional
+	 */
+	function serviceGetModels(req, resp) {
+		logger.info("<Service> GetModels.");
+		var getData = parseRequest(req, ['limit', 'offset']);
+		
+		writeHeaders(resp);
+		getModels(getData.limit, getData.offset, function (err, objects) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ objects: objects })); 
+		});
+	}
+
+
+
+	/*
+	 * ------------------------------------------
+	 * 3DOBJECT Services
+	 * ------------------------------------------
+	 */
+	 
+	/**
+	 * getModel
+	 * ====
+	 * Returns the Model corresponding to the given id
+	 * Parameters:
+	 *	- id (String): 					ID
+	 *	- cb (Function(err, Model[])):	Callback
+	 */
+	function getModel(id, cb) {
+		modelModel.findById(id, {__v:0}).lean().exec(cb);
+	}
+	/**
+	 * serviceGetModel
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		Model
+	 * Request Parameters:
+	 *		-none
+	 */
+	function serviceGetModel(req, resp) {
+		logger.info("<Service> GetModel.");
+		var getData = parseRequest(req, ['id']);
+		
+		writeHeaders(resp);
+		getModel(getData.id, function (err, obj) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify(obj)); 
+		});
+	}
+	 
+	/**
+	 * getModelName
+	 * ====
+	 * Returns the Model's name
+	 * Parameters:
+	 *	- id (String): 					ID
+	 *	- cb (Function(err, Model[])):	Callback
+	 */
+	function getModelName(id, cb) {
+		modelModel.findById(id, {__v:0, _id:0, file:0, creator:0, creationDate:0, thumbnail:0, tags:0}).lean().exec(cb);
+	}
+	/**
+	 * serviceGetModelName
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		ID
+	 * Request Parameters:
+	 *		-none
+	 */
+	function serviceGetModelName(req, resp) {
+		logger.info("<Service> GetModelName.");
+		var getData = parseRequest(req, ['id']);
+		
+		writeHeaders(resp);
+		getModelName(getData.id, function (err, obj) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ name: obj.name })); 
+		});
+	}
+	 
+	/**
+	 * getModelFile
+	 * ====
+	 * Returns the Model's file
+	 * Parameters:
+	 *	- id (String): 					ID
+	 *	- cb (Function(err, Model[])):	Callback
+	 */
+	function getModelFile(id, cb) {
+		modelModel.findById(id, {__v:0, _id:0, name:0, creator:0, creationDate:0, thumbnail:0, tags:0}).lean().exec(cb);
+	}
+	/**
+	 * serviceGetModelFile
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		ID
+	 * Request Parameters:
+	 *		-none
+	 */
+	function serviceGetModelFile(req, resp) {
+		logger.info("<Service> GetModelFile.");
+		var getData = parseRequest(req, ['id']);
+		
+		writeHeaders(resp);
+		getModelFile(getData.id, function (err, obj) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ file: obj.file })); 
+		});
+	}
+
+	 
+	/**
+	 * getModelCreator
+	 * ====
+	 * Returns the Model's file
+	 * Parameters:
+	 *	- id (String): 					ID
+	 *	- cb (Function(err, Model[])):	Callback
+	 */
+	function getModelCreator(id, cb) {
+		modelModel.findById(id, {__v:0, _id:0, file:0, creator:0, creationDate:0, thumbnail:0, tags:0}).lean().exec(cb);
+	}
+	/**
+	 * serviceGetModelCreator
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		ID
+	 * Request Parameters:
+	 *		-none
+	 */
+	function serviceGetModelCreator(req, resp) {
+		logger.info("<Service> GetModelCreator.");
+		var getData = parseRequest(req, ['id']);
+		
+		writeHeaders(resp);
+		getModelCreator(getData.id, function (err, obj) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({creator: obj.creator })); 
+		});
+	}
+
+	 
+	/**
+	 * getModelCreationDate
+	 * ====
+	 * Returns the Model's creation date
+	 * Parameters:
+	 *	- id (String): 					ID
+	 *	- cb (Function(err, Model[])):	Callback
+	 */
+	function getModelCreationDate(id, cb) {
+		modelModel.findById(id, {__v:0, _id:0, file:0, creator:0, name:0, thumbnail:0, tags:0}).lean().exec(cb);
+	}
+	/**
+	 * serviceGetModelCreationDate
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		ID
+	 * Request Parameters:
+	 *		-none
+	 */
+	function serviceGetModelCreationDate(req, resp) {
+		logger.info("<Service> GetModelCreationDate.");
+		var getData = parseRequest(req, ['id']);
+		
+		writeHeaders(resp);
+		getModelCreationDate(getData.id, function (err, obj) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({creationDate: obj.creationDate})); 
+		});
+	}
+
+	 
+	/**
+	 * getModelThumbnail
+	 * ====
+	 * Returns the Model's creation date
+	 * Parameters:
+	 *	- id (String): 					ID
+	 *	- cb (Function(err, Model[])):	Callback
+	 */
+	function getModelThumbnail(id, cb) {
+		modelModel.findById(id, {__v:0, _id:0, file:0, creator:0, name:0, creationDate:0, tags:0}).lean().exec(cb);
+	}
+	/**
+	 * serviceGetModelThumbnail
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		ID
+	 * Request Parameters:
+	 *		-none
+	 */
+	function serviceGetModelThumbnail(req, resp) {
+		logger.info("<Service> GetModelThumbnail.");
+		var getData = parseRequest(req, ['id']);
+		
+		writeHeaders(resp);
+		getModelThumbnail(getData.id, function (err, obj) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({thumbnail: obj.thumbnail})); 
+		});
+	}
+
+	 
+	/**
+	 * getModelTags
+	 * ====
+	 * Returns the Model's tags
+	 * Parameters:
+	 *	- id (String): 					ID
+	 *	- cb (Function(err, Model[])):	Callback
+	 */
+	function getModelTags(id, cb) {
+		modelModel.findById(id, {__v:0, _id:0, file:0, creator:0, name:0, creationDate:0, thumbnail:0}).lean().exec(cb);
+	}
+	/**
+	 * serviceGetModelTags
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		ID
+	 * Request Parameters:
+	 *		-none
+	 */
+	function serviceGetModelTags(req, resp) {
+		logger.info("<Service> GetModelTags.");
+		var getData = parseRequest(req, ['id']);
+		
+		writeHeaders(resp);
+		getModelTags(getData.id, function (err, obj) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({tags: obj.tags})); 
+		});
+	}
+
+	 
+	/**
+	 * deleteModel
+	 * ====
+	 * Delete the Model corresponding to the given ID
+	 * Parameters:
+	 *	- id (String): 						ID
+	 *	- cb (Function(err, Model[])):	Callback
+	 */
+	function deleteModel(id, cb) {
+		modelModel.findById(id, {__v:0, _id:0}).lean().exec(function (err, item) {
+			if (err){
+				cb(err, null);
+			}
+              else {
+					modelModel.remove(item, function (err, result) {
+						cb(err, result);
+					});
+              }
+       });
+	}
+	/**
+	 * serviceDeleteModel
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		ID
+	 * Request Parameters:
+	 *		-none
+	 */
+	function serviceDeleteModel(req, resp) {
+		logger.info("<Service> DeleteModel.");
+		var getData = parseRequest(req, ['id']);
+		
+		writeHeaders(resp);
+		deleteModel(getData.id, function (err, user) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ status: 1 })); 
+		});
+	}
+	
+	
+	/**
+	 * updateModel
+	 * ====
+	 * Update the Model corresponding to the given ID
+	 * Parameters:
+	 *	- id (String): 				ID
+	 *	- name (String): 			Model name
+	 *	- file (String): 			Filename
+	 *  - creator (String):			Username of the Creator
+	 *	- creationDate (Date): 		Date of creation
+	 *  - thumbnail (String):		Filename of the thumbnail
+	 *	- tags (String[]): 			Tags (optional)
+	 *	- cb (Function(err, Model[])):	Callback
+	 */ 
+	function updateModel(id, name, file, creator, creationDate, thumbnail, tags, cb) {
+		modelModel.update({ _id: id }, {name: name, file: file, creator: creator,  creationDate: creationDate,  thumbnail: thumbnail,  tags: tags}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+			if (err) { logger.error(err); return cb(err, raw); }
+			else { return cb(err, 1); }
+		});	
+	}
+	/**
+	 * serviceUpdateModel
+	 * ====
+	 * Request Var:
+	 * 		- name (string)		Modelname
+	 * Request Parameters:
+	 *		- password (String): 	Password 	- required
+	 *		- email (String): 		Email 		- required
+	 */
+	function serviceUpdateModel(req, resp) {
+		logger.info("<Service> UpdateModel.");
+		var objectsData = parseRequest(req, ['id', 'name', 'file', 'creator', 'creationDate', 'thumbnail', 'tags', ]);
+		
+		writeHeaders(resp);
+		updateModel(objectsData.id, objectsData.name, objectsData.file, objectsData.creator, objectsData.creationDate, objectsData.thumbnail, objectsData.tags, function(err, success) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ status: 1 })); 
+		});
+	}
+	
+	
+	/**
+	 * updateModelName
+	 * ====
+	 * Update the name of the Model corresponding to the given ID
+	 * Parameters:
+	 *	- id (String): 			ID
+	 *	- name (String): 		Name to change
+	 *	- cb (Function(err, User[])):	Callback
+	 */ 
+	function updateModelName(id, name, cb) {
+			modelModel.update({ _id: id }, {name: name}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+					if (err) { logger.error(err); return cb(err, raw); }
+					else { return cb(err, 1); }
+			});
+	}
+	/**
+	 * serviceUpdateModelName
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		Username
+	 * Request Parameters:
+	 *		- name (String): 	Name 		- required
+	 */
+	function serviceUpdateModelName(req, resp) {
+		logger.info("<Service> UpdateModelName.");
+		var objData = parseRequest(req, ['id', 'name']);
+		
+		writeHeaders(resp);
+		updateModelName(objData.id, objData.name, function(err, success) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ status: 1 })); 
+		});
+	}
+	
+	
+	/**
+	 * updateModelFile
+	 * ====
+	 * Update the file of the Model corresponding to the given ID
+	 * Parameters:
+	 *	- id (String): 			ID
+	 *	- name (String): 		File to change
+	 *	- cb (Function(err, User[])):	Callback
+	 */ 
+	function updateModelFile(id, name, cb) {
+			modelModel.update({ _id: id }, {file: file}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+					if (err) { logger.error(err); return cb(err, raw); }
+					else { return cb(err, 1); }
+			});
+	}
+	/**
+	 * serviceUpdateModelFile
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		Username
+	 * Request Parameters:
+	 *		- name (String): 	File 		- required
+	 */
+	function serviceUpdateModelFile(req, resp) {
+		logger.info("<Service> UpdateModelFile.");
+		var objData = parseRequest(req, ['id', 'file']);
+		
+		writeHeaders(resp);
+		updateModelFile(objData.id, objData.file, function(err, success) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ status: 1 })); 
+		});
+	}
+	
+	
+	/**
+	 * updateModelCreator
+	 * ====
+	 * Update the creator of the Model corresponding to the given ID
+	 * Parameters:
+	 *	- id (String): 			ID
+	 *	- name (String): 		Creator to change
+	 *	- cb (Function(err, User[])):	Callback
+	 */ 
+	function updateModelCreator(id, name, cb) {
+			modelModel.update({ _id: id }, {creator: creator}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+					if (err) { logger.error(err); return cb(err, raw); }
+					else { return cb(err, 1); }
+			});
+	}
+	/**
+	 * serviceUpdateModelCreator
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		Username
+	 * Request Parameters:
+	 *		- name (String): 	Creator 		- required
+	 */
+	function serviceUpdateModelCreator(req, resp) {
+		logger.info("<Service> UpdateModelCreator.");
+		var objData = parseRequest(req, ['id', 'creator']);
+		
+		writeHeaders(resp);
+		updateModelCreator(objData.id, objData.creator, function(err, success) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ status: 1 })); 
+		});
+	}
+
+	
+	
+	/**
+	 * updateModelCreationDate
+	 * ====
+	 * Update the creation date of the Model corresponding to the given ID
+	 * Parameters:
+	 *	- id (String): 			ID
+	 *	- name (String): 		CreationDate to change
+	 *	- cb (Function(err, User[])):	Callback
+	 */ 
+	function updateModelCreationDate(id, name, cb) {
+			modelModel.update({ _id: id }, {creationDate: creationDate}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+					if (err) { logger.error(err); return cb(err, raw); }
+					else { return cb(err, 1); }
+			});
+	}
+	/**
+	 * serviceUpdateModelCreationDate
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		Username
+	 * Request Parameters:
+	 *		- name (String): 	CreationDate 		- required
+	 */
+	function serviceUpdateModelCreationDate(req, resp) {
+		logger.info("<Service> UpdateModelCreationDate.");
+		var objData = parseRequest(req, ['id', 'creationDate']);
+		
+		writeHeaders(resp);
+		updateModelCreationDate(objData.id, objData.creationDate, function(err, success) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ status: 1 })); 
+		});
+	}
+
+	
+	
+	/**
+	 * updateModelThumbnail
+	 * ====
+	 * Update the thumbnail of the Model corresponding to the given ID
+	 * Parameters:
+	 *	- id (String): 			ID
+	 *	- name (String): 		Thumbnail to change
+	 *	- cb (Function(err, User[])):	Callback
+	 */ 
+	function updateModelThumbnail(id, name, cb) {
+			modelModel.update({ _id: id }, {thumbnail: thumbnail}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+					if (err) { logger.error(err); return cb(err, raw); }
+					else { return cb(err, 1); }
+			});
+	}
+	/**
+	 * serviceUpdateModelThumbnail
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		Username
+	 * Request Parameters:
+	 *		- name (String): 	Thumbnail 		- required
+	 */
+	function serviceUpdateModelThumbnail(req, resp) {
+		logger.info("<Service> UpdateModelThumbnail.");
+		var objData = parseRequest(req, ['id', 'thumbnail']);
+		
+		writeHeaders(resp);
+		updateModelThumbnail(objData.id, objData.thumbnail, function(err, success) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ status: 1 })); 
+		});
+	}
+
+	
+	
+	/**
+	 * updateModelTags
+	 * ====
+	 * Update the tags of the Model corresponding to the given ID
+	 * Parameters:
+	 *	- id (String): 			ID
+	 *	- name (String): 		Tags to change
+	 *	- cb (Function(err, User[])):	Callback
+	 */ 
+	function updateModelTags(id, name, cb) {
+			modelModel.update({ _id: id }, {tags: tags}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+					if (err) { logger.error(err); return cb(err, raw); }
+					else { return cb(err, 1); }
+			});
+	}
+	/**
+	 * serviceUpdateModelTags
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		Username
+	 * Request Parameters:
+	 *		- name (String): 	Tags 		- required
+	 */
+	function serviceUpdateModelTags(req, resp) {
+		logger.info("<Service> UpdateModelTags.");
+		var objData = parseRequest(req, ['id', 'tags']);
+		
+		writeHeaders(resp);
+		updateModelTags(objData.id, objData.tags, function(err, success) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ status: 1 })); 
+		});
+	}
+
+
+	/*
+	 * ------------------------------------------
+	 * USER + 3DOBJECT Services
+	 * ------------------------------------------
+	 */
+	 
+	/**
+	 * getUserModels
+	 * ====
+	 * Returns the models created by an User
+	 * Parameters:
+	 *	- name (String): 				Username
+	 *	- cb (Function(err, Model[])):	Callback
+	 */
+	function getUserModels(name, cb) {
+		modelModel.find({creator: name}, {__v:0}).lean().exec(cb);
+	}
+	/**
+	 * serviceGetUserModels
+	 * ====
+	 * Request Var:
+	 * 		- name (string)		name
+	 * Request Parameters:
+	 *		-none
+	 */
+	function serviceGetUserModels(req, resp) {
+		logger.info("<Service> GetUserModels.");
+		var getData = parseRequest(req, ['name']);
+		
+		writeHeaders(resp);
+		getUserModels(getData.name, function (err, objects) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({models: objects})); 
+		});
+	}
+	 
+
+
 
 	/*
 	 * ------------------------------------------
@@ -416,19 +1060,57 @@ module.exports = function(mongoose, modelUser /* TODO: add other needed models *
 		'GET'	: serviceGetUser,
 		'DELETE': serviceDeleteUser,
 		'PUT'	: serviceUpdateUser
-	}
+	};
 	this.rest['user/:name/id'] = {
 		'GET'	: serviceGetUserId
-	}
+	};
 	this.rest['user/:name/email'] = {
 		'GET'	: serviceGetUserEmail,
 		'PUT'	: serviceUpdateUserEmail
-	}
+	};
 	this.rest['user/:name/password'] = {
 		'PUT'	: serviceUpdateUserPassword
-	}
+	};
+	
+	
+	this.rest['models'] = {
+		'POST'	: serviceCreateModel,
+		'GET'	: serviceGetModels
+	};
+	this.rest['model/:id'] = {
+		'GET'	: serviceGetModel,
+		'DELETE': serviceDeleteModel,
+		'PUT'	: serviceUpdateModel
+	};
+	this.rest['model/:id/name'] = {
+		'GET'	: serviceGetModelName,
+		'PUT'	: serviceUpdateModelName
+	};
+	this.rest['model/:id/file'] = {
+		'GET'	: serviceGetModelFile,
+		'PUT'	: serviceUpdateModelFile
+	};
+	this.rest['model/:id/creator'] = {
+		'GET'	: serviceGetModelCreator,
+		'PUT'	: serviceUpdateModelCreator
+	};
+	this.rest['model/:id/creationdate'] = {
+		'GET'	: serviceGetModelCreationDate,
+		'PUT'	: serviceUpdateModelCreationDate
+	};
+	this.rest['model/:id/thumbnail'] = {
+		'GET'	: serviceGetModelThumbnail,
+		'PUT'	: serviceUpdateModelThumbnail
+	};
+	this.rest['model/:id/tags'] = {
+		'GET'	: serviceGetModelTags,
+		'PUT'	: serviceUpdateModelTags
+	};
 	 
 
+	this.rest['user/:name/models'] = {
+		'GET'	: serviceGetUserModels
+	};
 	/*
 	 * ------------------------------------------
 	 * LOCAL MODULE METHODS
