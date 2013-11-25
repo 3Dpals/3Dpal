@@ -5,7 +5,9 @@
  * REST and local services
  */
 
- var logger = require("./logger");
+var	logger = require("./logger");
+var	bcrypt = require('bcrypt'),
+	SALT_WORK_FACTOR = 10;
 
 module.exports = function(mongoose, modelUser /* TODO: add other needed models */) {
 
@@ -173,6 +175,66 @@ module.exports = function(mongoose, modelUser /* TODO: add other needed models *
 	}
 	 
 	/**
+	 * getUserId
+	 * ====
+	 * Returns the User's id
+	 * Parameters:
+	 *	- name (String): 				Username
+	 *	- cb (Function(err, User[])):	Callback
+	 */
+	function getUserId(name, cb) {
+		modelUser.findOne({name: name}, {__v:0, email:0, name:0}).lean().exec(cb);
+	}
+	/**
+	 * serviceGetUserId
+	 * ====
+	 * Request Var:
+	 * 		- name (string)		Username
+	 * Request Parameters:
+	 *		-none
+	 */
+	function serviceGetUserId(req, resp) {
+		logger.info("<Service> GetUserId.");
+		var getData = parseRequest(req, ['name']);
+		
+		writeHeaders(resp);
+		getUserId(getData.name, function (err, user) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ id: user._id })); 
+		});
+	}
+	 
+	/**
+	 * getUserEmail
+	 * ====
+	 * Returns the User's email
+	 * Parameters:
+	 *	- name (String): 				Username
+	 *	- cb (Function(err, User[])):	Callback
+	 */
+	function getUserEmail(name, cb) {
+		modelUser.findOne({name: name}, {__v:0, _id:0, name:0}).lean().exec(cb);
+	}
+	/**
+	 * serviceGetUserEmail
+	 * ====
+	 * Request Var:
+	 * 		- name (string)		Username
+	 * Request Parameters:
+	 *		-none
+	 */
+	function serviceGetUserEmail(req, resp) {
+		logger.info("<Service> GetUserEmail.");
+		var getData = parseRequest(req, ['name']);
+		
+		writeHeaders(resp);
+		getUserEmail(getData.name, function (err, user) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ email: user.email })); 
+		});
+	}
+	 
+	/**
 	 * deleteUser
 	 * ====
 	 * Delete the User corresponding to the given username
@@ -223,10 +285,20 @@ module.exports = function(mongoose, modelUser /* TODO: add other needed models *
 	 *	- cb (Function(err, User[])):	Callback
 	 */ 
 	function updateUser(name, password, email, cb) {
-			modelUser.update({ name: name }, {password: password, email: email}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+		// generate a salt
+		bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
+			if (err) { logger.error(err); return cb(err, null); }
+
+			// hash the password using our new salt
+			bcrypt.hash(password, salt, function(err, hash) {
+				if (err) { logger.error(err); return cb(err, null); }
+
+				modelUser.update({ name: name }, {password: hash, email: email}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
 					else { return cb(err, 1); }
+				});
 			});
+		});	
 	}
 	/**
 	 * serviceUpdateUser
@@ -243,6 +315,86 @@ module.exports = function(mongoose, modelUser /* TODO: add other needed models *
 		
 		writeHeaders(resp);
 		updateUser(userData.name, userData.password, userData.email, function(err, success) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ status: 1 })); 
+		});
+	}
+	
+	
+	/**
+	 * updateUserEmail
+	 * ====
+	 * Update the email of the User corresponding to the given username
+	 * Parameters:
+	 *	- name (String): 		Username
+	 *	- email (String): 		Email to change
+	 *	- cb (Function(err, User[])):	Callback
+	 */ 
+	function updateUserEmail(name, email, cb) {
+			modelUser.update({ name: name }, {email: email}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+					if (err) { logger.error(err); return cb(err, raw); }
+					else { return cb(err, 1); }
+			});
+	}
+	/**
+	 * serviceUpdateUserEmail
+	 * ====
+	 * Request Var:
+	 * 		- name (string)		Username
+	 * Request Parameters:
+	 *		- email (String): 		Email 		- required
+	 */
+	function serviceUpdateUserEmail(req, resp) {
+		logger.info("<Service> UpdateUserEmail.");
+		var userData = parseRequest(req, ['name', 'email']);
+		
+		writeHeaders(resp);
+		updateUserEmail(userData.name, userData.email, function(err, success) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ status: 1 })); 
+		});
+	}
+	
+	
+	/**
+	 * updateUserPassword
+	 * ====
+	 * Update the password of the User corresponding to the given username
+	 * Parameters:
+	 *	- name (String): 		Username
+	 *	- password (String): 	Password to change
+	 *	- cb (Function(err, User[])):	Callback
+	 */ 
+	function updateUserPassword(name, password, cb) {
+		// generate a salt
+		bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
+			if (err) { logger.error(err); return cb(err, null); }
+
+			// hash the password using our new salt
+			bcrypt.hash(password, salt, function(err, hash) {
+				if (err) { logger.error(err); return cb(err, null); }
+
+				modelUser.update({ name: name }, {password: hash}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+					if (err) { logger.error(err); return cb(err, raw); }
+					else { return cb(err, 1); }
+				});
+			});
+		});
+	}
+	/**
+	 * serviceUpdateUserPassword
+	 * ====
+	 * Request Var:
+	 * 		- name (string)		Username
+	 * Request Parameters:
+	 *		- email (String): 		Email 		- required
+	 */
+	function serviceUpdateUserPassword(req, resp) {
+		logger.info("<Service> UpdateUserPassword.");
+		var userData = parseRequest(req, ['name', 'password']);
+		
+		writeHeaders(resp);
+		updateUserPassword(userData.name, userData.password, function(err, success) {
 			if (err) error(2, resp);
 			else resp.end(JSON.stringify({ status: 1 })); 
 		});
@@ -264,6 +416,16 @@ module.exports = function(mongoose, modelUser /* TODO: add other needed models *
 		'GET'	: serviceGetUser,
 		'DELETE': serviceDeleteUser,
 		'PUT'	: serviceUpdateUser
+	}
+	this.rest['user/:name/id'] = {
+		'GET'	: serviceGetUserId
+	}
+	this.rest['user/:name/email'] = {
+		'GET'	: serviceGetUserEmail,
+		'PUT'	: serviceUpdateUserEmail
+	}
+	this.rest['user/:name/password'] = {
+		'PUT'	: serviceUpdateUserPassword
 	}
 	 
 
