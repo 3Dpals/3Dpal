@@ -77,7 +77,7 @@ function viewGallery(req, res) {
 	logger.info("<View> Viewing gallery.");
 
 //	res.render('gallery', {title: "Gallery", rest: rest});
-	res.render('gallery', {title: "Gallery", rest: [{id:"00",name:"name0"},{id:"01",name:"name01"}]});
+	res.render('gallery', {title: "Gallery", rest: [{id:"00",name:"name00"},{id:"01",name:"name01"},{id:"02",name:"name02"},{id:"03",name:"name03"}]});
 }
 
 /*
