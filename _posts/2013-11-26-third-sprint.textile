@@ -20,7 +20,7 @@ h2. ToDos for the third sprint:
 * Documentation of the API
 * Implement AJAX in the front end and connect with the API
 * Deploy the application on heroku
-* Implement the Authentication with the Passport module
+* Implement the Authentication with the Passport, a nice authentication middleware for Node.js.
 * Further improve existing application
 
 Stay tuned.
