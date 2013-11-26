@@ -1,0 +1,28 @@
+---
+layout: post
+title: Third Sprint
+---
+
+h1. {{ page.title }}
+
+p(meta). 26 Nov 2011 - Luleå
+
+The sprint meeting is over, and we have a working front and back end. Now we have to wire them together in the next sprint.
+
+h2. Our results from the second sprint:
+* Working Rest API for 3DModel, user and rights object.
+* Front end design finished and layout with static pages in place
+
+*Open Problems:*
+no
+
+h2. ToDos for the third sprint:
+* Documentation of the API
+* Implement AJAX in the front end and connect with the API
+* Deploy the application on heroku
+* Implement the Authentication with the Passport module
+* Further improve existing application
+
+Stay tuned.
+
+
