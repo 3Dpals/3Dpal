@@ -11,7 +11,7 @@ module.exports = function(mongoose) {
 	var RightSchema = new Schema({
 		modelId: { type: ObjectID, required: true},			// ID of the Model
 		userId: { type: String, required: true},			// ID of the User
-		rightLevel: { type: Number, required: true}			// 0 = none, 1 = Read, 10 = Write, 11 = Read+Write		
+		rightLevel: { type: Boolean, required: true}		// false = Read only, true = Read+Write	
 	});
 
 	this.model = mongoose.model('Right', RightSchema);
