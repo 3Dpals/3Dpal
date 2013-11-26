@@ -9,7 +9,7 @@ var	logger = require("./logger");
 var	bcrypt = require('bcrypt'),
 	SALT_WORK_FACTOR = 10;
 
-module.exports = function(mongoose, modelUser, modelModel, modelRight) {
+module.exports = function(mongoose, modelUser, modelModel) {
 
 	function error(code, resp) {
 		var result = {};
@@ -60,21 +60,20 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	/**
 	 * createUser
 	 * ====
-	 * Create a user (only if her/his name is unique).
+	 * Create a user (only if her/his username is unique).
 	 * Parameters:
-	 *	- name (String): 			User name
+	 *	- username (String): 			User username
 	 *	- password (String): 		Password
 	 *	- email (String): 			Email
 	 *	- cb (Function(bool)):		Callback
 	 */
-	function createUser(name, password, email, cb) {
-		modelUser.findOne({ name: name }, function(err, user) {
+	function createUser(username, password, email, cb) {
+		modelUser.findOne({ username: username }, function(err, user) {
 			if (err || user) return cb(err, user); // User already exists
 			
-			var user = new modelUser({name: name, password: password, email: email});
+			var user = new modelUser({username: username, password: password, email: email});
 			user.save(function(err) {
-				logger.debug(err);
-				cb (err, user);
+				cb (err, 'ok');
 			});
 		});
 	}
@@ -84,25 +83,25 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 * Request Var:
 	 * 		none
 	 * Request Parameters:
-	 * 		- name (String):		User name 	- required
+	 * 		- username (String):		User username 	- required
 	 *		- password (String): 	Password 	- required
 	 *		- email (String): 		Email 		- required
 	 */
 	function serviceCreateUser(req, resp) {
 		logger.info("<Service> CreateUser.");
-		var userData = parseRequest(req, ['name', 'password', 'email']);
+		var userData = parseRequest(req, ['username', 'password', 'email']);
 		
 		writeHeaders(resp);
-		createUser(userData.name, userData.password, userData.email, function(err, user) {
+		createUser(userData.username, userData.password, userData.email, function(err, status) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: 1 }));
+			else resp.end(JSON.stringify({ status: status }));
 		});
 	}
 	 
 	/**
 	 * getUsers
 	 * ====
-	 * Returns a list of users, ordered by name.
+	 * Returns a list of users, ordered by username.
 	 * Parameters:
 	 *	- limit (int): 					Number max of users to return
 	 *	- offset (int): 				Number of the user to start with
@@ -111,10 +110,10 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	function getUsers(limit, offset, cb) {
 		if (!offset) offset = 0;
 		if (limit) {
-			modelUser.find({}, {__v:0, _id:0}).sort({name: 1}).skip(offset).limit(limit).lean().exec(cb);
+			modelUser.find({}, {__v:0, _id:0}).sort({username: 1}).skip(offset).limit(limit).lean().exec(cb);
 		}
 		else {
-			modelUser.find({}, {__v:0, _id:0}).sort({name: 1}).skip(offset).lean().exec(cb);
+			modelUser.find({}, {__v:0, _id:0}).sort({username: 1}).skip(offset).lean().exec(cb);
 		}
 	}
 	/**
@@ -148,28 +147,28 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	/**
 	 * getUser
 	 * ====
-	 * Returns the User corresponding to the given username
+	 * Returns the User corresponding to the given userusername
 	 * Parameters:
-	 *	- name (String): 				Username
+	 *	- username (String): 				Username
 	 *	- cb (Function(err, User[])):	Callback
 	 */
-	function getUser(name, cb) {
-		modelUser.findOne({name: name}, {__v:0, _id:0}).lean().exec(cb);
+	function getUser(username, cb) {
+		modelUser.findOne({username: username}, {__v:0, _id:0}).lean().exec(cb);
 	}
 	/**
 	 * serviceGetUser
 	 * ====
 	 * Request Var:
-	 * 		- name (string)		Username
+	 * 		- username (string)		Username
 	 * Request Parameters:
 	 *		-none
 	 */
 	function serviceGetUser(req, resp) {
 		logger.info("<Service> GetUser.");
-		var getData = parseRequest(req, ['name']);
+		var getData = parseRequest(req, ['username']);
 		
 		writeHeaders(resp);
-		getUser(getData.name, function (err, user) {
+		getUser(getData.username, function (err, user) {
 			if (err) error(2, resp);
 			else resp.end(JSON.stringify(user)); 
 		});
@@ -180,26 +179,26 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 * ====
 	 * Returns the User's id
 	 * Parameters:
-	 *	- name (String): 				Username
+	 *	- username (String): 				Username
 	 *	- cb (Function(err, User[])):	Callback
 	 */
-	function getUserId(name, cb) {
-		modelUser.findOne({name: name}).select('_id').lean().exec(cb);
+	function getUserId(username, cb) {
+		modelUser.findOne({username: username}).select('_id').lean().exec(cb);
 	}
 	/**
 	 * serviceGetUserId
 	 * ====
 	 * Request Var:
-	 * 		- name (string)		Username
+	 * 		- username (string)		Username
 	 * Request Parameters:
 	 *		-none
 	 */
 	function serviceGetUserId(req, resp) {
 		logger.info("<Service> GetUserId.");
-		var getData = parseRequest(req, ['name']);
+		var getData = parseRequest(req, ['username']);
 		
 		writeHeaders(resp);
-		getUserId(getData.name, function (err, user) {
+		getUserId(getData.username, function (err, user) {
 			if (err) error(2, resp);
 			else resp.end(JSON.stringify({ id: user._id })); 
 		});
@@ -210,26 +209,26 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 * ====
 	 * Returns the User's email
 	 * Parameters:
-	 *	- name (String): 				Username
+	 *	- username (String): 				Username
 	 *	- cb (Function(err, User[])):	Callback
 	 */
-	function getUserEmail(name, cb) {
-		modelUser.findOne({name: name}).select('email').lean().exec(cb);
+	function getUserEmail(username, cb) {
+		modelUser.findOne({username: username}).select('email').lean().exec(cb);
 	}
 	/**
 	 * serviceGetUserEmail
 	 * ====
 	 * Request Var:
-	 * 		- name (string)		Username
+	 * 		- username (string)		Username
 	 * Request Parameters:
 	 *		-none
 	 */
 	function serviceGetUserEmail(req, resp) {
 		logger.info("<Service> GetUserEmail.");
-		var getData = parseRequest(req, ['name']);
+		var getData = parseRequest(req, ['username']);
 		
 		writeHeaders(resp);
-		getUserEmail(getData.name, function (err, user) {
+		getUserEmail(getData.username, function (err, user) {
 			if (err) error(2, resp);
 			else resp.end(JSON.stringify({ email: user.email })); 
 		});
@@ -240,11 +239,11 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 * ====
 	 * Delete the User corresponding to the given username
 	 * Parameters:
-	 *	- name (String): 				Username
+	 *	- username (String): 				Username
 	 *	- cb (Function(err, User[])):	Callback
 	 */
-	function deleteUser(name, cb) {
-		modelUser.findOne({name: name}).exec(function (err, item) {
+	function deleteUser(username, cb) {
+		modelUser.findOne({username: username}).exec(function (err, item) {
 			if (err){
 				cb(err, null);
 			}
@@ -259,18 +258,18 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 * serviceDeleteUser
 	 * ====
 	 * Request Var:
-	 * 		- name (string)		Username
+	 * 		- username (string)		Username
 	 * Request Parameters:
 	 *		-none
 	 */
 	function serviceDeleteUser(req, resp) {
 		logger.info("<Service> DeleteUser.");
-		var getData = parseRequest(req, ['name']);
+		var getData = parseRequest(req, ['username']);
 		
 		writeHeaders(resp);
-		deleteUser(getData.name, function (err, user) {
+		deleteUser(getData.username, function (err, user) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: 1 })); 
+			else resp.end(JSON.stringify({ status: status })); 
 		});
 	}
 	
@@ -280,12 +279,12 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 * ====
 	 * Update the User corresponding to the given username
 	 * Parameters:
-	 *	- name (String): 			Username
+	 *	- username (String): 			Username
 	 *	- password (String): 		Password
 	 *	- email (String): 			Email
 	 *	- cb (Function(err, User[])):	Callback
 	 */ 
-	function updateUser(name, password, email, cb) {
+	function updateUser(username, password, email, cb) {
 		// generate a salt
 		bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
 			if (err) { logger.error(err); return cb(err, null); }
@@ -294,9 +293,9 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 			bcrypt.hash(password, salt, function(err, hash) {
 				if (err) { logger.error(err); return cb(err, null); }
 
-				modelUser.update({ name: name }, {password: hash, email: email}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+				modelUser.update({ username: username }, {password: hash, email: email}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
-					else { return cb(err, 1); }
+					else { return cb(err, 'ok'); }
 				});
 			});
 		});	
@@ -305,19 +304,19 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 * serviceUpdateUser
 	 * ====
 	 * Request Var:
-	 * 		- name (string)		Username
+	 * 		- username (string)		Username
 	 * Request Parameters:
 	 *		- password (String): 	Password 	- required
 	 *		- email (String): 		Email 		- required
 	 */
 	function serviceUpdateUser(req, resp) {
 		logger.info("<Service> UpdateUser.");
-		var userData = parseRequest(req, ['name', 'password', 'email']);
+		var userData = parseRequest(req, ['username', 'password', 'email']);
 		
 		writeHeaders(resp);
-		updateUser(userData.name, userData.password, userData.email, function(err, success) {
+		updateUser(userData.username, userData.password, userData.email, function(err, status) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: 1 })); 
+			else resp.end(JSON.stringify({ status: status })); 
 		});
 	}
 	
@@ -327,32 +326,32 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 * ====
 	 * Update the email of the User corresponding to the given username
 	 * Parameters:
-	 *	- name (String): 		Username
+	 *	- username (String): 		Username
 	 *	- email (String): 		Email to change
 	 *	- cb (Function(err, User[])):	Callback
 	 */ 
-	function updateUserEmail(name, email, cb) {
-			modelUser.update({ name: name }, {email: email}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+	function updateUserEmail(username, email, cb) {
+			modelUser.update({ username: username }, {email: email}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
-					else { return cb(err, 1); }
+					else { return cb(err, 'ok'); }
 			});
 	}
 	/**
 	 * serviceUpdateUserEmail
 	 * ====
 	 * Request Var:
-	 * 		- name (string)		Username
+	 * 		- username (string)		Username
 	 * Request Parameters:
 	 *		- email (String): 		Email 		- required
 	 */
 	function serviceUpdateUserEmail(req, resp) {
 		logger.info("<Service> UpdateUserEmail.");
-		var userData = parseRequest(req, ['name', 'email']);
+		var userData = parseRequest(req, ['username', 'email']);
 		
 		writeHeaders(resp);
-		updateUserEmail(userData.name, userData.email, function(err, success) {
+		updateUserEmail(userData.username, userData.email, function(err, status) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: 1 })); 
+			else resp.end(JSON.stringify({ status: status })); 
 		});
 	}
 	
@@ -362,11 +361,11 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 * ====
 	 * Update the password of the User corresponding to the given username
 	 * Parameters:
-	 *	- name (String): 		Username
+	 *	- username (String): 		Username
 	 *	- password (String): 	Password to change
 	 *	- cb (Function(err, User[])):	Callback
 	 */ 
-	function updateUserPassword(name, password, cb) {
+	function updateUserPassword(username, password, cb) {
 		// generate a salt
 		bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
 			if (err) { logger.error(err); return cb(err, null); }
@@ -375,9 +374,9 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 			bcrypt.hash(password, salt, function(err, hash) {
 				if (err) { logger.error(err); return cb(err, null); }
 
-				modelUser.update({ name: name }, {password: hash}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+				modelUser.update({ username: username }, {password: hash}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
-					else { return cb(err, 1); }
+					else { return cb(err, 'ok'); }
 				});
 			});
 		});
@@ -386,18 +385,18 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 * serviceUpdateUserPassword
 	 * ====
 	 * Request Var:
-	 * 		- name (string)		Username
+	 * 		- username (string)		Username
 	 * Request Parameters:
 	 *		- email (String): 		Email 		- required
 	 */
 	function serviceUpdateUserPassword(req, resp) {
 		logger.info("<Service> UpdateUserPassword.");
-		var userData = parseRequest(req, ['name', 'password']);
+		var userData = parseRequest(req, ['username', 'password']);
 		
 		writeHeaders(resp);
-		updateUserPassword(userData.name, userData.password, function(err, success) {
+		updateUserPassword(userData.username, userData.password, function(err, status) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: 1 })); 
+			else resp.end(JSON.stringify({ status: status })); 
 		});
 	}
 	 
@@ -411,7 +410,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	/**
 	 * createModel
 	 * ====
-	 * Create a Model (only if her/his name is unique).
+	 * Create a Model (only if its name is unique).
 	 * Parameters:
 	 *	- name (String): 			Model name
 	 *	- file (String): 			Filename
@@ -447,7 +446,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 		writeHeaders(resp);
 		createModel(objectsData.name, objectsData.file, objectsData.creator, objectsData.creationDate, objectsData.thumbnail, objectsData.tags, function(err, user) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: 1 }));
+			else resp.end(JSON.stringify({ status: status }));
 		});
 	}
 	 
@@ -742,7 +741,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 		writeHeaders(resp);
 		deleteModel(getData.id, function (err, user) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: 1 })); 
+			else resp.end(JSON.stringify({ status: status })); 
 		});
 	}
 		
@@ -763,7 +762,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	function updateModel(id, name, file, creator, creationDate, thumbnail, tags, cb) {
 		modelModel.update({ _id: id }, {name: name, file: file, creator: creator,  creationDate: creationDate,  thumbnail: thumbnail,  tags: tags}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 			if (err) { logger.error(err); return cb(err, raw); }
-			else { return cb(err, 1); }
+			else { return cb(err, 'ok'); }
 		});	
 	}
 	/**
@@ -780,9 +779,9 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 		var objectsData = parseRequest(req, ['id', 'name', 'file', 'creator', 'creationDate', 'thumbnail', 'tags']);
 		
 		writeHeaders(resp);
-		updateModel(objectsData.id, objectsData.name, objectsData.file, objectsData.creator, objectsData.creationDate, objectsData.thumbnail, objectsData.tags, function(err, success) {
+		updateModel(objectsData.id, objectsData.name, objectsData.file, objectsData.creator, objectsData.creationDate, objectsData.thumbnail, objectsData.tags, function(err, status) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: 1 })); 
+			else resp.end(JSON.stringify({ status: status })); 
 		});
 	}
 	
@@ -798,7 +797,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	function updateModelName(id, name, cb) {
 			modelModel.update({ _id: id }, {name: name}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
-					else { return cb(err, 1); }
+					else { return cb(err, 'ok'); }
 			});
 	}
 	/**
@@ -814,9 +813,9 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 		var objData = parseRequest(req, ['id', 'name']);
 		
 		writeHeaders(resp);
-		updateModelName(objData.id, objData.name, function(err, success) {
+		updateModelName(objData.id, objData.name, function(err, status) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: 1 })); 
+			else resp.end(JSON.stringify({ status: status })); 
 		});
 	}
 		
@@ -832,7 +831,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	function updateModelFile(id, name, cb) {
 			modelModel.update({ _id: id }, {file: file}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
-					else { return cb(err, 1); }
+					else { return cb(err, 'ok'); }
 			});
 	}
 	/**
@@ -848,9 +847,9 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 		var objData = parseRequest(req, ['id', 'file']);
 		
 		writeHeaders(resp);
-		updateModelFile(objData.id, objData.file, function(err, success) {
+		updateModelFile(objData.id, objData.file, function(err, status) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: 1 })); 
+			else resp.end(JSON.stringify({ status: status })); 
 		});
 	}
 		
@@ -866,7 +865,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	function updateModelCreator(id, name, cb) {
 			modelModel.update({ _id: id }, {creator: creator}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
-					else { return cb(err, 1); }
+					else { return cb(err, 'ok'); }
 			});
 	}
 	/**
@@ -882,9 +881,9 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 		var objData = parseRequest(req, ['id', 'creator']);
 		
 		writeHeaders(resp);
-		updateModelCreator(objData.id, objData.creator, function(err, success) {
+		updateModelCreator(objData.id, objData.creator, function(err, status) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: 1 })); 
+			else resp.end(JSON.stringify({ status: status })); 
 		});
 	}
 	
@@ -900,7 +899,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	function updateModelCreationDate(id, name, cb) {
 			modelModel.update({ _id: id }, {creationDate: creationDate}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
-					else { return cb(err, 1); }
+					else { return cb(err, 'ok'); }
 			});
 	}
 	/**
@@ -916,9 +915,9 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 		var objData = parseRequest(req, ['id', 'creationDate']);
 		
 		writeHeaders(resp);
-		updateModelCreationDate(objData.id, objData.creationDate, function(err, success) {
+		updateModelCreationDate(objData.id, objData.creationDate, function(err, status) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: 1 })); 
+			else resp.end(JSON.stringify({ status: status })); 
 		});
 	}
 	
@@ -934,7 +933,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	function updateModelThumbnail(id, name, cb) {
 			modelModel.update({ _id: id }, {thumbnail: thumbnail}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
-					else { return cb(err, 1); }
+					else { return cb(err, 'ok'); }
 			});
 	}
 	/**
@@ -950,9 +949,9 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 		var objData = parseRequest(req, ['id', 'thumbnail']);
 		
 		writeHeaders(resp);
-		updateModelThumbnail(objData.id, objData.thumbnail, function(err, success) {
+		updateModelThumbnail(objData.id, objData.thumbnail, function(err, status) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: 1 })); 
+			else resp.end(JSON.stringify({ status: status })); 
 		});
 	}	
 	
@@ -968,7 +967,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	function updateModelTags(id, name, cb) {
 			modelModel.update({ _id: id }, {tags: tags}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
-					else { return cb(err, 1); }
+					else { return cb(err, 'ok'); }
 			});
 	}
 	/**
@@ -984,9 +983,9 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 		var objData = parseRequest(req, ['id', 'tags']);
 		
 		writeHeaders(resp);
-		updateModelTags(objData.id, objData.tags, function(err, success) {
+		updateModelTags(objData.id, objData.tags, function(err, status) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: 1 })); 
+			else resp.end(JSON.stringify({ status: status })); 
 		});
 	}
 
@@ -1002,11 +1001,11 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 * ====
 	 * Returns the models created by an User
 	 * Parameters:
-	 *	- name (String): 				Username
+	 *	- username (String): 				Username
 	 *	- cb (Function(err, Model[])):	Callback
 	 */
-	function getUserModels(name, cb) {
-		modelModel.find({creator: name}, {__v:0}).lean().exec(cb);
+	function getUserModels(username, cb) {
+		modelModel.find({creator: username}, {__v:0}).lean().exec(cb);
 	}
 	/**
 	 * serviceGetUserModels
@@ -1018,10 +1017,10 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 */
 	function serviceGetUserModels(req, resp) {
 		logger.info("<Service> GetUserModels.");
-		var getData = parseRequest(req, ['name']);
+		var getData = parseRequest(req, ['username']);
 		
 		writeHeaders(resp);
-		getUserModels(getData.name, function (err, objects) {
+		getUserModels(getData.username, function (err, objects) {
 			if (err) error(2, resp);
 			else resp.end(JSON.stringify({models: objects})); 
 		});
@@ -1040,12 +1039,12 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 * Add a Right
 	 * Parameters:
 	 *	- modelId (String): 		ID of the model
-	 *	- userId (String): 			ID of the user
+	 *	- username (String): 			ID of the user
 	 *	- rightToWrite (bool): 		Flag: false = Read only, true = Read+Write	
 	 *	- cb (Function(bool)):		Callback
 	 */
-	function addRight(modelId, userId, rightToWrite, cb) {
-		getUserId(userId, function(err, id){
+	function addRight(modelId, username, rightToWrite, cb) {
+		getUserId(username, function(err, id){
 			if (err) { return cb(err, null); }
 			if (!id) { return cb(null, 'User doesn\'t exist'); }
 			id = id._id;
@@ -1092,15 +1091,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 * 		none
 	 * Request Parameters:
 	 *	- modelId (String): 		ID of the model				- required
-	 *	- userId (String): 			ID of the user				- required
+	 *	- username (String): 			ID of the user				- required
 	 *	- rightToWrite (bool): 		Flag for the right to write	- required
 	 */
 	function serviceAddRight(req, resp) {
 		logger.info("<Service> AddRight.");
-		var objectsData = parseRequest(req, ['modelId', 'userId', 'rightToWrite']);
+		var objectsData = parseRequest(req, ['modelId', 'username', 'rightToWrite']);
 		
 		writeHeaders(resp);
-		addRight(objectsData.modelId, objectsData.userId, objectsData.rightToWrite, function(err, status) {
+		addRight(objectsData.modelId, objectsData.username, objectsData.rightToWrite, function(err, status) {
 			if (err) error(2, resp);
 			else resp.end(JSON.stringify({ status: status }));
 		});
@@ -1112,11 +1111,11 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 * Add a Right to Write & Read
 	 * Parameters:
 	 *	- modelId (String): 		ID of the model
-	 *	- userId (String): 			ID of the user
+	 *	- username (String): 			ID of the user
 	 *	- cb (Function(bool)):		Callback
 	 */
-	function addCompleteRight(modelId, userId, cb) {
-		getUserId(userId, function(err, id){
+	function addCompleteRight(modelId, username, cb) {
+		getUserId(username, function(err, id){
 			if (err) { return cb(err, null); }
 			if (!id) { return cb(null, 'User doesn\'t exist'); }
 			id = id._id;
@@ -1144,15 +1143,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 * 		none
 	 * Request Parameters:
 	 *	- modelId (String): 		ID of the model				- required
-	 *	- userId (String): 			ID of the user				- required
+	 *	- username (String): 			ID of the user				- required
 	 *	- rightToWrite (bool): 		Flag for the right to write	- required
 	 */
 	function serviceAddCompleteRight(req, resp) {
 		logger.info("<Service> AddCompleteRight.");
-		var objectsData = parseRequest(req, ['modelId', 'userId']);
+		var objectsData = parseRequest(req, ['modelId', 'username']);
 		
 		writeHeaders(resp);
-		addCompleteRight(objectsData.modelId, objectsData.userId, function(err, status) {
+		addCompleteRight(objectsData.modelId, objectsData.username, function(err, status) {
 			if (err) error(2, resp);
 			else resp.end(JSON.stringify({ status: status }));
 		});
@@ -1164,11 +1163,11 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 * Add a Right to Read
 	 * Parameters:
 	 *	- modelId (String): 		ID of the model
-	 *	- userId (String): 			ID of the user
+	 *	- username (String): 			ID of the user
 	 *	- cb (Function(bool)):		Callback
 	 */
-	function addReadRight(modelId, userId, cb) {
-		getUserId(userId, function(err, id){
+	function addReadRight(modelId, username, cb) {
+		getUserId(username, function(err, id){
 			if (err) { return cb(err, null); }
 			if (!id) { return cb(null, 'User doesn\'t exist'); }
 			id = id._id;
@@ -1196,15 +1195,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 * 		none
 	 * Request Parameters:
 	 *	- modelId (String): 		ID of the model				- required
-	 *	- userId (String): 			ID of the user				- required
+	 *	- username (String): 			ID of the user				- required
 	 *	- rightToWrite (bool): 		Flag for the right to write	- required
 	 */
 	function serviceAddReadRight(req, resp) {
 		logger.info("<Service> AddReadRight.");
-		var objectsData = parseRequest(req, ['modelId', 'userId']);
+		var objectsData = parseRequest(req, ['modelId', 'username']);
 		
 		writeHeaders(resp);
-		addReadRight(objectsData.modelId, objectsData.userId, function(err, status) {
+		addReadRight(objectsData.modelId, objectsData.username, function(err, status) {
 			if (err) error(2, resp);
 			else resp.end(JSON.stringify({ status: status }));
 		});
@@ -1216,12 +1215,12 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 * Remove a Right
 	 * Parameters:
 	 *	- modelId (String): 		ID of the model
-	 *	- userId (String): 			ID of the user
+	 *	- username (String): 			ID of the user
 	 *	- rightToWrite (bool): 		Flag: true = remove Write only, false = remove Write+Read
 	 *	- cb (Function(bool)):		Callback
 	 */
-	function removeRight(modelId, userId, rightToWrite, cb) {
-		getUserId(userId, function(err, id){
+	function removeRight(modelId, username, rightToWrite, cb) {
+		getUserId(username, function(err, id){
 			if (err) { return cb(err, null); }
 			if (!id) { return cb(null, 'User doesn\'t exist'); }
 			id = id._id;
@@ -1268,14 +1267,14 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 * 		none
 	 * Request Parameters:
 	 *	- modelId (String): 		ID of the model				- required
-	 *	- userId (String): 			ID of the user				- required
+	 *	- username (String): 			ID of the user				- required
 	 */
 	function serviceRemoveRight(req, resp) {
 		logger.info("<Service> RemoveRight.");
-		var objectsData = parseRequest(req, ['modelId', 'userId', 'rightToWrite']);
+		var objectsData = parseRequest(req, ['modelId', 'username', 'rightToWrite']);
 		
 		writeHeaders(resp);
-		removeRight(objectsData.modelId, objectsData.userId, objectsData.rightToWrite, function(err, status) {
+		removeRight(objectsData.modelId, objectsData.username, objectsData.rightToWrite, function(err, status) {
 			if (err) error(2, resp);
 			else resp.end(JSON.stringify({ status: status }));
 		});
@@ -1287,11 +1286,11 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 * Remove a Right to Write & Read
 	 * Parameters:
 	 *	- modelId (String): 		ID of the model
-	 *	- userId (String): 			ID of the user
+	 *	- username (String): 			ID of the user
 	 *	- cb (Function(bool)):		Callback
 	 */
-	function removeCompleteRight(modelId, userId, cb) {
-		getUserId(userId, function(err, id){
+	function removeCompleteRight(modelId, username, cb) {
+		getUserId(username, function(err, id){
 			if (err) { return cb(err, null); }
 			if (!id) { return cb(null, 'User doesn\'t exist'); }
 			id = id._id;
@@ -1319,14 +1318,14 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 * 		none
 	 * Request Parameters:
 	 *	- modelId (String): 		ID of the model				- required
-	 *	- userId (String): 			ID of the user				- required
+	 *	- username (String): 			ID of the user				- required
 	 */
 	function serviceRemoveCompleteRight(req, resp) {
 		logger.info("<Service> RemoveCompleteRight.");
-		var objectsData = parseRequest(req, ['modelId', 'userId']);
+		var objectsData = parseRequest(req, ['modelId', 'username']);
 		
 		writeHeaders(resp);
-		removeCompleteRight(objectsData.modelId, objectsData.userId, objectsData.rightToWrite, function(err, status) {
+		removeCompleteRight(objectsData.modelId, objectsData.username, objectsData.rightToWrite, function(err, status) {
 			if (err) error(2, resp);
 			else resp.end(JSON.stringify({ status: status }));
 		});
@@ -1338,11 +1337,11 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 * Remove a Right to Write & Read
 	 * Parameters:
 	 *	- modelId (String): 		ID of the model
-	 *	- userId (String): 			ID of the user
+	 *	- username (String): 			ID of the user
 	 *	- cb (Function(bool)):		Callback
 	 */
-	function removeWriteRight(modelId, userId, cb) {
-		getUserId(userId, function(err, id){
+	function removeWriteRight(modelId, username, cb) {
+		getUserId(username, function(err, id){
 			if (err) { return cb(err, null); }
 			if (!id) { return cb(null, 'User doesn\'t exist'); }
 			id = id._id;
@@ -1370,14 +1369,14 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 * 		none
 	 * Request Parameters:
 	 *	- modelId (String): 		ID of the model				- required
-	 *	- userId (String): 			ID of the user				- required
+	 *	- username (String): 			ID of the user				- required
 	 */
 	function serviceRemoveWriteRight(req, resp) {
 		logger.info("<Service> RemoveWriteRight.");
-		var objectsData = parseRequest(req, ['modelId', 'userId']);
+		var objectsData = parseRequest(req, ['modelId', 'username']);
 		
 		writeHeaders(resp);
-		removeWriteRight(objectsData.modelId, objectsData.userId, objectsData.rightToWrite, function(err, status) {
+		removeWriteRight(objectsData.modelId, objectsData.username, objectsData.rightToWrite, function(err, status) {
 			if (err) error(2, resp);
 			else resp.end(JSON.stringify({ status: status }));
 		});
@@ -1388,21 +1387,21 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 * ====
 	 * Returns a list of Model the User got the personal right to read
 	 * Parameters:
-	 * 	- userId (String):				ID of the User
+	 * 	- username (String):				ID of the User
 	 *	- limit (int): 					Number max of Model to return
 	 *	- offset (int): 				Number of the Model to start with
 	 *	- cb (Function(err, Right[])):	Callback
 	 */
-	function getPersonallyReadableModels(userId, limit, offset, cb) {
+	function getPersonallyReadableModels(username, limit, offset, cb) {
 		if (!offset) offset = 0;
 		if (limit) {
-			modelUser.findOne(userId).populate('readModels', '-__v -writers -readers').sort({name: 1}).skip(offset).limit(limit).exec(function(err, user) {
+			modelUser.findOne(username).populate('readModels', '-__v -writers -readers').sort({name: 1}).skip(offset).limit(limit).exec(function(err, user) {
 				if (!user) { return cb(null, 'User doesn\'t exist'); }
 				cb(err, user.readModels);
 			});
 		}
 		else {
-			modelUser.findOne(userId).populate('readModels', '-__v -writers -readers').sort({name: 1}).skip(offset).exec(function(err, user) {
+			modelUser.findOne(username).populate('readModels', '-__v -writers -readers').sort({name: 1}).skip(offset).exec(function(err, user) {
 				if (!user) { return cb(null, 'User doesn\'t exist'); }
 				cb(err, user.readModels);
 			});
@@ -1414,16 +1413,16 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 * Request Var:
 	 * 		none
 	 * Request Parameters:
-	 * 		- userId (String):	ID of the User						- required
+	 * 		- username (String):	ID of the User						- required
 	 *		- limit (int): 		Number max to return				- optional
 	 *		- offset (int): 	Number of the Right to start with	- optional
 	 */
 	function serviceGetPersonallyReadableModels(req, resp) {
 		logger.info("<Service> GetPersonallyReadableModels.");
-		var getData = parseRequest(req, ['userId', 'limit', 'offset']);
+		var getData = parseRequest(req, ['username', 'limit', 'offset']);
 		
 		writeHeaders(resp);
-		getPersonallyReadableModels(getData.userId, getData.limit, getData.offset, function (err, objects) {
+		getPersonallyReadableModels(getData.username, getData.limit, getData.offset, function (err, objects) {
 			if (err) error(2, resp);
 			else resp.end(JSON.stringify({ readModels: objects })); 
 		});
@@ -1434,21 +1433,21 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 * ====
 	 * Returns a list of Model the User got the personal right to edit
 	 * Parameters:
-	 * 	- userId (String):				ID of the User
+	 * 	- username (String):				ID of the User
 	 *	- limit (int): 					Number max of Model to return
 	 *	- offset (int): 				Number of the Model to start with
 	 *	- cb (Function(err, Right[])):	Callback
 	 */
-	function getPersonallyEditableModels(userId, limit, offset, cb) {
+	function getPersonallyEditableModels(username, limit, offset, cb) {
 		if (!offset) offset = 0;
 		if (limit) {
-			modelUser.findOne(userId).populate('writeModels', '-__v -writers -readers').sort({name: 1}).skip(offset).limit(limit).lean().exec(function(err, user) {
+			modelUser.findOne(username).populate('writeModels', '-__v -writers -readers').sort({name: 1}).skip(offset).limit(limit).lean().exec(function(err, user) {
 				if (!user) { return cb(null, 'User doesn\'t exist'); }
 				cb(err, user.writeModels);
 			});
 		}
 		else {
-			modelUser.findOne(userId).populate('writeModels', '-__v -writers -readers').sort({name: 1}).skip(offset).lean().exec(function(err, user) {
+			modelUser.findOne(username).populate('writeModels', '-__v -writers -readers').sort({name: 1}).skip(offset).lean().exec(function(err, user) {
 				if (!user) { return cb(null, 'User doesn\'t exist'); }
 				cb(err, user.writeModels);
 			});
@@ -1460,16 +1459,16 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 * Request Var:
 	 * 		none
 	 * Request Parameters:
-	 * 		- userId (String):	ID of the User						- required
+	 * 		- username (String):	ID of the User						- required
 	 *		- limit (int): 		Number max to return				- optional
 	 *		- offset (int): 	Number of the Right to start with	- optional
 	 */
 	function serviceGetPersonallyEditableModels(req, resp) {
 		logger.info("<Service> GetPersonallyEditableModels.");
-		var getData = parseRequest(req, ['userId', 'limit', 'offset']);
+		var getData = parseRequest(req, ['username', 'limit', 'offset']);
 		
 		writeHeaders(resp);
-		getPersonallyEditableModels(getData.userId, getData.limit, getData.offset, function (err, objects) {
+		getPersonallyEditableModels(getData.username, getData.limit, getData.offset, function (err, objects) {
 			if (err) error(2, resp);
 			else resp.end(JSON.stringify({ writeModels: objects })); 
 		});
@@ -1716,7 +1715,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	function updateModelPublicRead(id, flag, cb) {
 			modelModel.update({ _id: id }, {publicRead: flag}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
-					else { return cb(err, 1); }
+					else { return cb(err, 'ok'); }
 			});
 	}
 	/**
@@ -1732,9 +1731,9 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 		var objData = parseRequest(req, ['id', 'publicRead']);
 		
 		writeHeaders(resp);
-		updateModelPublicRead(objData.id, objData.tags, function(err, success) {
+		updateModelPublicRead(objData.id, objData.tags, function(err, status) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: 1 })); 
+			else resp.end(JSON.stringify({ status: status })); 
 		});
 	}
 	 
@@ -1750,7 +1749,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	function updateModelPublicWrite(id, flag, cb) {
 			modelModel.update({ _id: id }, {publicWrite: flag}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
-					else { return cb(err, 1); }
+					else { return cb(err, 'ok'); }
 			});
 	}
 	/**
@@ -1766,9 +1765,9 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 		var objData = parseRequest(req, ['id', 'publicWrite']);
 		
 		writeHeaders(resp);
-		updateModelPublicWrite(objData.id, objData.tags, function(err, success) {
+		updateModelPublicWrite(objData.id, objData.tags, function(err, status) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: 1 })); 
+			else resp.end(JSON.stringify({ status: status })); 
 		});
 	}
 			 
@@ -1859,25 +1858,25 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 		'GET'	: serviceGetReaders,
 		'POST'	: serviceAddReadRight
 	};
-	this.rest['user/:userId/writeModels'] = {
+	this.rest['user/:username/writeModels'] = {
 		'GET'	: serviceGetPersonallyEditableModels,
 		'POST'	: serviceAddCompleteRight
 	};
-	this.rest['user/:userId/readModels'] = {
+	this.rest['user/:username/readModels'] = {
 		'GET'	: serviceGetPersonallyReadableModels,
 		'POST'	: serviceAddReadRight
 	};
 
-	this.rest['user/:userId/writeModel/:modelId'] = {
+	this.rest['user/:username/writeModel/:modelId'] = {
 		'DELETE': serviceRemoveWriteRight
 	};
-	this.rest['user/:userId/readModel/:modelId'] = {
+	this.rest['user/:username/readModel/:modelId'] = {
 		'DELETE': serviceRemoveCompleteRight
 	};
-	this.rest['model/:modelId/writer/:userId'] = {
+	this.rest['model/:modelId/writer/:username'] = {
 		'DELETE': serviceRemoveWriteRight
 	};
-	this.rest['model/:modelId/reader/:userId'] = {
+	this.rest['model/:modelId/reader/:username'] = {
 		'DELETE': serviceRemoveCompleteRight
 	};
 
