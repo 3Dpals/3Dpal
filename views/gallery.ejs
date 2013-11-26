@@ -1,4 +1,30 @@
 <% layout('layout') -%>
+<script type="text/javascript">
+$(window).scroll(function()
+{
+    if($(window).scrollTop() == $(document).height() - $(window).height())
+    {
+        $('div#loadmoreajaxloader').show();
+        $.ajax({
+        url: "gallery",
+        success: function(html)
+        {
+            if(html)
+            {
+                $("#postswrapper").append(html);
+                $('div#loadmoreajaxloader').hide();
+            }else
+            {
+                $('div#loadmoreajaxloader').html('<center>No more posts to show.</center>');
+            }
+        }
+        });
+    }
+});
+</script>
+
+
+
 <div class="container">
 <form class="form-inline  form-horizontal " role="form">
   <div class="form-group">
@@ -21,25 +47,16 @@
   <button type="button" class="btn btn-primary">Search</button>
 </form>
 </div>
-<ul class="pagination">
-  <li><a href="#">&laquo;</a></li>
-  <li><a href="#">1</a></li>
-  <li><a href="#">2</a></li>
-  <li><a href="#">3</a></li>
-  <li><a href="#">4</a></li>
-  <li><a href="#">5</a></li>
-  <li><a href="#">&raquo;</a></li>
-</ul>
-<section>
 
-<% for(var i=0; i<rest.length; i++) { %>
-<% if(i%3==0 && i>0){%>
-    </div>
-	<div class="row">
-<%}else if (i%3==0){ %>
-	<div class="row">
-<%}%>
-	<div class="col-md-4 ">
+<section>
+<div id="postswrapper">
+  
+  
+
+
+<% for(var i=0; (i<rest.length & i<12); i++) { %>
+
+	<div class="col-xs-6 .col-sm-6 col-md-4 .col-lg-3">
 		  <div class="thumbnail">
 		  <img src='thumbnail/<%= rest[i].id %>.png'> 
 		  <div class="caption">
@@ -51,14 +68,7 @@
 			</div>
 <% } %>
         
-          
+<div id="loadmoreajaxloader" style="display:none;"><center><img src="image/ajax-loader.gif" /></center></div>
+</div>     
 </section>
-<ul class="pagination">
-  <li><a href="#">&laquo;</a></li>
-  <li><a href="#">1</a></li>
-  <li><a href="#">2</a></li>
-  <li><a href="#">3</a></li>
-  <li><a href="#">4</a></li>
-  <li><a href="#">5</a></li>
-  <li><a href="#">&raquo;</a></li>
-</ul>
+
