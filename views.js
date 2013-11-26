@@ -70,8 +70,33 @@ function viewHelp(req, res) {
 	res.render('help', {title: "Help", rest: rest});
 }
 
+/*
+ * VIEW Gallery
+ */
+function viewGallery(req, res) {
+	logger.info("<View> Viewing gallery.");
+
+//	res.render('gallery', {title: "Gallery", rest: rest});
+	res.render('gallery', {title: "Gallery", rest: [{id:"00",name:"name00"},{id:"01",name:"name01"},{id:"02",name:"name02"},{id:"03",name:"name03"}]});
+}
+
+/*
+ * VIEW User Profile
+ */
+function viewProfile(req, res) {
+	logger.info("<View> Viewing User Profile.");
+	var email = "johannes.baldinger@googlemail.com";
+	email = email.trim();
+	email = email.toLowerCase();
+	var emailHash = require('crypto').createHash('md5').update(email).digest("hex");
+//	res.render('profile', {title: "Profile", rest: rest});
+	res.render('profile', {title: "Profile", rest: {id:"00",name:"Johannes Baldinger",email:email,emailHash :emailHash }});
+}
+
 exports.index = viewIndex;
 exports.signin = viewSignin;
 exports.login = viewLogin;
 exports.notfound = viewNotfound;
 exports.help = viewHelp;
+exports.gallery = viewGallery;
+exports.profile = viewProfile;

@@ -109,6 +109,9 @@ viewHandler["/(index)?"] = views.index;
 viewHandler["/login"] = views.login;
 viewHandler["/signin"] = views.signin;
 viewHandler["/help"] = views.help;
+viewHandler["/gallery"] = views.gallery;
+viewHandler["/profile"] = views.profile;
+
 
 viewHandler["*"] = views.notfound;
 

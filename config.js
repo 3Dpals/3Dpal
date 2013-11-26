@@ -13,7 +13,7 @@ var config = {
 	},
 	"security" : {
 		"ssl" : false,
-		"auth" : true
+		"auth" : false
 	},
 	"rest" : {
 		"url" : "localhost", // TO CHANGE BEFORE DEPLOYING!
