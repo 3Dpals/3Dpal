@@ -1045,7 +1045,6 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 *	- cb (Function(bool)):		Callback
 	 */
 	function createRight(modelId, userId, rightToWrite, cb) {
-		if (rightToRead &!rightToWrite) { cb ('No rights given', null); return; }
 		var obj = new modelRight({modelId: modelId, userId: userId, rightLevel: rightToWrite});
 		obj.save(function(err) {
 			logger.debug(err);
@@ -1107,7 +1106,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 		writeHeaders(resp);
 		getRights(getData.limit, getData.offset, function (err, objects) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ objects: objects })); 
+			else resp.end(JSON.stringify({ rights: objects })); 
 		});
 	}
 	 
@@ -1147,7 +1146,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 		writeHeaders(resp);
 		getRightsPerUser(getData.userId, getData.limit, getData.offset, function (err, objects) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ objects: objects })); 
+			else resp.end(JSON.stringify({ rights: objects })); 
 		});
 	}
  
@@ -1187,7 +1186,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 		writeHeaders(resp);
 		getRightsPerModel(getData.modelId, getData.limit, getData.offset, function (err, objects) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ objects: objects })); 
+			else resp.end(JSON.stringify({ rights: objects })); 
 		});
 	}
 
@@ -1251,7 +1250,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 		var getData = parseRequest(req, ['modelId', 'userId']);
 		
 		writeHeaders(resp);
-		getRight(getData.modelId, getData.userId, function (err, obj) {
+		getRightWithModelAndUser(getData.modelId, getData.userId, function (err, obj) {
 			if (err) error(2, resp);
 			else resp.end(JSON.stringify(obj)); 
 		});
