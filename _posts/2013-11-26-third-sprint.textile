@@ -14,7 +14,7 @@ h2. Our results from the second sprint:
 * Front end design finished and layout with static pages in place
 
 h2. Open Problems:
-no
+* no
 
 h2. ToDos for the third sprint:
 * Documentation of the API
