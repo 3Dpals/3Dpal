@@ -9,7 +9,7 @@
 module.exports = function(mongoose) {
 	var Schema = mongoose.Schema;
 	var RightSchema = new Schema({
-		modelId: { type: ObjectID, required: true},			// ID of the Model
+		modelId: { type: Schema.Types.ObjectId, required: true},			// ID of the Model
 		userId: { type: String, required: true},			// ID of the User
 		rightLevel: { type: Boolean, required: true}		// false = Read only, true = Read+Write	
 	});
