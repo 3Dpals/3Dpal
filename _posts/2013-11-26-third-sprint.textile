@@ -13,7 +13,7 @@ h2. Our results from the second sprint:
 * Working Rest API for 3DModel, user and rights object.
 * Front end design finished and layout with static pages in place
 
-*Open Problems:*
+h2. Open Problems:
 no
 
 h2. ToDos for the third sprint:

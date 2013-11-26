@@ -12,17 +12,17 @@ We also have an architecture overview:
 !../../../images/Architecture.png(Architecture.)!
 
 
-*Our results from the first sprint:*
+h2. Our results from the first sprint:
 * Models and Tool defined
 * Plain Node.js Server running
 * REST API defined, halfway implemented
 * First front-end sites ready
 
-*Open Problems:*
+h2. Open Problems:
 * REST API structure (file handling)
 * Rights management (solved?)
 
-*ToDos for the second sprint:*
+h2. ToDos for the second sprint:
 * Finishing the implement of the API (REST)
 * Implement the API for 3d object
 * Finish the front-end framework and layout
