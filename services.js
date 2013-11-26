@@ -15,6 +15,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 		var result = {};
 		result.error = {};
 		result.error.code = code;
+		result.status = 'nok';
 
 		switch(code) {
 			case 0:
@@ -183,7 +184,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 *	- cb (Function(err, User[])):	Callback
 	 */
 	function getUserId(name, cb) {
-		modelUser.findOne({name: name}, {__v:0, email:0, name:0}).lean().exec(cb);
+		modelUser.findOne({name: name}).select('_id').lean().exec(cb);
 	}
 	/**
 	 * serviceGetUserId
@@ -213,7 +214,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 *	- cb (Function(err, User[])):	Callback
 	 */
 	function getUserEmail(name, cb) {
-		modelUser.findOne({name: name}, {__v:0, _id:0, name:0}).lean().exec(cb);
+		modelUser.findOne({name: name}).select('email').lean().exec(cb);
 	}
 	/**
 	 * serviceGetUserEmail
@@ -423,7 +424,6 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	function createModel(name, file, creator, creationDate, thumbnail, tags, cb) {
 		var obj = new modelModel({name: name, file: file, creator: creator,  creationDate: creationDate,  thumbnail: thumbnail,  tags: tags});
 		obj.save(function(err) {
-			logger.debug(err);
 			cb (err, obj);
 		});
 	}
@@ -536,7 +536,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 *	- cb (Function(err, Model[])):	Callback
 	 */
 	function getModelName(id, cb) {
-		modelModel.findById(id, {__v:0, _id:0, file:0, creator:0, creationDate:0, thumbnail:0, tags:0}).lean().exec(cb);
+		modelModel.findById(id).select('_id').lean().exec(cb);
 	}
 	/**
 	 * serviceGetModelName
@@ -566,7 +566,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 *	- cb (Function(err, Model[])):	Callback
 	 */
 	function getModelFile(id, cb) {
-		modelModel.findById(id, {__v:0, _id:0, name:0, creator:0, creationDate:0, thumbnail:0, tags:0}).lean().exec(cb);
+		modelModel.findById(id).select('file').lean().exec(cb);
 	}
 	/**
 	 * serviceGetModelFile
@@ -596,7 +596,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 *	- cb (Function(err, Model[])):	Callback
 	 */
 	function getModelCreator(id, cb) {
-		modelModel.findById(id, {__v:0, _id:0, file:0, creator:0, creationDate:0, thumbnail:0, tags:0}).lean().exec(cb);
+		modelModel.findById(id).select('creator').lean().exec(cb);
 	}
 	/**
 	 * serviceGetModelCreator
@@ -626,7 +626,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 *	- cb (Function(err, Model[])):	Callback
 	 */
 	function getModelCreationDate(id, cb) {
-		modelModel.findById(id, {__v:0, _id:0, file:0, creator:0, name:0, thumbnail:0, tags:0}).lean().exec(cb);
+		modelModel.findById(id).select('creationDate').lean().exec(cb);
 	}
 	/**
 	 * serviceGetModelCreationDate
@@ -656,7 +656,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 *	- cb (Function(err, Model[])):	Callback
 	 */
 	function getModelThumbnail(id, cb) {
-		modelModel.findById(id, {__v:0, _id:0, file:0, creator:0, name:0, creationDate:0, tags:0}).lean().exec(cb);
+		modelModel.findById(id).select('thumbnail').lean().exec(cb);
 	}
 	/**
 	 * serviceGetModelThumbnail
@@ -686,7 +686,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 *	- cb (Function(err, Model[])):	Callback
 	 */
 	function getModelTags(id, cb) {
-		modelModel.findById(id, {__v:0, _id:0, file:0, creator:0, name:0, creationDate:0, thumbnail:0}).lean().exec(cb);
+		modelModel.findById(id).select('tags').lean().exec(cb);
 	}
 	/**
 	 * serviceGetModelTags
@@ -1035,24 +1035,58 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 */
 	 
 	/**
-	 * createRight
+	 * addRight
 	 * ====
-	 * Create a Right (only if her/his name is unique).
+	 * Add a Right
 	 * Parameters:
 	 *	- modelId (String): 		ID of the model
 	 *	- userId (String): 			ID of the user
 	 *	- rightToWrite (bool): 		Flag: false = Read only, true = Read+Write	
 	 *	- cb (Function(bool)):		Callback
 	 */
-	function createRight(modelId, userId, rightToWrite, cb) {
-		var obj = new modelRight({modelId: modelId, userId: userId, rightLevel: rightToWrite});
-		obj.save(function(err) {
-			logger.debug(err);
-			cb (err, obj);
+	function addRight(modelId, userId, rightToWrite, cb) {
+		getUserId(userId, function(err, id){
+			if (err) { return cb(err, null); }
+			if (!id) { return cb(null, 'User doesn\'t exist'); }
+			id = id._id;
+			if (rightToWrite) {
+				modelUser.findByIdAndUpdate(
+					id,
+					{$addToSet: { writeModels : modelId, readModels : modelId }},
+					{ upsert: false, multi: false },
+					function (err, numberAffected, raw) {
+						if (err) { logger.error(err); return cb(err, raw); }
+						modelModel.findByIdAndUpdate(
+							modelId,
+							{$addToSet: { writers : id, readers : id }},
+							{ upsert: false, multi: false },
+							function (err, numberAffected, raw) {
+								if (err) { logger.error(err); return cb(err, raw); }
+								else { return cb(err, 'ok'); }
+							});
+					});	
+			} else {
+				modelUser.findByIdAndUpdate(
+					id,
+					{$addToSet: { readModels : modelId }},
+					{ upsert: false, multi: false },
+					function (err, numberAffected, raw) {
+						if (err) { logger.error(err); return cb(err, raw); }
+						modelModel.findByIdAndUpdate(
+							modelId,
+							{$addToSet: { readers : id }},
+							{ upsert: false, multi: false },
+							function (err, numberAffected, raw) {
+								if (err) { logger.error(err); return cb(err, raw); }
+								else { return cb(err, 'ok'); }
+							});	
+					});	
+				
+			}
 		});
 	}
 	/**
-	 * serviceCreateRight
+	 * serviceAddRight
 	 * ====
 	 * Request Var:
 	 * 		none
@@ -1061,76 +1095,321 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 *	- userId (String): 			ID of the user				- required
 	 *	- rightToWrite (bool): 		Flag for the right to write	- required
 	 */
-	function serviceCreateRight(req, resp) {
-		logger.info("<Service> CreateRight.");
+	function serviceAddRight(req, resp) {
+		logger.info("<Service> AddRight.");
 		var objectsData = parseRequest(req, ['modelId', 'userId', 'rightToWrite']);
 		
 		writeHeaders(resp);
-		createRight(objectsData.modelId, objectsData.userId, objectsData.rightToWrite, function(err, right) {
+		addRight(objectsData.modelId, objectsData.userId, objectsData.rightToWrite, function(err, status) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: 1 }));
+			else resp.end(JSON.stringify({ status: status }));
 		});
 	}
-	 
+
 	/**
-	 * getRights
+	 * addCompleteRight
 	 * ====
-	 * Returns a list of rights, ordered by name.
+	 * Add a Right to Write & Read
 	 * Parameters:
-	 *	- limit (int): 					Number max of Right to return
-	 *	- offset (int): 				Number of the Right to start with
-	 *	- cb (Function(err, Right[])):	Callback
+	 *	- modelId (String): 		ID of the model
+	 *	- userId (String): 			ID of the user
+	 *	- cb (Function(bool)):		Callback
 	 */
-	function getRights(limit, offset, cb) {
-		if (!offset) offset = 0;
-		if (limit) {
-			modelRight.find({}, {__v:0}).sort({name: 1}).skip(offset).limit(limit).lean().exec(cb);
-		}
-		else {
-			modelRight.find({}, {__v:0}).sort({name: 1}).skip(offset).lean().exec(cb);
-		}
+	function addCompleteRight(modelId, userId, cb) {
+		getUserId(userId, function(err, id){
+			if (err) { return cb(err, null); }
+			if (!id) { return cb(null, 'User doesn\'t exist'); }
+			id = id._id;
+			modelUser.findByIdAndUpdate(
+				id,
+				{$addToSet: { writeModels : modelId, readModels : modelId }},
+				{ upsert: false, multi: false },
+				function (err, numberAffected, raw) {
+					if (err) { logger.error(err); return cb(err, raw); }
+					modelModel.findByIdAndUpdate(
+						modelId,
+						{$addToSet: { writers : id, readers : id }},
+						{ upsert: false, multi: false },
+						function (err, numberAffected, raw) {
+							if (err) { logger.error(err); return cb(err, raw); }
+							else { return cb(err, 'ok'); }
+						});
+				});	
+		});
 	}
 	/**
-	 * serviceGetRights
+	 * serviceAddCompleteRight
 	 * ====
 	 * Request Var:
 	 * 		none
 	 * Request Parameters:
-	 *		- limit (int): 		Number max to return				- optional
-	 *		- offset (int): 	Number of the Right to start with	- optional
+	 *	- modelId (String): 		ID of the model				- required
+	 *	- userId (String): 			ID of the user				- required
+	 *	- rightToWrite (bool): 		Flag for the right to write	- required
 	 */
-	function serviceGetRights(req, resp) {
-		logger.info("<Service> GetRights.");
-		var getData = parseRequest(req, ['limit', 'offset']);
+	function serviceAddCompleteRight(req, resp) {
+		logger.info("<Service> AddCompleteRight.");
+		var objectsData = parseRequest(req, ['modelId', 'userId']);
 		
 		writeHeaders(resp);
-		getRights(getData.limit, getData.offset, function (err, objects) {
+		addCompleteRight(objectsData.modelId, objectsData.userId, function(err, status) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ rights: objects })); 
+			else resp.end(JSON.stringify({ status: status }));
 		});
 	}
-	 
+
 	/**
-	 * getRightsPerUser
+	 * addReadRight
 	 * ====
-	 * Returns a list of rights for a given User, ordered by name.
+	 * Add a Right to Read
+	 * Parameters:
+	 *	- modelId (String): 		ID of the model
+	 *	- userId (String): 			ID of the user
+	 *	- cb (Function(bool)):		Callback
+	 */
+	function addReadRight(modelId, userId, cb) {
+		getUserId(userId, function(err, id){
+			if (err) { return cb(err, null); }
+			if (!id) { return cb(null, 'User doesn\'t exist'); }
+			id = id._id;
+			modelUser.findByIdAndUpdate(
+				id,
+				{$addToSet: { readModels : modelId }},
+				{ upsert: false, multi: false },
+				function (err, numberAffected, raw) {
+					if (err) { logger.error(err); return cb(err, raw); }
+					modelModel.findByIdAndUpdate(
+						modelId,
+						{$addToSet: { readers : id }},
+						{ upsert: false, multi: false },
+						function (err, numberAffected, raw) {
+							if (err) { logger.error(err); return cb(err, raw); }
+							else { return cb(err, 'ok'); }
+						});
+				});	
+		});
+	}
+	/**
+	 * serviceAddReadRight
+	 * ====
+	 * Request Var:
+	 * 		none
+	 * Request Parameters:
+	 *	- modelId (String): 		ID of the model				- required
+	 *	- userId (String): 			ID of the user				- required
+	 *	- rightToWrite (bool): 		Flag for the right to write	- required
+	 */
+	function serviceAddReadRight(req, resp) {
+		logger.info("<Service> AddReadRight.");
+		var objectsData = parseRequest(req, ['modelId', 'userId']);
+		
+		writeHeaders(resp);
+		addReadRight(objectsData.modelId, objectsData.userId, function(err, status) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ status: status }));
+		});
+	}
+		
+	/**
+	 * removeRight
+	 * ====
+	 * Remove a Right
+	 * Parameters:
+	 *	- modelId (String): 		ID of the model
+	 *	- userId (String): 			ID of the user
+	 *	- rightToWrite (bool): 		Flag: true = remove Write only, false = remove Write+Read
+	 *	- cb (Function(bool)):		Callback
+	 */
+	function removeRight(modelId, userId, rightToWrite, cb) {
+		getUserId(userId, function(err, id){
+			if (err) { return cb(err, null); }
+			if (!id) { return cb(null, 'User doesn\'t exist'); }
+			id = id._id;
+			if (rightToWrite) {
+				modelUser.findByIdAndUpdate(
+					id,
+					{$pull: { writeModels : modelId, readModels : modelId }},
+					{ upsert: false, multi: false },
+					function (err, numberAffected, raw) {
+						if (err) { logger.error(err); return cb(err, raw); }
+						modelModel.findByIdAndUpdate(
+							modelId,
+							{$pull: { writers : id, readers : id }},
+							{ upsert: false, multi: false },
+							function (err, numberAffected, raw) {
+								if (err) { logger.error(err); return cb(err, raw); }
+								else { return cb(err, 'ok'); }
+							});
+					});	
+			} else {
+				modelUser.findByIdAndUpdate(
+					id,
+					{$pull: { writeModels : modelId }},
+					{ upsert: false, multi: false },
+					function (err, numberAffected, raw) {
+						if (err) { logger.error(err); return cb(err, raw); }
+						modelModel.findByIdAndUpdate(
+							modelId,
+							{$pull: { writers : id }},
+							{ upsert: false, multi: false },
+							function (err, numberAffected, raw) {
+								if (err) { logger.error(err); return cb(err, raw); }
+								else { return cb(err, 'ok'); }
+							});	
+					});	
+				
+			}
+		});
+	}
+	/**
+	 * serviceRemoveRight
+	 * ====
+	 * Request Var:
+	 * 		none
+	 * Request Parameters:
+	 *	- modelId (String): 		ID of the model				- required
+	 *	- userId (String): 			ID of the user				- required
+	 */
+	function serviceRemoveRight(req, resp) {
+		logger.info("<Service> RemoveRight.");
+		var objectsData = parseRequest(req, ['modelId', 'userId', 'rightToWrite']);
+		
+		writeHeaders(resp);
+		removeRight(objectsData.modelId, objectsData.userId, objectsData.rightToWrite, function(err, status) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ status: status }));
+		});
+	}
+		
+	/**
+	 * removeCompleteRight
+	 * ====
+	 * Remove a Right to Write & Read
+	 * Parameters:
+	 *	- modelId (String): 		ID of the model
+	 *	- userId (String): 			ID of the user
+	 *	- cb (Function(bool)):		Callback
+	 */
+	function removeCompleteRight(modelId, userId, cb) {
+		getUserId(userId, function(err, id){
+			if (err) { return cb(err, null); }
+			if (!id) { return cb(null, 'User doesn\'t exist'); }
+			id = id._id;
+			modelUser.findByIdAndUpdate(
+				id,
+				{$pull: { writeModels : modelId, readModels : modelId }},
+				{ upsert: false, multi: false },
+				function (err, numberAffected, raw) {
+					if (err) { logger.error(err); return cb(err, raw); }
+					modelModel.findByIdAndUpdate(
+						modelId,
+						{$pull: { writers : id, readers : id }},
+						{ upsert: false, multi: false },
+						function (err, numberAffected, raw) {
+							if (err) { logger.error(err); return cb(err, raw); }
+							else { return cb(err, 'ok'); }
+						});
+				});	
+		});
+	}
+	/**
+	 * serviceRemoveCompleteRight
+	 * ====
+	 * Request Var:
+	 * 		none
+	 * Request Parameters:
+	 *	- modelId (String): 		ID of the model				- required
+	 *	- userId (String): 			ID of the user				- required
+	 */
+	function serviceRemoveCompleteRight(req, resp) {
+		logger.info("<Service> RemoveCompleteRight.");
+		var objectsData = parseRequest(req, ['modelId', 'userId']);
+		
+		writeHeaders(resp);
+		removeCompleteRight(objectsData.modelId, objectsData.userId, objectsData.rightToWrite, function(err, status) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ status: status }));
+		});
+	}
+		
+	/**
+	 * removeWriteRight
+	 * ====
+	 * Remove a Right to Write & Read
+	 * Parameters:
+	 *	- modelId (String): 		ID of the model
+	 *	- userId (String): 			ID of the user
+	 *	- cb (Function(bool)):		Callback
+	 */
+	function removeWriteRight(modelId, userId, cb) {
+		getUserId(userId, function(err, id){
+			if (err) { return cb(err, null); }
+			if (!id) { return cb(null, 'User doesn\'t exist'); }
+			id = id._id;
+			modelUser.findByIdAndUpdate(
+				id,
+				{$pull: { writeModels : modelId }},
+				{ upsert: false, multi: false },
+				function (err, numberAffected, raw) {
+					if (err) { logger.error(err); return cb(err, raw); }
+					modelModel.findByIdAndUpdate(
+						modelId,
+						{$pull: { writers : id }},
+						{ upsert: false, multi: false },
+						function (err, numberAffected, raw) {
+							if (err) { logger.error(err); return cb(err, raw); }
+							else { return cb(err, 'ok'); }
+						});
+				});	
+		});
+	}
+	/**
+	 * serviceRemoveWriteRight
+	 * ====
+	 * Request Var:
+	 * 		none
+	 * Request Parameters:
+	 *	- modelId (String): 		ID of the model				- required
+	 *	- userId (String): 			ID of the user				- required
+	 */
+	function serviceRemoveWriteRight(req, resp) {
+		logger.info("<Service> RemoveWriteRight.");
+		var objectsData = parseRequest(req, ['modelId', 'userId']);
+		
+		writeHeaders(resp);
+		removeWriteRight(objectsData.modelId, objectsData.userId, objectsData.rightToWrite, function(err, status) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ status: status }));
+		});
+	}
+		 	 
+	/**
+	 * getPersonallyReadableModels
+	 * ====
+	 * Returns a list of Model the User got the personal right to read
 	 * Parameters:
 	 * 	- userId (String):				ID of the User
-	 *	- limit (int): 					Number max of Right to return
-	 *	- offset (int): 				Number of the Right to start with
+	 *	- limit (int): 					Number max of Model to return
+	 *	- offset (int): 				Number of the Model to start with
 	 *	- cb (Function(err, Right[])):	Callback
 	 */
-	function getRightsPerUser(userId, limit, offset, cb) {
+	function getPersonallyReadableModels(userId, limit, offset, cb) {
 		if (!offset) offset = 0;
 		if (limit) {
-			modelRight.find({userId: userId}, {__v:0}).sort({name: 1}).skip(offset).limit(limit).lean().exec(cb);
+			modelUser.findOne(userId).populate('readModels', '-__v -writers -readers').sort({name: 1}).skip(offset).limit(limit).exec(function(err, user) {
+				if (!user) { return cb(null, 'User doesn\'t exist'); }
+				cb(err, user.readModels);
+			});
 		}
 		else {
-			modelRight.find({}, {__v:0}).sort({name: 1}).skip(offset).lean().exec(cb);
+			modelUser.findOne(userId).populate('readModels', '-__v -writers -readers').sort({name: 1}).skip(offset).exec(function(err, user) {
+				if (!user) { return cb(null, 'User doesn\'t exist'); }
+				cb(err, user.readModels);
+			});
 		}
 	}
 	/**
-	 * serviceGetRightsPerUser
+	 * serviceGetPersonallyReadableModels
 	 * ====
 	 * Request Var:
 	 * 		none
@@ -1139,38 +1418,166 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 *		- limit (int): 		Number max to return				- optional
 	 *		- offset (int): 	Number of the Right to start with	- optional
 	 */
-	function serviceGetRightsPerUser(req, resp) {
-		logger.info("<Service> GetRightsPerUser.");
+	function serviceGetPersonallyReadableModels(req, resp) {
+		logger.info("<Service> GetPersonallyReadableModels.");
 		var getData = parseRequest(req, ['userId', 'limit', 'offset']);
 		
 		writeHeaders(resp);
-		getRightsPerUser(getData.userId, getData.limit, getData.offset, function (err, objects) {
+		getPersonallyReadableModels(getData.userId, getData.limit, getData.offset, function (err, objects) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ rights: objects })); 
+			else resp.end(JSON.stringify({ readModels: objects })); 
 		});
 	}
- 
+  
 	/**
-	 * getRightsPerModel
+	 * getPersonallyEditableModels
 	 * ====
-	 * Returns a list of rights for a given Model, ordered by name.
+	 * Returns a list of Model the User got the personal right to edit
 	 * Parameters:
-	 * 	- modelId (String):				ID of the Model
-	 *	- limit (int): 					Number max of Right to return
-	 *	- offset (int): 				Number of the Right to start with
+	 * 	- userId (String):				ID of the User
+	 *	- limit (int): 					Number max of Model to return
+	 *	- offset (int): 				Number of the Model to start with
 	 *	- cb (Function(err, Right[])):	Callback
 	 */
-	function getRightsPerModel(modelId, limit, offset, cb) {
+	function getPersonallyEditableModels(userId, limit, offset, cb) {
 		if (!offset) offset = 0;
 		if (limit) {
-			modelRight.find({modelId: modelId}, {__v:0}).sort({name: 1}).skip(offset).limit(limit).lean().exec(cb);
+			modelUser.findOne(userId).populate('writeModels', '-__v -writers -readers').sort({name: 1}).skip(offset).limit(limit).lean().exec(function(err, user) {
+				if (!user) { return cb(null, 'User doesn\'t exist'); }
+				cb(err, user.writeModels);
+			});
 		}
 		else {
-			modelRight.find({}, {__v:0}).sort({name: 1}).skip(offset).lean().exec(cb);
+			modelUser.findOne(userId).populate('writeModels', '-__v -writers -readers').sort({name: 1}).skip(offset).lean().exec(function(err, user) {
+				if (!user) { return cb(null, 'User doesn\'t exist'); }
+				cb(err, user.writeModels);
+			});
 		}
 	}
 	/**
-	 * serviceGetRightsPerModel
+	 * serviceGetPersonallyEditableModels
+	 * ====
+	 * Request Var:
+	 * 		none
+	 * Request Parameters:
+	 * 		- userId (String):	ID of the User						- required
+	 *		- limit (int): 		Number max to return				- optional
+	 *		- offset (int): 	Number of the Right to start with	- optional
+	 */
+	function serviceGetPersonallyEditableModels(req, resp) {
+		logger.info("<Service> GetPersonallyEditableModels.");
+		var getData = parseRequest(req, ['userId', 'limit', 'offset']);
+		
+		writeHeaders(resp);
+		getPersonallyEditableModels(getData.userId, getData.limit, getData.offset, function (err, objects) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ writeModels: objects })); 
+		});
+	}
+
+	/**
+	 * getPubliclyReadableModels
+	 * ====
+	 * Returns a list of Model with public consultation
+	 * Parameters:
+	 *	- limit (int): 					Number max of Model to return
+	 *	- offset (int): 				Number of the Model to start with
+	 *	- cb (Function(err, Right[])):	Callback
+	 */
+	function getPubliclyReadableModels(limit, offset, cb) {
+		if (!offset) offset = 0;
+		if (limit) {
+			modelModel.find({publicRead: true}, {__v: 0, writers: 0, readers: 0}).sort({name: 1}).skip(offset).limit(limit).lean().exec(cb);
+		}
+		else {
+			modelModel.find({publicRead: true}, {__v: 0, writers: 0, readers: 0}).sort({name: 1}).skip(offset).lean().exec(cb);
+		}
+	}
+	/**
+	 * serviceGetPubliclyReadableModels
+	 * ====
+	 * Request Var:
+	 * 		none
+	 * Request Parameters:
+	 *		- limit (int): 		Number max to return				- optional
+	 *		- offset (int): 	Number of the Right to start with	- optional
+	 */
+	function serviceGetPubliclyReadableModels(req, resp) {
+		logger.info("<Service> GetPubliclyEditableModels.");
+		var getData = parseRequest(req, ['limit', 'offset']);
+		
+		writeHeaders(resp);
+		getPubliclyReadableModels(getData.limit, getData.offset, function (err, objects) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ models: objects })); 
+		});
+	}
+ 	   
+	/**
+	 * getPubliclyEditableModels
+	 * ====
+	 * Returns a list of Model with public edition
+	 * Parameters:
+	 *	- limit (int): 					Number max of Model to return
+	 *	- offset (int): 				Number of the Model to start with
+	 *	- cb (Function(err, Right[])):	Callback
+	 */
+	function getPubliclyEditableModels(limit, offset, cb) {
+		if (!offset) offset = 0;
+		if (limit) {
+			modelModel.find({publicWrite: true}, {__v: 0, writers: 0, readers: 0}).sort({name: 1}).skip(offset).limit(limit).lean().exec(cb);
+		}
+		else {
+			modelModel.find({publicWrite: true}, {__v: 0, writers: 0, readers: 0}).sort({name: 1}).skip(offset).lean().exec(cb);
+		}
+	}
+	/**
+	 * serviceGetPubliclyEditableModels
+	 * ====
+	 * Request Var:
+	 * 		none
+	 * Request Parameters:
+	 *		- limit (int): 		Number max to return				- optional
+	 *		- offset (int): 	Number of the Right to start with	- optional
+	 */
+	function serviceGetPubliclyEditableModels(req, resp) {
+		logger.info("<Service> GetPubliclyEditableModels.");
+		var getData = parseRequest(req, ['limit', 'offset']);
+		
+		writeHeaders(resp);
+		getPubliclyEditableModels(getData.limit, getData.offset, function (err, objects) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ models: objects })); 
+		});
+	}
+ 	 	 	 	 
+	/**
+	 * getWriters
+	 * ====
+	 * Returns a list of User the Model can be edited by
+	 * Parameters:
+	 * 	- modelId (String):				ID of the Model
+	 *	- limit (int): 					Number max of User to return
+	 *	- offset (int): 				Number of the User to start with
+	 *	- cb (Function(err, Right[])):	Callback
+	 */
+	function getWriters(modelId, limit, offset, cb) {
+		if (!offset) offset = 0;
+		if (limit) {
+			modelModel.findOne(modelId).populate('writers', '-__v -_id -readModels -writeModels').sort({name: 1}).skip(offset).limit(limit).exec(function(err, model) {
+				if (!model) { return cb(null, 'Model doesn\'t exist'); }
+				cb(err, model.writers);
+			});
+		}
+		else {
+			modelModel.findOne(modelId).populate('writers', '-__v -_id -readModels -writeModels').sort({name: 1}).skip(offset).lean().exec(function(err, model) {
+				if (!model) { return cb(null, 'Model doesn\'t exist'); }
+				cb(err, model.writers);
+			});
+		}
+	}
+	/**
+	 * serviceGetWriters
 	 * ====
 	 * Request Var:
 	 * 		none
@@ -1179,370 +1586,192 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 	 *		- limit (int): 		Number max to return				- optional
 	 *		- offset (int): 	Number of the Right to start with	- optional
 	 */
-	function serviceGetRightsPerModel(req, resp) {
-		logger.info("<Service> GetRightsPerModel.");
+	function serviceGetWriters(req, resp) {
+		logger.info("<Service> GetWriters.");
 		var getData = parseRequest(req, ['modelId', 'limit', 'offset']);
 		
 		writeHeaders(resp);
-		getRightsPerModel(getData.modelId, getData.limit, getData.offset, function (err, objects) {
+		getWriters(getData.modelId, getData.limit, getData.offset, function (err, objects) {
+			logger.error(err);
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ rights: objects })); 
+			else resp.end(JSON.stringify({ writers: objects })); 
+		});
+	}
+ 	 	 	 
+	/**
+	 * getReaders
+	 * ====
+	 * Returns a list of User the Model can be edited by
+	 * Parameters:
+	 * 	- modelId (String):				ID of the Model
+	 *	- limit (int): 					Number max of User to return
+	 *	- offset (int): 				Number of the User to start with
+	 *	- cb (Function(err, Right[])):	Callback
+	 */
+	function getReaders(modelId, limit, offset, cb) {
+		if (!offset) offset = 0;
+		if (limit) {
+			modelModel.findOne(modelId).populate('readers', '-__v -_id -readModels -writeModels').sort({name: 1}).skip(offset).limit(limit).exec(function(err, model) {
+				if (!model) { return cb(null, 'Model doesn\'t exist'); }
+				cb(err, model.readers);
+			});
+		}
+		else {
+			modelModel.findOne(modelId).populate('readers', '-__v -_id -readModels -writeModels').sort({name: 1}).skip(offset).exec(function(err, model) {
+				if (!model) { return cb(null, 'Model doesn\'t exist'); }
+				cb(err, model.readers);
+			});
+		}
+	}
+	/**
+	 * serviceGetReaders
+	 * ====
+	 * Request Var:
+	 * 		none
+	 * Request Parameters:
+	 * 		- modelId (String):	ID of the Model						- required
+	 *		- limit (int): 		Number max to return				- optional
+	 *		- offset (int): 	Number of the Right to start with	- optional
+	 */
+	function serviceGetReaders(req, resp) {
+		logger.info("<Service> GetReaders.");
+		var getData = parseRequest(req, ['modelId', 'limit', 'offset']);
+		
+		writeHeaders(resp);
+		getReaders(getData.modelId, getData.limit, getData.offset, function (err, objects) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ readers: objects })); 
 		});
 	}
 
-	/*
-	 * ------------------------------------------
-	 * RIGHT Services
-	 * ------------------------------------------
+	/**
+	 * getModelPublicRead
+	 * ====
+	 * Returns the Model's public read flag
+	 * Parameters:
+	 *	- id (String): 					ID
+	 *	- cb (Function(err, Model[])):	Callback
 	 */
+	function getModelPublicRead(id, cb) {
+		modelModel.findById(id).select('publicRead').lean().exec(cb);
+	}
+	/**
+	 * serviceGetModelPublicRead
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		ID
+	 * Request Parameters:
+	 *		-none
+	 */
+	function serviceGetModelPublicRead(req, resp) {
+		logger.info("<Service> GetModelPublicRead.");
+		var getData = parseRequest(req, ['id']);
+		
+		writeHeaders(resp);
+		getModelPublicRead(getData.id, function (err, obj) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({publicRead: obj.publicRead})); 
+		});
+	}
+
+	/**
+	 * getModelPublicWrite
+	 * ====
+	 * Returns the Model's public write flag
+	 * Parameters:
+	 *	- id (String): 					ID
+	 *	- cb (Function(err, Model[])):	Callback
+	 */
+	function getModelPublicWrite(id, cb) {
+		modelModel.findById(id).select('publicWrite').lean().exec(cb);
+	}
+	/**
+	 * serviceGetModelPublicWrite
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		ID
+	 * Request Parameters:
+	 *		-none
+	 */
+	function serviceGetModelPublicWrite(req, resp) {
+		logger.info("<Service> GetModelPublicWrite.");
+		var getData = parseRequest(req, ['id']);
+		
+		writeHeaders(resp);
+		getModelPublicWrite(getData.id, function (err, obj) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({publicWrite: obj.publicWrite})); 
+		});
+	}
 	 
 	/**
-	 * getRight
+	 * updateModelPublicRead
 	 * ====
-	 * Returns the Right corresponding to the given id
+	 * Update the public read flag of the Model corresponding to the given ID
 	 * Parameters:
 	 *	- id (String): 					ID
-	 *	- cb (Function(err, Right[])):	Callback
-	 */
-	function getRight(id, cb) {
-		modelRight.findById(id, {__v:0}).lean().exec(cb);
-	}
-	/**
-	 * serviceGetRight
-	 * ====
-	 * Request Var:
-	 * 		- id (string)		Right
-	 * Request Parameters:
-	 *		-none
-	 */
-	function serviceGetRight(req, resp) {
-		logger.info("<Service> GetRight.");
-		var getData = parseRequest(req, ['id']);
-		
-		writeHeaders(resp);
-		getRight(getData.id, function (err, obj) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify(obj)); 
-		});
-	}
-	 	 
-	/**
-	 * getRightWithModelAndUser
-	 * ====
-	 * Returns the Right corresponding to the given Model and User
-	 * Parameters:
-	 *	- modelId (String): 			ID of the Model
-	 *	- userId (String): 				ID of the User
-	 *	- cb (Function(err, Right[])):	Callback
-	 */
-	function getRightWithModelAndUser(modelId, userId, cb) {
-		modelRight.findOne({modelId: modelId, userId:userId}, {__v:0}).lean().exec(cb);
-	}
-	/**
-	 * serviceGetRightWithModelAndUser
-	 * ====
-	 * Request Var + Parameters:
-	 *	- modelId (String): 			ID of the Model	- required
-	 *	- userId (String): 				ID of the User	- required
-	 */
-	function serviceGetRightWithModelAndUser(req, resp) {
-		logger.info("<Service> GetRightWithModelAndUser.");
-		var getData = parseRequest(req, ['modelId', 'userId']);
-		
-		writeHeaders(resp);
-		getRightWithModelAndUser(getData.modelId, getData.userId, function (err, obj) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify(obj)); 
-		});
-	}
-		 
-	/**
-	 * deleteRight
-	 * ====
-	 * Delete the Right corresponding to the given ID
-	 * Parameters:
-	 *	- id (String): 						ID
-	 *	- cb (Function(err, Right[])):	Callback
-	 */
-	function deleteRight(id, cb) {
-		modelRight.findById(id).exec(function (err, item) {
-			if (err){
-				cb(err, null);
-			}
-              else {
-					modelRight.remove(item, function (err, result) {
-						cb(err, result);
-					});
-              }
-       });
-	}
-	/**
-	 * serviceDeleteRight
-	 * ====
-	 * Request Var:
-	 * 		- id (string)		ID
-	 * Request Parameters:
-	 *		-none
-	 */
-	function serviceDeleteRight(req, resp) {
-		logger.info("<Service> DeleteRight.");
-		var getData = parseRequest(req, ['id']);
-		
-		writeHeaders(resp);
-		deleteRight(getData.id, function (err, user) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: 1 })); 
-		});
-	}
-		
-	/**
-	 * updateRight
-	 * ====
-	 * Update the Right corresponding to the given ID
-	 * Parameters:
-	 *	- id (String): 					ID
-	 *	- rightToWrite (bool): 			Flag: false = Read only, true = Read+Write	
-	 *	- cb (Function(err, Right[])):	Callback
-	 */ 
-	function updateRight(id, rightToWrite, cb) {
-		modelRight.update({ _id: id }, {rightLevel: rightToWrite}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
-			if (err) { logger.error(err); return cb(err, raw); }
-			else { return cb(err, 1); }
-		});	
-	}
-	/**
-	 * serviceUpdateRight
-	 * ====
-	 * Request Var:
-	 * 		- id (string)		ID
-	 * Request Parameters:
-	 *		- rightToWrite (bool): 		Flag: false = Read only, true = Read+Write	- required
-	 */
-	function serviceUpdateRight(req, resp) {
-		logger.info("<Service> UpdateRight.");
-		var objectsData = parseRequest(req, ['id', 'rightToWrite']);
-		
-		writeHeaders(resp);
-		updateRight(objectsData.id, objectsData.rightToWrite, function(err, success) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: 1 })); 
-		});
-	}		
-
-	/**
-	 * updateRightWithModelAndUser
-	 * ====
-	 * Update the Right corresponding to the given User & Model
-	 * Parameters:
-	 *	- modelId (String): 			ID of the Model
-	 *	- userId (String): 				ID of the User
-	 *	- rightToWrite (bool): 			Flag: false = Read only, true = Read+Write	
-	 *	- cb (Function(err, Right[])):	Callback
-	 */ 
-	function updateRightWithModelAndUser(id, rightToWrite, cb) {
-		modelRight.update({ _id: id }, {rightLevel: rightToWrite}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
-			if (err) { logger.error(err); return cb(err, raw); }
-			else { return cb(err, 1); }
-		});	
-	}
-	/**
-	 * serviceUpdateRightWithModelAndUser
-	 * ====
-	 * Request Var + Parameters:
-	 *		- modelId (String): 			ID of the Model	- required
-	 *		- userId (String): 				ID of the User	- required
-	 * Request Parameters:
-	 *		- rightToWrite (bool): 		Flag: false = Read only, true = Read+Write	- required
-	 */
-	function serviceUpdateRightWithModelAndUser(req, resp) {
-		logger.info("<Service> UpdateRightWithModelAndUser.");
-		var objectsData = parseRequest(req, ['modelId', 'userId', 'rightToWrite']);
-		
-		writeHeaders(resp);
-		updateRightWithModelAndUser(objectsData.modelId, objectsData.userId, objectsData.rightToWrite, function(err, success) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: 1 })); 
-		});
-	}
-		 
-	/**
-	 * deleteRightWithModelAndUser
-	 * ====
-	 * Delete the Right corresponding to the given given Model and User
-	 * Parameters:
-	 *	- modelId (String): 			ID of the Model
-	 *	- userId (String): 				ID of the User
-	 *	- cb (Function(err, Right[])):	Callback
-	 */
-	function deleteRightWithModelAndUser(modelId, userId, cb) {
-		modelRight.findOne({modelId: modelId, userId:userId}).exec(function (err, item) {
-			if (err){
-				cb(err, null);
-			}
-              else {
-					modelRight.remove(item, function (err, result) {
-						cb(err, result);
-					});
-              }
-       });
-	}
-	/**
-	 * serviceDeleteRightWithModelAndUser
-	 * ====
-	 * Request Var + Parameters:
-	 *	- modelId (String): 			ID of the Model	- required
-	 *	- userId (String): 				ID of the User	- required
-	 */
-	function serviceDeleteRightWithModelAndUser(req, resp) {
-		logger.info("<Service> DeleteRightWithModelAndUser.");
-		var getData = parseRequest(req, ['modelId', 'userId']);
-		
-		writeHeaders(resp);
-		deleteRight(getData.modelId, getData.userId, function (err, user) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: 1 })); 
-		});
-	}	
- 
-	/**
-	 * getRightLevel
-	 * ====
-	 * Returns the Right's tags
-	 * Parameters:
-	 *	- id (String): 					ID
-	 *	- cb (Function(err, Right[])):	Callback
-	 */
-	function getRightLevel(id, cb) {
-		modelRight.findById(id, {__v:0, _id:0, userId:0, modelId:0}).lean().exec(cb);
-	}
-	/**
-	 * serviceGetRightLevel
-	 * ====
-	 * Request Var:
-	 * 		- id (string)		ID
-	 * Request Parameters:
-	 *		-none
-	 */
-	function serviceGetRightLevel(req, resp) {
-		logger.info("<Service> GetRightLevel.");
-		var getData = parseRequest(req, ['id']);
-		
-		writeHeaders(resp);
-		getRightLevel(getData.id, function (err, obj) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({rightToWrite: obj.rightLevel})); 
-		});
-	}
-	
-	/**
-	 * getRightLevelWithModelAndUser
-	 * ====
-	 * Returns the Right's tags
-	 * Parameters:
-	 *	- modelId (String): 			ID of the Model
-	 *	- userId (String): 				ID of the User
-	 *	- cb (Function(err, Right[])):	Callback
-	 */
-	function getRightLevelWithModelAndUser(modelId, userId, cb) {
-		modelRight.findOne({modelId: modelId, userId:userId}, {__v:0, _id:0, userId:0, modelId:0}).lean().exec(cb);
-	}
-	/**
-	 * serviceGetRightLevelWithModelAndUser
-	 * ====
-	 * Request Var + Parameters:
-	 *	- modelId (String): 			ID of the Model	- required
-	 *	- userId (String): 				ID of the User	- required
-	 */
-	function serviceGetRightLevelWithModelAndUser(req, resp) {
-		logger.info("<Service> GetRightLevelWithModelAndUser.");
-		var getData = parseRequest(req, ['modelId', 'userId']);
-		
-		writeHeaders(resp);
-		getRightLevelWithModelAndUser(getData.modelId, getData.userId, function (err, obj) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({rightToWrite: obj.rightLevel})); 
-		});
-	}		 
-
-	/**
-	 * updateRightLevel
-	 * ====
-	 * Update the level of the Right corresponding to the given ID
-	 * Parameters:
-	 *	- id (String): 				ID
-	 *	- rightToWrite (bool): 		Level to change
+	 *	- flag (bool): 					Flag Value
 	 *	- cb (Function(err, User[])):	Callback
 	 */ 
-	function updateRightLevel(id, rightToWrite, cb) {
-			modelRight.update({ _id: id }, {rightLevel: rightToWrite}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+	function updateModelPublicRead(id, flag, cb) {
+			modelModel.update({ _id: id }, {publicRead: flag}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
 					else { return cb(err, 1); }
 			});
 	}
 	/**
-	 * serviceUpdateRightLevel
+	 * serviceUpdateModelPublicRead
 	 * ====
 	 * Request Var:
 	 * 		- id (string)		Username
 	 * Request Parameters:
-	 *		- rightToWrite (bool): 		Level to change 	- required
+	 *		- flag (bool): 		Flag Value		- required
 	 */
-	function serviceUpdateRightLevel(req, resp) {
-		logger.info("<Service> UpdateRightLevel.");
-		var objData = parseRequest(req, ['id', 'rightToWrite']);
+	function serviceUpdateModelPublicRead(req, resp) {
+		logger.info("<Service> UpdateModelPublicRead.");
+		var objData = parseRequest(req, ['id', 'publicRead']);
 		
 		writeHeaders(resp);
-		updateRightLevel(objData.id, objData.rightToWrite, function(err, success) {
+		updateModelPublicRead(objData.id, objData.tags, function(err, success) {
 			if (err) error(2, resp);
 			else resp.end(JSON.stringify({ status: 1 })); 
 		});
 	}
- 	
+	 
 	/**
-	 * updateRightLevelWithModelAndUser
+	 * updateModelPublicWrite
 	 * ====
-	 * Update the level of the Right corresponding to the given User & Model
+	 * Update the public write flag of the Model corresponding to the given ID
 	 * Parameters:
-	 *	- modelId (String): 			ID of the Model
-	 *	- userId (String): 				ID of the User
-	 *	- rightToWrite (bool): 		Level to change
+	 *	- id (String): 					ID
+	 *	- flag (bool): 					Flag Value
 	 *	- cb (Function(err, User[])):	Callback
 	 */ 
-	function updateRightLevelWithModelAndUser(modelId, userId, rightToWrite, cb) {
-			modelRight.update({modelId: modelId, userId:userId}, {rightLevel: rightToWrite}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+	function updateModelPublicWrite(id, flag, cb) {
+			modelModel.update({ _id: id }, {publicWrite: flag}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
 					else { return cb(err, 1); }
 			});
 	}
 	/**
-	 * serviceUpdateRightLevelWithModelAndUser
+	 * serviceUpdateModelPublicWrite
 	 * ====
-	 * Request Var + Parameters:
-	 *		- modelId (String): 			ID of the Model	- required
-	 *		- userId (String): 				ID of the User	- required
+	 * Request Var:
+	 * 		- id (string)		Username
 	 * Request Parameters:
-	 *		- rightToWrite (bool): 		Level to change 	- required
+	 *		- flag (bool): 		Flag Value		- required
 	 */
-	function serviceUpdateRightLevelWithModelAndUser(req, resp) {
-		logger.info("<Service> UpdateRightLevelWithModelAndUser.");
-		var objData = parseRequest(req, ['modelId', 'userId', 'rightToWrite']);
+	function serviceUpdateModelPublicWrite(req, resp) {
+		logger.info("<Service> UpdateModelPublicWrite.");
+		var objData = parseRequest(req, ['id', 'publicWrite']);
 		
 		writeHeaders(resp);
-		updateRightLevelWithModelAndUser(objData.modelId, objData.userId, objData.rightToWrite, function(err, success) {
+		updateModelPublicWrite(objData.id, objData.tags, function(err, success) {
 			if (err) error(2, resp);
 			else resp.end(JSON.stringify({ status: 1 })); 
 		});
 	}
- 
- 
-	/*
-	 * ------------------------------------------
-	 * RIGHT + USER + MODEL Services
-	 * ------------------------------------------
-	 */
-	 
-	 
-
+			 
 
 	/*
 	 * ------------------------------------------
@@ -1605,46 +1834,52 @@ module.exports = function(mongoose, modelUser, modelModel, modelRight) {
 		'GET'	: serviceGetModelTags,
 		'PUT'	: serviceUpdateModelTags
 	};
-	
-	
-	this.rest['rights'] = {
-		'POST'	: serviceCreateRight,
-		'GET'	: serviceGetRights
+
+	this.rest['model/:id/publicRead'] = {
+		'GET'	: serviceGetModelPublicRead,
+		'PUT'	: serviceUpdateModelPublicRead
 	};
-	this.rest['right/:id'] = {
-		'GET'	: serviceGetRight,
-		'DELETE': serviceDeleteRight,
-		'PUT'	: serviceUpdateRight
+	this.rest['model/:id/publicWrite'] = {
+		'GET'	: serviceGetModelPublicWrite,
+		'PUT'	: serviceUpdateModelPublicWrite
 	};
-	this.rest['right/:id/level'] = {
-		'GET'	: serviceGetRightLevel,
-		'PUT'	: serviceUpdateRightLevel
+
+	this.rest['models/publicRead'] = {
+		'GET'	: serviceGetPubliclyReadableModels
 	};
-	this.rest['user/:userId/rights'] = {
-		'GET'	: serviceGetRightsPerUser
+	this.rest['models/publicWrite'] = {
+		'GET'	: serviceGetPubliclyEditableModels
 	};
-	this.rest['model/:modelId/rights'] = {
-		'GET'	: serviceGetRightsPerModel
+		
+	this.rest['model/:modelId/writers'] = {
+		'GET'	: serviceGetWriters,
+		'POST'	: serviceAddCompleteRight
 	};
-	this.rest['user/:userId/model/:modelId'] = {
-		'GET'	: serviceGetRightWithModelAndUser,
-		'PUT'	: serviceUpdateRightWithModelAndUser,
-		'DELETE': serviceDeleteRightWithModelAndUser
+	this.rest['model/:modelId/readers'] = {
+		'GET'	: serviceGetReaders,
+		'POST'	: serviceAddReadRight
 	};
-	this.rest['user/:userId/model/:modelId/level'] = {
-		'GET'	: serviceGetRightLevelWithModelAndUser,
-		'PUT'	: serviceUpdateRightLevelWithModelAndUser
+	this.rest['user/:userId/writeModels'] = {
+		'GET'	: serviceGetPersonallyEditableModels,
+		'POST'	: serviceAddCompleteRight
 	};
-	this.rest['model/:modelId/user/:userId'] = {
-		'GET'	: serviceGetRightWithModelAndUser,
-		'PUT'	: serviceUpdateRightWithModelAndUser,
-		'DELETE': serviceDeleteRightWithModelAndUser
+	this.rest['user/:userId/readModels'] = {
+		'GET'	: serviceGetPersonallyReadableModels,
+		'POST'	: serviceAddReadRight
 	};
-	this.rest['model/:modelId/user/:userId/level'] = {
-		'GET'	: serviceGetRightLevelWithModelAndUser,
-		'PUT'	: serviceUpdateRightLevelWithModelAndUser
+
+	this.rest['user/:userId/writeModel/:modelId'] = {
+		'DELETE': serviceRemoveWriteRight
 	};
-	 
+	this.rest['user/:userId/readModel/:modelId'] = {
+		'DELETE': serviceRemoveCompleteRight
+	};
+	this.rest['model/:modelId/writer/:userId'] = {
+		'DELETE': serviceRemoveWriteRight
+	};
+	this.rest['model/:modelId/reader/:userId'] = {
+		'DELETE': serviceRemoveCompleteRight
+	};
 
 	this.rest['user/:name/models'] = {
 		'GET'	: serviceGetUserModels
