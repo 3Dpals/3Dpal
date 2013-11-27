@@ -9,7 +9,7 @@ var	logger = require("./logger");
 var	bcrypt = require('bcrypt'),
 	SALT_WORK_FACTOR = 10;
 
-module.exports = function(mongoose, modelUser, modelModel, modelComment) {
+module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFile) {
 
 	function error(code, resp) {
 		var result = {};
