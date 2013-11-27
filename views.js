@@ -8,16 +8,13 @@
 var config = require("./config");
 var logger = require("./logger");
 
-var rest = config.getProperty("security.ssl") ? "https://" : "http://";
-rest += config.getProperty("rest.url");
-rest += ':'+config.getProperty("rest.port");
 
 /*
  * VIEW Index
  */
 function viewIndex(req, res) {
 	logger.debug("<View> Viewing index (User "+req.session.username+").");
-	res.render('index', {title: "Main", rest: rest, username: req.session.username});
+	res.render('index', {title: "Main", username: req.session.username});
 }
 
 /*
@@ -25,7 +22,7 @@ function viewIndex(req, res) {
  */
 function viewSignin(req, res) {
 	logger.debug("<View> Viewing signin.");
-	res.render('signin', {title: "Sign-In", rest: rest});
+	res.render('signin', {title: "Sign-In"});
 }
 
 
@@ -35,7 +32,16 @@ function viewSignin(req, res) {
 function viewLogin(req, res) {
 	next = req.param("next", null);
 	logger.info("<View> Viewing login page. Next is : " + next);
-	res.render('login', {title: "Login", rest: rest, next: next, error: null});
+	res.render('login', {title: "Login", next: next, error: null});
+}
+
+/*
+ * VIEW API
+ */
+function viewApi(req, res) {
+	next = req.param("next", null);
+	logger.info("<View> Viewing API");
+	res.render('api', {title: "API"});
 }
 
 function dateToString(date) {
@@ -62,12 +68,12 @@ function twoDigits(nb) {
 
 function viewNotfound(req, res) {
 	logger.warn("<View> View not found : " + req.url);
-	res.render('404', {title: "Page not found", rest: rest});
+	res.render('404', {title: "Page not found"});
 }
 
 function viewHelp(req, res) {
 	logger.info("<View> Viewing help page.");
-	res.render('help', {title: "Help", rest: rest});
+	res.render('help', {title: "Help"});
 }
 
 /*
@@ -97,6 +103,7 @@ exports.index = viewIndex;
 exports.signin = viewSignin;
 exports.login = viewLogin;
 exports.notfound = viewNotfound;
+exports.api = viewApi;
 exports.help = viewHelp;
 exports.gallery = viewGallery;
 exports.profile = viewProfile;
