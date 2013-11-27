@@ -1886,7 +1886,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 *	- cb (Function(err, Comment[])):	Callback
 	 */
 	function getComment(id, cb) {
-		modelComment.findById({id: username}, {__v:0}).lean().exec(cb);
+		modelComment.findById(id, {__v:0}).lean().exec(cb);
 	}
 	/**
 	 * serviceGetComment
@@ -2234,7 +2234,226 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		});
 	}
 		
-	 		
+	
+	/*
+	 * ------------------------------------------
+	 * FILES Services
+	 * ------------------------------------------
+	 */
+
+	/**
+	 * createFile
+	 * ====
+	 * Create a File.
+	 * Parameters:
+	 *	- content (String): 		Content of the File
+	 *	- cb (Function(bool)):		Callback
+	 */
+	function createFile(content, cb) {
+		var comment = new modelFile({content: content});
+		comment.save(function(err) {
+			cb (err, 'ok');
+		});
+	}
+	/**
+	 * serviceCreateFile
+	 * ====
+	 * Request Var:
+	 * 		none
+	 * Request Parameters:
+	 *	- content (String): 		Content	- required
+	 */
+	function serviceCreateFile(req, resp) {
+		logger.info("<Service> CreateFile.");
+		var userData = parseRequest(req, ['content']);
+		
+		writeHeaders(resp);
+		createFile(userData.content, function(err, status) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ status: status }));
+		});
+	}
+	 
+	/**
+	 * getFiles
+	 * ====
+	 * Returns a list of Files.
+	 * Parameters:
+	 *	- limit (int): 					Number max of files to return
+	 *	- offset (int): 				Number of the file to start with
+	 *	- cb (Function(err, File[])):	Callback
+	 */
+	function getFiles(limit, offset, cb) {
+		if (!offset) offset = 0;
+		if (limit) {
+			modelFile.find({}, {__v:0}).skip(offset).limit(limit).lean().exec(cb);
+		}
+		else {
+			modelFile.find({}, {__v:0}).skip(offset).lean().exec(cb);
+		}
+	}
+	
+	/**
+	 * serviceGetFiles
+	 * ====
+	 * Request Var:
+	 * 		none
+	 * Request Parameters:
+	 *		- limit (int): 		Number max to return				- optional
+	 *		- offset (int): 	Number of the comment to start with	- optional
+	 */
+	function serviceGetFiles(req, resp) {
+		logger.info("<Service> GetFiles.");
+		var getData = parseRequest(req, ['limit', 'offset']);
+		
+		writeHeaders(resp);
+		getFiles(getData.limit, getData.offset, function (err, users) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ users: users })); 
+		});
+	}
+ 	
+ 	
+ 	/*
+	 * ------------------------------------------
+	 * FILE Services
+	 * ------------------------------------------
+	 */
+	 
+	/**
+	 * getFile
+	 * ====
+	 * Returns the File corresponding to the given id
+	 * Parameters:
+	 *	- id (String): 						ID
+	 *	- cb (Function(err, File[])):	Callback
+	 */
+	function getFile(id, cb) {
+		modelFile.findById(id, {__v:0}).lean().exec(cb);
+	}
+	/**
+	 * serviceGetFile
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		id
+	 * Request Parameters:
+	 *		-none
+	 */
+	function serviceGetFile(req, resp) {
+		logger.info("<Service> GetFile.");
+		var getData = parseRequest(req, ['id']);
+		
+		writeHeaders(resp);
+		getFile(getData.id, function (err, comment) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify(comment)); 
+		});
+	}
+
+	/**
+	 * getFileContent
+	 * ====
+	 * Returns the File's content
+	 * Parameters:
+	 *	- id (String): 					ID
+	 *	- cb (Function(err, File[])):	Callback
+	 */
+	function getFileContent(id, cb) {
+		modelFile.findById(id).select('content').lean().exec(cb);
+	}
+	/**
+	 * serviceGetFileContent
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		ID
+	 * Request Parameters:
+	 *		-none
+	 */
+	function serviceGetFileContent(req, resp) {
+		logger.info("<Service> GetFileContent.");
+		var getData = parseRequest(req, ['id']);
+		
+		writeHeaders(resp);
+		getFileContent(getData.id, function (err, obj) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ content: obj.content })); 
+		});
+	}
+			
+	/**
+	 * updateFileContent
+	 * ====
+	 * Update the content of the File corresponding to the given ID
+	 * Parameters:
+	 *	- id (String): 			ID
+	 *	- name (String): 		Content to change
+	 *	- cb (Function(err, User[])):	Callback
+	 */ 
+	function updateFileContent(id, name, cb) {
+			modelFile.update({ _id: id }, {content: content}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+					if (err) { logger.error(err); return cb(err, raw); }
+					else { return cb(err, 'ok'); }
+			});
+	}
+	/**
+	 * serviceUpdateFileContent
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		Username
+	 * Request Parameters:
+	 *		- name (String): 	Content 		- required
+	 */
+	function serviceUpdateFileContent(req, resp) {
+		logger.info("<Service> UpdateFileContent.");
+		var objData = parseRequest(req, ['id', 'content']);
+		
+		writeHeaders(resp);
+		updateFileContent(objData.id, objData.content, function(err, status) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ status: status })); 
+		});
+	}
+	 
+	/**
+	 * deleteFile
+	 * ====
+	 * Delete the File corresponding to the given ID
+	 * Parameters:
+	 *	- id (String): 						ID
+	 *	- cb (Function(err, File[])):	Callback
+	 */
+	function deleteFile(id, cb) {
+		modelFile.findById(id).exec(function (err, item) {
+			if (err){
+				cb(err, null);
+			}
+              else {
+					modelFile.remove(item, function (err, result) {
+						cb(err, result);
+					});
+              }
+       });
+	}
+	/**
+	 * serviceDeleteFile
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		ID
+	 * Request Parameters:
+	 *		-none
+	 */
+	function serviceDeleteFile(req, resp) {
+		logger.info("<Service> DeleteFile.");
+		var getData = parseRequest(req, ['id']);
+		
+		writeHeaders(resp);
+		deleteFile(getData.id, function (err, user) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ status: status })); 
+		});
+	}
+
+	
 	/*
 	 * ------------------------------------------
 	 * ROUTING
@@ -2347,7 +2566,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		'GET'	: serviceGetUserModels
 	};
 	
-	this.rest['comment'] = {
+	this.rest['comments'] = {
 		'POST'	: serviceCreateComment,
 		'GET'	: serviceGetComments
 	};
@@ -2382,6 +2601,18 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		'GET'	: serviceGetModelComments
 	};
 	
+	this.rest['files'] = {
+		'POST'	: serviceCreateFile,
+		'GET'	: serviceGetFile
+	};
+	this.rest['file/:id'] = {
+		'GET'	: serviceGetFile,
+		'DELETE': serviceDeleteFile,
+	};
+	this.rest['file/:id/content'] = {
+		'GET'	: serviceGetFileContent,
+		'PUT'	: serviceUpdateFileContent
+	};
 
 	/*
 	 * ------------------------------------------
