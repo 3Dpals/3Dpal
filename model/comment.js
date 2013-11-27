@@ -10,13 +10,12 @@
 module.exports = function(mongoose) {
 	var Schema = mongoose.Schema;
 	var CommentSchema = new Schema({
-		modelId: { type: Schema.Types.ObjectId, ref: 'Model', required: true },		// Model the comment is associated with
-		parentId: { type: Schema.Types.ObjectId, ref: 'Comment', required: false },	// Parent comment if nested (answer)
-		slug: { type: String, required: true},										// Slug
-		fullSlug: { type: String, required: false },								// Full slug
-		postedDate: { type: Date, default: Date.now },								// Date of creation
-		author: { type: Schema.Types.ObjectId, ref: 'User' , required: true },		// User ID of the author
-		text: { type: String, required: true }										// Content
+		modelId: { type: Schema.Types.ObjectId, required: true },	// Model the comment is associated with
+		parentId: { type: Schema.Types.ObjectId,required: false },	// Parent comment if nested (answer)
+		slug: { type: String, required: true},						// Slug
+		postedDate: { type: Date, default: Date.now },				// Date of creation
+		author: { type: String, required: true },					// Username of the author
+		text: { type: String, required: true }						// Content
 	});
 
 	this.model = mongoose.model('Comment', CommentSchema);

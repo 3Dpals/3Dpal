@@ -9,7 +9,7 @@ var	logger = require("./logger");
 var	bcrypt = require('bcrypt'),
 	SALT_WORK_FACTOR = 10;
 
-module.exports = function(mongoose, modelUser, modelModel) {
+module.exports = function(mongoose, modelUser, modelModel, modelComment) {
 
 	function error(code, resp) {
 		var result = {};
@@ -410,7 +410,7 @@ module.exports = function(mongoose, modelUser, modelModel) {
 	/**
 	 * createModel
 	 * ====
-	 * Create a Model (only if its name is unique).
+	 * Create a Model
 	 * Parameters:
 	 *	- name (String): 			Model name
 	 *	- file (String): 			Filename
@@ -1770,8 +1770,471 @@ module.exports = function(mongoose, modelUser, modelModel) {
 			else resp.end(JSON.stringify({ status: status })); 
 		});
 	}
-			 
+	 	
+	
+	/*
+	 * ------------------------------------------
+	 * COMMENTS Services
+	 * ------------------------------------------
+	 */
 
+	/**
+	 * createComment
+	 * ====
+	 * Create a Comment.
+	 * Parameters:
+	 *	- modelId (String): 		Model the comment is associated with
+	 *	- author (String): 			User ID of the author
+	 *	- text (String): 			Content
+	 *	- postedDate (Date): 		Date of creation
+	 * 	- parentId (String)			ID of the parent comment (optional)
+	 *	- cb (Function(bool)):		Callback
+	 */
+	function createComment(modelId, author, text, postedDate, parentId, cb) {
+		var slug = author+postedDate.toISOString();
+		if (parentId) {
+			modelComment.findById(parentId).exec(function(err, parentCom) {
+				if (err) { error(2, resp); return; }
+				if (!parentCom) { cb(null, 'Parent doesn\'t exist'); return; }
+				slug = parentCom.slug + '/' + slug;
+				var comment = new modelComment({modelId: modelId, author: author, text: text, postedDate: postedDate, parentId: parentId, slug: slug});
+				comment.save(function(err) {
+					cb (err, 'ok');
+				});
+			});
+		} else {
+			var comment = new modelComment({modelId: modelId, author: author, text: text, postedDate: postedDate, parentId: parentId, slug: slug});
+			comment.save(function(err) {
+				cb (err, 'ok');
+			});
+		}
+	}
+	/**
+	 * serviceCreateComment
+	 * ====
+	 * Request Var:
+	 * 		none
+	 * Request Parameters:
+	 *	- modelId (String): 		Model the comment is associated with	- required
+	 *	- author (String): 			User ID of the author					- required
+	 *	- text (String): 			Content									- required
+	 *	- postedDate (Date): 		Date of creation						- required
+	 * 	- parentId (String)			ID of the parent comment (optional)		- o
+	 *	- cb (Function(bool)):		Callback								- required
+	 */
+	function serviceCreateComment(req, resp) {
+		logger.info("<Service> CreateComment.");
+		var userData = parseRequest(req, ['modelId', 'author', 'text', 'postedDate', 'parentId']);
+		
+		writeHeaders(resp);
+		createComment(userData.username, userData.password, userData.email, function(err, status) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ status: status }));
+		});
+	}
+	 
+	/**
+	 * getComments
+	 * ====
+	 * Returns a list of comments, ordered by date.
+	 * Parameters:
+	 *	- limit (int): 					Number max of users to return
+	 *	- offset (int): 				Number of the comment to start with
+	 *	- cb (Function(err, Comment[])):	Callback
+	 */
+	function getComments(limit, offset, cb) {
+		if (!offset) offset = 0;
+		if (limit) {
+			modelComment.find({}, {__v:0}).sort({postedDate: 1}).skip(offset).limit(limit).lean().exec(cb);
+		}
+		else {
+			modelComment.find({}, {__v:0}).sort({postedDate: 1}).skip(offset).lean().exec(cb);
+		}
+	}
+	/**
+	 * serviceGetComments
+	 * ====
+	 * Request Var:
+	 * 		none
+	 * Request Parameters:
+	 *		- limit (int): 		Number max to return				- optional
+	 *		- offset (int): 	Number of the comment to start with	- optional
+	 */
+	function serviceGetComments(req, resp) {
+		logger.info("<Service> GetComments.");
+		var getData = parseRequest(req, ['limit', 'offset']);
+		
+		writeHeaders(resp);
+		getComments(getData.limit, getData.offset, function (err, users) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ users: users })); 
+		});
+	}
+
+	/*
+	 * ------------------------------------------
+	 * COMMENT Services
+	 * ------------------------------------------
+	 */
+	 
+	/**
+	 * getComment
+	 * ====
+	 * Returns the Comment corresponding to the given id
+	 * Parameters:
+	 *	- id (String): 						ID
+	 *	- cb (Function(err, Comment[])):	Callback
+	 */
+	function getComment(id, cb) {
+		modelComment.findById({id: username}, {__v:0}).lean().exec(cb);
+	}
+	/**
+	 * serviceGetComment
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		id
+	 * Request Parameters:
+	 *		-none
+	 */
+	function serviceGetComment(req, resp) {
+		logger.info("<Service> GetComment.");
+		var getData = parseRequest(req, ['id']);
+		
+		writeHeaders(resp);
+		getComment(getData.id, function (err, comment) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify(comment)); 
+		});
+	}
+
+	/**
+	 * getCommentModelId
+	 * ====
+	 * Returns the Comment's modelId
+	 * Parameters:
+	 *	- id (String): 					ID
+	 *	- cb (Function(err, Comment[])):	Callback
+	 */
+	function getCommentModelId(id, cb) {
+		modelComment.findById(id).select('modelId').lean().exec(cb);
+	}
+	/**
+	 * serviceGetCommentModelId
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		ID
+	 * Request Parameters:
+	 *		-none
+	 */
+	function serviceGetCommentModelId(req, resp) {
+		logger.info("<Service> GetCommentModelId.");
+		var getData = parseRequest(req, ['id']);
+		
+		writeHeaders(resp);
+		getCommentModelId(getData.id, function (err, obj) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ modelId: obj.modelId })); 
+		});
+	}
+
+	/**
+	 * getCommentAuthor
+	 * ====
+	 * Returns the Comment's author
+	 * Parameters:
+	 *	- id (String): 					ID
+	 *	- cb (Function(err, Comment[])):	Callback
+	 */
+	function getCommentAuthor(id, cb) {
+		modelComment.findById(id).select('author').lean().exec(cb);
+	}
+	/**
+	 * serviceGetCommentAuthor
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		ID
+	 * Request Parameters:
+	 *		-none
+	 */
+	function serviceGetCommentAuthor(req, resp) {
+		logger.info("<Service> GetCommentAuthor.");
+		var getData = parseRequest(req, ['id']);
+		
+		writeHeaders(resp);
+		getCommentAuthor(getData.id, function (err, obj) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ author: obj.author })); 
+		});
+	}
+
+	/**
+	 * getCommentParentId
+	 * ====
+	 * Returns the Comment's parentId
+	 * Parameters:
+	 *	- id (String): 					ID
+	 *	- cb (Function(err, Comment[])):	Callback
+	 */
+	function getCommentParentId(id, cb) {
+		modelComment.findById(id).select('parentId').lean().exec(cb);
+	}
+	/**
+	 * serviceGetCommentParentId
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		ID
+	 * Request Parameters:
+	 *		-none
+	 */
+	function serviceGetCommentParentId(req, resp) {
+		logger.info("<Service> GetCommentParentId.");
+		var getData = parseRequest(req, ['id']);
+		
+		writeHeaders(resp);
+		getCommentParentId(getData.id, function (err, obj) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ parentId: obj.parentId })); 
+		});
+	}
+
+	/**
+	 * getCommentSlug
+	 * ====
+	 * Returns the Comment's slug
+	 * Parameters:
+	 *	- id (String): 					ID
+	 *	- cb (Function(err, Comment[])):	Callback
+	 */
+	function getCommentSlug(id, cb) {
+		modelComment.findById(id).select('slug').lean().exec(cb);
+	}
+	/**
+	 * serviceGetCommentSlug
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		ID
+	 * Request Parameters:
+	 *		-none
+	 */
+	function serviceGetCommentSlug(req, resp) {
+		logger.info("<Service> GetCommentSlug.");
+		var getData = parseRequest(req, ['id']);
+		
+		writeHeaders(resp);
+		getCommentSlug(getData.id, function (err, obj) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ slug: obj.slug })); 
+		});
+	}
+
+	/**
+	 * getCommentPostedDate
+	 * ====
+	 * Returns the Comment's postedDate
+	 * Parameters:
+	 *	- id (String): 					ID
+	 *	- cb (Function(err, Comment[])):	Callback
+	 */
+	function getCommentPostedDate(id, cb) {
+		modelComment.findById(id).select('postedDate').lean().exec(cb);
+	}
+	/**
+	 * serviceGetCommentPostedDate
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		ID
+	 * Request Parameters:
+	 *		-none
+	 */
+	function serviceGetCommentPostedDate(req, resp) {
+		logger.info("<Service> GetCommentPostedDate.");
+		var getData = parseRequest(req, ['id']);
+		
+		writeHeaders(resp);
+		getCommentPostedDate(getData.id, function (err, obj) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ postedDate: obj.postedDate })); 
+		});
+	}
+
+	/**
+	 * getCommentText
+	 * ====
+	 * Returns the Comment's text
+	 * Parameters:
+	 *	- id (String): 					ID
+	 *	- cb (Function(err, Comment[])):	Callback
+	 */
+	function getCommentText(id, cb) {
+		modelComment.findById(id).select('text').lean().exec(cb);
+	}
+	/**
+	 * serviceGetCommentText
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		ID
+	 * Request Parameters:
+	 *		-none
+	 */
+	function serviceGetCommentText(req, resp) {
+		logger.info("<Service> GetCommentText.");
+		var getData = parseRequest(req, ['id']);
+		
+		writeHeaders(resp);
+		getCommentText(getData.id, function (err, obj) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ text: obj.text })); 
+		});
+	}
+		
+	/**
+	 * updateCommentText
+	 * ====
+	 * Update the text of the Comment corresponding to the given ID
+	 * Parameters:
+	 *	- id (String): 			ID
+	 *	- name (String): 		Text to change
+	 *	- cb (Function(err, User[])):	Callback
+	 */ 
+	function updateCommentText(id, name, cb) {
+			modelComment.update({ _id: id }, {text: text}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+					if (err) { logger.error(err); return cb(err, raw); }
+					else { return cb(err, 'ok'); }
+			});
+	}
+	/**
+	 * serviceUpdateCommentText
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		Username
+	 * Request Parameters:
+	 *		- name (String): 	Text 		- required
+	 */
+	function serviceUpdateCommentText(req, resp) {
+		logger.info("<Service> UpdateCommentText.");
+		var objData = parseRequest(req, ['id', 'text']);
+		
+		writeHeaders(resp);
+		updateCommentText(objData.id, objData.text, function(err, status) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ status: status })); 
+		});
+	}
+	 
+	/**
+	 * deleteComment
+	 * ====
+	 * Delete the Comment corresponding to the given ID
+	 * Parameters:
+	 *	- id (String): 						ID
+	 *	- cb (Function(err, Comment[])):	Callback
+	 */
+	function deleteComment(id, cb) {
+		modelComment.findById(id).exec(function (err, item) {
+			if (err){
+				cb(err, null);
+			}
+              else {
+					modelComment.remove(item, function (err, result) {
+						cb(err, result);
+					});
+              }
+       });
+	}
+	/**
+	 * serviceDeleteComment
+	 * ====
+	 * Request Var:
+	 * 		- id (string)		ID
+	 * Request Parameters:
+	 *		-none
+	 */
+	function serviceDeleteComment(req, resp) {
+		logger.info("<Service> DeleteComment.");
+		var getData = parseRequest(req, ['id']);
+		
+		writeHeaders(resp);
+		deleteComment(getData.id, function (err, user) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ status: status })); 
+		});
+	}
+
+
+	/*
+	 * ------------------------------------------
+	 * USER + COMMENT Services
+	 * ------------------------------------------
+	 */
+	 
+	/**
+	 * getUserComments
+	 * ====
+	 * Returns the Comments created by an User
+	 * Parameters:
+	 *	- username (String): 				Username
+	 *	- cb (Function(err, Model[])):	Callback
+	 */
+	function getUserComments(username, cb) {
+		modelComment.find({author: username}, {__v:0}).lean().exec(cb);
+	}
+	/**
+	 * serviceGetUserComments
+	 * ====
+	 * Request Var:
+	 * 		- name (string)		name
+	 * Request Parameters:
+	 *		-none
+	 */
+	function serviceGetUserComments(req, resp) {
+		logger.info("<Service> GetUserComments.");
+		var getData = parseRequest(req, ['username']);
+		
+		writeHeaders(resp);
+		getUserComments(getData.username, function (err, objects) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({models: objects})); 
+		});
+	}
+
+
+	/*
+	 * ------------------------------------------
+	 * MODEL + COMMENT Services
+	 * ------------------------------------------
+	 */
+	 
+	/**
+	 * getModelComments
+	 * ====
+	 * Returns the Comments created for an Model
+	 * Parameters:
+	 *	- modelId (String): 			Model's ID
+	 *	- cb (Function(err, Model[])):	Callback
+	 */
+	function getModelComments(modelId, cb) {
+		modelComment.find({modelId: modelId}, {__v:0}).lean().exec(cb);
+	}
+	/**
+	 * serviceGetModelComments
+	 * ====
+	 * Request Var:
+	 * 		- modelId (string)		modelId
+	 * Request Parameters:
+	 *		-none
+	 */
+	function serviceGetModelComments(req, resp) {
+		logger.info("<Service> GetModelComments.");
+		var getData = parseRequest(req, ['modelId']);
+		
+		writeHeaders(resp);
+		getModelComments(getData.modelId, function (err, objects) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({models: objects})); 
+		});
+	}
+		
+	 		
 	/*
 	 * ------------------------------------------
 	 * ROUTING
@@ -1783,19 +2246,19 @@ module.exports = function(mongoose, modelUser, modelModel) {
 		'POST'	: serviceCreateUser,
 		'GET'	: serviceGetUsers
 	};
-	this.rest['user/:name'] = {
+	this.rest['user/:username'] = {
 		'GET'	: serviceGetUser,
 		'DELETE': serviceDeleteUser,
 		'PUT'	: serviceUpdateUser
 	};
-	this.rest['user/:name/id'] = {
+	this.rest['user/:username/id'] = {
 		'GET'	: serviceGetUserId
 	};
-	this.rest['user/:name/email'] = {
+	this.rest['user/:username/email'] = {
 		'GET'	: serviceGetUserEmail,
 		'PUT'	: serviceUpdateUserEmail
 	};
-	this.rest['user/:name/password'] = {
+	this.rest['user/:username/password'] = {
 		'PUT'	: serviceUpdateUserPassword
 	};
 	
@@ -1880,20 +2343,57 @@ module.exports = function(mongoose, modelUser, modelModel) {
 		'DELETE': serviceRemoveCompleteRight
 	};
 
-	this.rest['user/:name/models'] = {
+	this.rest['user/:username/models'] = {
 		'GET'	: serviceGetUserModels
 	};
+	
+	this.rest['comment'] = {
+		'POST'	: serviceCreateComment,
+		'GET'	: serviceGetComments
+	};
+	this.rest['comment/:id'] = {
+		'GET'	: serviceGetComment,
+		'DELETE': serviceDeleteComment,
+	};
+	this.rest['comment/:id/modelId'] = {
+		'GET'	: serviceGetCommentModelId
+	};
+	this.rest['comment/:id/author'] = {
+		'GET'	: serviceGetCommentAuthor
+	};
+	this.rest['comment/:id/text'] = {
+		'GET'	: serviceGetCommentText,
+		'PUT'	: serviceUpdateCommentText
+	};
+	this.rest['comment/:id/slug'] = {
+		'GET'	: serviceGetCommentSlug
+	};
+	this.rest['comment/:id/postedDate'] = {
+		'GET'	: serviceGetCommentPostedDate
+	};
+	this.rest['comment/:id/parentId'] = {
+		'GET'	: serviceGetCommentParentId
+	};
+
+	this.rest['user/:username/comments'] = {
+		'GET'	: serviceGetUserComments
+	};
+	this.rest['model/:modelId/comments'] = {
+		'GET'	: serviceGetModelComments
+	};
+	
+
 	/*
 	 * ------------------------------------------
 	 * LOCAL MODULE METHODS
 	 * ------------------------------------------
 	 */
 	 
-	this.local = {};
+	/*this.local = {};
 	this.local.createUser = createUser;
 	this.local.getUsers = getUsers;
 	this.local.getUser = getUser;
-	
+	*/
 	
 	return this;
 };

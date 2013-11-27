@@ -35,9 +35,10 @@ mongoose.connect(config.getProperty("db.uri"), function(err) {
 });
 
 var	modelUser = require("./model/user")(mongoose).model,
-	modelModel = require("./model/model")(mongoose).model;
+	modelModel = require("./model/model")(mongoose).model,
+	modelComment = require("./model/comment")(mongoose).model;
 
-var	services = require("./services")(mongoose, modelUser, modelModel),
+var	services = require("./services")(mongoose, modelUser, modelModel, modelComment),
 	views = require("./views");
 
 /* ------------------------
