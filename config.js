@@ -16,10 +16,10 @@ var config = {
 		"auth" : false
 	},
 	"http" : {
-		"port" : 8080
+		"port" : process.env.PORT || 8080
 	},
 	"db": {
-		"uri" :	'mongodb://localhost/3dpal'
+		"uri" :	process.env.MONGOHQ_URL || 'mongodb://localhost/3dpal'
 	},
 	"session" : {
 		"secret" : "One does not simply walk into this website."
