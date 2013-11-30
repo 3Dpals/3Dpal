@@ -8,15 +8,21 @@ body{
 .back-to-top {
     position: fixed;
     bottom: 2em;
-    right: 0px;
+    right: 1em;
     text-decoration: none;
-    color: #000000;
-    background-color: rgba(235, 235, 235, 0.80);
-    font-size: 12px;
-    padding: 1em;
+    color: #fff;
+	border-radius: 4px;
+	border-style: solid;
+	border-width: 1px;
+	border-color: rgb(53, 126, 189);
+    background-color: rgba(66, 139, 202, 0.80);
+    font-size: 16px;
+    padding: 0.7em;
     display: none;
 }
 
 .back-to-top:hover {    
-    background-color: rgba(135, 135, 135, 0.50);
-}
+    background-color: rgba(53, 126, 189, 1);
+	text-decoration: none;
+    color: #fff;
+    }

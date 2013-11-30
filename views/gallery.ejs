@@ -1,17 +1,48 @@
 <% layout('layout') -%>
 <script type="text/javascript">
+window.sessionStorage.setItem("LoadMoreModels", "true");
+function convertJSONinHTML(html){
+	var myObjects = JSON.parse(html).objects;
+	var returnVal = "";
+	if (myObjects == null || myObjects.length == 0){
+		window.sessionStorage.setItem("LoadMoreModels", "false");	
+		returnVal = '<div class="col-md-11 col-lg-11 col-sm-11"><center><h3>No more Models</h3></center><br></div>';
+	}else{
+		var noOfModels = window.sessionStorage.getItem("noOfItems");
+		for(var i=0; i<myObjects.length; i++){
+			returnVal+='<div class="col-xs-6 col-sm-6 col-md-4 col-lg-3"><div class="thumbnail"><img width="200px" hight="200px" src="thumbnail/';
+			returnVal+=myObjects[i].thumbnail;
+			returnVal+='.png"><div class="caption"><h3>';
+			returnVal+=myObjects[i].name;
+			returnVal+='</h3><p>created by ';
+			returnVal+=myObjects[i].creator;
+			returnVal+=' on ';
+			returnVal+=myObjects[i].creationDate;
+			returnVal+='</p><a class="btn btn-default" href="model/';
+			returnVal+=myObjects[i].id;
+			returnVal+='" role="button">View details &raquo;</a></p></div></div></div>';
+			noOfModels =+1
+		}
+		window.sessionStorage.setItem("noOfItems", noOfModels);
+	}
+	return returnVal;
+}
+
+
 $(window).scroll(function()
 {
-    if($(window).scrollTop() == $(document).height() - $(window).height())
-    {
+    if(($(window).scrollTop() == $(document).height() - $(window).height()) && window.sessionStorage.getItem("LoadMoreModels")=="true")
+    {	
+		console.log(window.sessionStorage.getItem("LoadMoreModels"));
+		var offset = window.sessionStorage.getItem("noOfItems");
         $('div#loadmoreajaxloader').show();
         $.ajax({
-        url: "gallery",
+        url: "api/models?limi=12&offset="+offset,
         success: function(html)
         {
             if(html)
             {
-                $("#postswrapper").append(html);
+                $("#postswrapper").append(convertJSONinHTML(html));
                 $('div#loadmoreajaxloader').hide();
             }else
             {
@@ -73,21 +104,26 @@ jQuery(document).ready(function() {
   
 
 
-<% for(var i=0; (i<rest.length & i<12); i++) { %>
+<% var size=0; for(var i=0; (i<rest.length & i<12); i++) { %>
 
-	<div class="col-xs-6 .col-sm-6 col-md-4 .col-lg-3">
+	<div class="col-xs-6 col-sm-6 col-md-4 col-lg-3">
 		  <div class="thumbnail">
-		  <img src='thumbnail/<%= rest[i].id %>.png'> 
+		  <img width="200px" hight="200px"  src="thumbnail/<%= rest[i].id %>.png"> 
 		  <div class="caption">
-			  <h3><%= rest[i].name %></h2>
+			  <h3><%= rest[i].name %></h3>
 			  <p>created by user on date ... </p>
-			  </p><a class="btn btn-default" href="model/<%= rest[i].id %>" role="button">View details &raquo;</a></p>
+			  <a class="btn btn-default" href="model/<%= rest[i].id %>" role="button">View details &raquo;</a></p>
 			</div>
 			</div>
 			</div>
-<% } %>
-<a href="#" class="back-to-top">Back to Top</a>        
+<%  size=i;} %>
+</div>
 <div id="loadmoreajaxloader" style="display:none;"><center><img src="image/ajax-loader.gif" /></center></div>
-</div>     
+
+<script>
+window.sessionStorage.setItem("noOfItems", <%= size+1 %>);
+</script>
+<a href="#" class="back-to-top">Back to Top</a>        
+
 </section>
 
