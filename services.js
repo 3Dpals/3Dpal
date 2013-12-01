@@ -11,11 +11,13 @@ var	bcrypt = require('bcrypt'),
 
 module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFile) {
 
-	function error(code, resp) {
+	function error(code, resp, customMsg) {
 		var result = {};
 		result.error = {};
 		result.error.code = code;
 		result.status = 'nok';
+		
+		
 
 		switch(code) {
 			case 0:
@@ -28,14 +30,14 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 				result.error.msg = "DB error";
 				break;
 			default:
-				result.error.msg = "Unknow error";
+				result.error.msg = customMsg?customMsg:"Unknow error";
 		}
 
-		logger.error("Error function with message : " + result.error.msg)
+		logger.error("Error function with message : " + result.error.msg + (customMsg?' (err: '+customMsg+')':''));
 		var jsonResult = JSON.stringify(result);
 			resp.end(jsonResult);
 	}
-
+	
 	// Adds the header indicating all went sucessfully.
 	function writeHeaders(resp) {
 		resp.header("Access-Control-Allow-Origin","*");
@@ -249,7 +251,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 			}
               else {
 					modelUser.remove(item, function (err, result) {
-						cb(err, result);
+						cb(err, 'ok');
 					});
               }
        });
@@ -312,7 +314,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	function serviceUpdateUser(req, resp) {
 		logger.info("<Service> UpdateUser.");
 		var userData = parseRequest(req, ['username', 'password', 'email']);
-		
+		if (!userData.password) { error(10, resp, 'Password required'); return; }
 		writeHeaders(resp);
 		updateUser(userData.username, userData.password, userData.email, function(err, status) {
 			if (err) error(2, resp);
@@ -423,6 +425,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	function createModel(name, file, creator, creationDate, thumbnail, tags, cb) {
 		var obj = new modelModel({name: name, file: file, creator: creator,  creationDate: creationDate,  thumbnail: thumbnail,  tags: tags});
 		obj.save(function(err) {
+			if (err) logger.error(err);
 			cb (err, obj);
 		});
 	}
@@ -442,11 +445,10 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	function serviceCreateModel(req, resp) {
 		logger.info("<Service> CreateModel.");
 		var objectsData = parseRequest(req, ['name', 'file', 'creator', 'creationDate', 'thumbnail', 'tags']);
-		
 		writeHeaders(resp);
-		createModel(objectsData.name, objectsData.file, objectsData.creator, objectsData.creationDate, objectsData.thumbnail, objectsData.tags, function(err, user) {
+		createModel(objectsData.name, objectsData.file, objectsData.creator, objectsData.creationDate, objectsData.thumbnail, objectsData.tags, function(err, model) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status }));
+			else resp.end(JSON.stringify({ status: 'ok', id: model.id }));
 		});
 	}
 	 
@@ -721,7 +723,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 			}
               else {
 					modelModel.remove(item, function (err, result) {
-						cb(err, result);
+						cb(err, 'ok');
 					});
               }
        });
@@ -739,7 +741,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['id']);
 		
 		writeHeaders(resp);
-		deleteModel(getData.id, function (err, user) {
+		deleteModel(getData.id, function (err, status) {
 			if (err) error(2, resp);
 			else resp.end(JSON.stringify({ status: status })); 
 		});
