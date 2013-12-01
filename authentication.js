@@ -8,6 +8,7 @@
 var LocalStrategy = require('passport-local').Strategy,
 	OpenIDStrategy = require('passport-openid').Strategy,
 	FacebookStrategy = require('passport-facebook').Strategy,
+	GoogleStrategy = require('passport-google').Strategy;
 	logger = require("./logger");
 
 module.exports = function(passport, modelUser, config) {
@@ -85,7 +86,50 @@ module.exports = function(passport, modelUser, config) {
 					});
 				}
 			});
-		}
-		
-));
+		}	
+	));
+	
+	passport.use(new GoogleStrategy({
+			returnURL: config.getProperty("http.address")+":"+config.getProperty("http.port")+'/auth/google/return',
+			realm: config.getProperty("http.address")+":"+config.getProperty("http.port")
+		  },
+		  function(identifier, profile, done) {
+			var emails = [];
+			for (var i in profile.emails) {
+				emails.push(profile.emails[i].value);
+			}
+			modelUser.find().where('emails').in(emails).exec(function(err, users) {
+				if (err) { done(err, null); return; }
+				if (users.length > 1) {
+					// TO DO: Handle the possibility of multiple email addresses returned by FB (and what they correspond to different 3Dpal accounts?)
+					if (!users[0].openid) {
+						users[0].openid = identifier;
+						users[0].save(function(err) {
+							if (err) { logger.error(err); done(err, null); return; }
+							done(err, users[0]);
+						});
+					}
+					else { done(null, users[0]); return; }
+				}
+				else if (users.length == 1) {
+					if (!users[0].openid) {
+						users[0].openid = identifier;
+						users[0].save(function(err) {
+							if (err) { logger.error(err); done(err, null); return; }
+							done(err, users[0]);
+						});
+					}
+					else { done(null, users[0]); return; }
+				}	
+				else {
+					// TO DO: Handle case if profile.username already taken
+					var user = new modelUser({username: identifier, email: emails[0], openid: identifier});
+					user.save(function(err) {
+						if (err) { logger.error(err); done(err, null); return; }
+						done(err, user);
+					});
+				}
+			});;
+		  }
+	));
 }

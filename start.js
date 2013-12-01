@@ -116,25 +116,26 @@ html.post('/auth/openid',
 	function(req, res) {
 		res.redirect('/');
 	});
-
 html.get('/auth/openid/return',
 	passport.authenticate('openid', { failureRedirect: '/openid' }),
 	function(req, res) {
 		res.redirect('/');
 	});                           
-                                   
-                                   
+
+html.get('/auth/facebook', passport.authenticate('facebook', { scope: 'email' }));
+html.get('/auth/facebook/callback', 
+	passport.authenticate('facebook', {	successRedirect: '/',
+										failureRedirect: '/login' }));                              
+     
+html.get('/auth/google', passport.authenticate('google'));
+html.get('/auth/google/return', 
+	passport.authenticate('google', { 	successRedirect: '/',
+										failureRedirect: '/login' })); 
+										                             
 html.get('/logout', function(req, res){
 	req.logout();
 	res.redirect('/');
 });
-
-html.get('/auth/facebook', passport.authenticate('facebook', { scope: 'email' }));
-
-
-html.get('/auth/facebook/callback', 
-	passport.authenticate('facebook', { successRedirect: '/',
-										failureRedirect: '/login' }));
 
 // Different views of the HTML server :
 viewHandler = {};
