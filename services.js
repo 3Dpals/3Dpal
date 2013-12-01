@@ -443,7 +443,6 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	function serviceCreateModel(req, resp) {
 		logger.info("<Service> CreateModel.");
 		var objectsData = parseRequest(req, ['name', 'file', 'creator', 'creationDate', 'thumbnail', 'tags']);
-		logger.error(JSON.stringify(objectsData));
 		writeHeaders(resp);
 		createModel(objectsData.name, objectsData.file, objectsData.creator, objectsData.creationDate, objectsData.thumbnail, objectsData.tags, function(err, model) {
 			if (err) error(2, resp);
