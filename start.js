@@ -126,7 +126,7 @@ viewHandler["*"] = {handler: views.notfound, secured: false};
 for (var url in viewHandler) {
 	(securityActivated) ?
 		(viewHandler[url].secured) ?
-			html.get(url, ensureLoggedIn, viewHandler[url].handler)
+			html.get(url, ensureLoggedIn('/login'), viewHandler[url].handler)
 			: html.get(url, viewHandler[url].handler)
 		: html.get(url, viewHandler[url].handler)
 }
