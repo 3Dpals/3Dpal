@@ -10,6 +10,9 @@
     "mongoose": "*",
     "ejs-locals": "~1.0.2",
     "connect": "~2.9.1",
-    "bcrypt": "*"
+    "bcrypt": "*",
+    "connect-flash": "~0.1.1",
+    "passport": "~0.1.17",
+    "connect-ensure-login": "~0.1.1"
   }
 }

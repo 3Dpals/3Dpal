@@ -13,8 +13,8 @@ var logger = require("./logger");
  * VIEW Index
  */
 function viewIndex(req, res) {
-	logger.debug("<View> Viewing index (User "+req.session.username+").");
-	res.render('index', {title: "Main", username: req.session.username});
+	logger.debug("<View> Viewing index (User "+(req.user?req.user.username:'Unknown')+").");
+	res.render('index', {title: "Main", username: (req.user?req.user.username:null)});
 }
 
 /*
