@@ -41,6 +41,8 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	// Adds the header indicating all went sucessfully.
 	function writeHeaders(resp) {
 		resp.header("Access-Control-Allow-Origin","*");
+		resp.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+		resp.header('Access-Control-Allow-Headers', 'Content-Type');
 	}
 
 	function parseRequest(req, names) {
