@@ -249,7 +249,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 			}
               else {
 					modelUser.remove(item, function (err, result) {
-						cb(err, result);
+						cb(err, 'ok');
 					});
               }
        });
@@ -423,6 +423,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	function createModel(name, file, creator, creationDate, thumbnail, tags, cb) {
 		var obj = new modelModel({name: name, file: file, creator: creator,  creationDate: creationDate,  thumbnail: thumbnail,  tags: tags});
 		obj.save(function(err) {
+			if (err) logger.error(err);
 			cb (err, obj);
 		});
 	}
@@ -442,11 +443,11 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	function serviceCreateModel(req, resp) {
 		logger.info("<Service> CreateModel.");
 		var objectsData = parseRequest(req, ['name', 'file', 'creator', 'creationDate', 'thumbnail', 'tags']);
-		
+		logger.error(JSON.stringify(objectsData));
 		writeHeaders(resp);
-		createModel(objectsData.name, objectsData.file, objectsData.creator, objectsData.creationDate, objectsData.thumbnail, objectsData.tags, function(err, user) {
+		createModel(objectsData.name, objectsData.file, objectsData.creator, objectsData.creationDate, objectsData.thumbnail, objectsData.tags, function(err, model) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status }));
+			else resp.end(JSON.stringify({ status: 'ok', id: model.id }));
 		});
 	}
 	 
@@ -721,7 +722,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 			}
               else {
 					modelModel.remove(item, function (err, result) {
-						cb(err, result);
+						cb(err, 'ok');
 					});
               }
        });
@@ -739,7 +740,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['id']);
 		
 		writeHeaders(resp);
-		deleteModel(getData.id, function (err, user) {
+		deleteModel(getData.id, function (err, status) {
 			if (err) error(2, resp);
 			else resp.end(JSON.stringify({ status: status })); 
 		});
