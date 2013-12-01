@@ -7,6 +7,7 @@
 
 var LocalStrategy = require('passport-local').Strategy,
 	OpenIDStrategy = require('passport-openid').Strategy,
+	FacebookStrategy = require('passport-facebook').Strategy,
 	logger = require("./logger");
 
 module.exports = function(passport, modelUser, config) {
@@ -55,4 +56,36 @@ module.exports = function(passport, modelUser, config) {
 				});
 			}
 		));
+		
+	passport.use(new FacebookStrategy({
+			clientID: config.getProperty("facebook.id"),
+			clientSecret: config.getProperty("facebook.secret"),
+			callbackURL: config.getProperty("http.address")+":"+config.getProperty("http.port")+'/auth/facebook/callback'
+		},
+		function(accessToken, refreshToken, profile, done) {
+			var emails = [];
+			for (var i in profile.emails) {
+				emails.push(profile.emails[i].value);
+			}
+			modelUser.find().where('emails').in(emails).exec(function(err, users) {
+				if (err) { done(err, null); return; }
+				if (users.length > 1) {
+					// TO DO: Handle the possibility of multiple email addresses returned by FB (and what they correspond to different 3Dpal accounts?)
+					done(null, users[0]); return;
+				}
+				else if (users.length == 1) {
+					done(null, users[0]); return;
+				}	
+				else {
+					// TO DO: Handle case if profile.username already taken
+					var user = new modelUser({username: profile.username, email: emails[0]});
+					user.save(function(err) {
+						if (err) { logger.error(err); done(err, null); return; }
+						done(err, user);
+					});
+				}
+			});
+		}
+		
+));
 }

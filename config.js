@@ -24,6 +24,10 @@ var config = {
 	},
 	"session" : {
 		"secret" : "One does not simply walk into this website."
+	},
+	"facebook" : {
+		"id" : "636773756380634",
+		"secret" : "80d651a213387f6edfa4504ca7b1dc86" // TO BE RESET & HIDDEN ONCE TESTING DONE
 	}
 };
 

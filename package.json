@@ -15,6 +15,7 @@
     "passport": "~0.1.17",
     "connect-ensure-login": "~0.1.1",
     "passport-local": "~0.1.6",
-    "passport-openid": "~0.3.1"
+    "passport-openid": "~0.3.1",
+    "passport-facebook": "~1.0.2"
   }
 }

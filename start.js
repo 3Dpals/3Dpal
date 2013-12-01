@@ -129,6 +129,13 @@ html.get('/logout', function(req, res){
 	res.redirect('/');
 });
 
+html.get('/auth/facebook', passport.authenticate('facebook', { scope: 'email' }));
+
+
+html.get('/auth/facebook/callback', 
+	passport.authenticate('facebook', { successRedirect: '/',
+										failureRedirect: '/login' }));
+
 // Different views of the HTML server :
 viewHandler = {};
 viewHandler["/(index)?"] = {handler: views.index, secured: true};
