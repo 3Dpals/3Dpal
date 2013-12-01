@@ -11,11 +11,13 @@ var	bcrypt = require('bcrypt'),
 
 module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFile) {
 
-	function error(code, resp) {
+	function error(code, resp, customMsg) {
 		var result = {};
 		result.error = {};
 		result.error.code = code;
 		result.status = 'nok';
+		
+		
 
 		switch(code) {
 			case 0:
@@ -28,14 +30,14 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 				result.error.msg = "DB error";
 				break;
 			default:
-				result.error.msg = "Unknow error";
+				result.error.msg = customMsg?customMsg:"Unknow error";
 		}
 
-		logger.error("Error function with message : " + result.error.msg)
+		logger.error("Error function with message : " + result.error.msg + (customMsg?' (err: '+customMsg+')':''));
 		var jsonResult = JSON.stringify(result);
 			resp.end(jsonResult);
 	}
-
+	
 	// Adds the header indicating all went sucessfully.
 	function writeHeaders(resp) {
 		resp.header("Access-Control-Allow-Origin","*");
@@ -312,7 +314,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	function serviceUpdateUser(req, resp) {
 		logger.info("<Service> UpdateUser.");
 		var userData = parseRequest(req, ['username', 'password', 'email']);
-		
+		if (!userData.password) { error(10, resp, 'Password required'); return; }
 		writeHeaders(resp);
 		updateUser(userData.username, userData.password, userData.email, function(err, status) {
 			if (err) error(2, resp);
