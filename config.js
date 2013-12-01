@@ -16,6 +16,7 @@ var config = {
 		"auth" : true
 	},
 	"http" : {
+		"address": "http://localhost",
 		"port" : process.env.PORT || 8080
 	},
 	"db": {

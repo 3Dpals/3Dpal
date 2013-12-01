@@ -36,6 +36,15 @@ function viewLogin(req, res) {
 }
 
 /*
+ * VIEW OpenID
+ */
+function viewOpenID(req, res) {
+	next = req.param("next", null);
+	logger.info("<View> Viewing OpenID login page. Next is : " + next);
+	res.render('openid', {title: "OpenID Authentification", next: next, error: null, username: (req.user? req.user.username: '')});
+}
+
+/*
  * VIEW API
  */
 function viewApi(req, res) {
@@ -102,6 +111,7 @@ function viewProfile(req, res) {
 exports.index = viewIndex;
 exports.signin = viewSignin;
 exports.login = viewLogin;
+exports.openid = viewOpenID;
 exports.notfound = viewNotfound;
 exports.api = viewApi;
 exports.help = viewHelp;

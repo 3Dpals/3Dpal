@@ -1,0 +1,15 @@
+<% layout('layout') -%>
+
+<form class="well form-vertical" action="/auth/openid" method="post">
+	<p>
+	<% if (next != null) { %>
+		<input type="hidden" name="next" value="<%= next %>" />
+	<% } %>
+	
+	<% if (error != null) { %>
+		<p><%= error %></p>
+	<% } %>
+	<input type="text" class="input-medium" name="openid_identifier" required="required" placeholder="OpenID"/><br />
+	<button type="submit" class="btn-primary">Login</button><br />
+	</p>
+</form>

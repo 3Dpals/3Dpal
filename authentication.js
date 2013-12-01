@@ -5,9 +5,11 @@
  * Manage the authentification and sessions
  */
 
-var LocalStrategy = require('passport-local').Strategy;
+var LocalStrategy = require('passport-local').Strategy,
+	OpenIDStrategy = require('passport-openid').Strategy,
+	logger = require("./logger");
 
-module.exports = function(passport, modelUser) {
+module.exports = function(passport, modelUser, config) {
 
 	passport.use(new LocalStrategy(
 			function(username, password, done) {
@@ -28,6 +30,7 @@ module.exports = function(passport, modelUser) {
 				});
 			}
 		));
+		
 	passport.serializeUser(function(user, done) {
 		done(null, user.id);
 	});
@@ -37,4 +40,19 @@ module.exports = function(passport, modelUser) {
 			done(err, user);
 		});
 	});
+
+	passport.use(new OpenIDStrategy(
+			{
+				returnURL: config.getProperty("http.address")+":"+config.getProperty("http.port")+'/auth/openid/return',
+				realm: config.getProperty("http.address")+":"+config.getProperty("http.port")
+			},
+			function(identifier, profile, done) {
+					logger.error(JSON.stringify(profile));
+				modelUser.findOneAndUpdate({ username: identifier }, { openId: identifier, email: profile.emails[0].value }, {upsert: true}, function(err, user) {
+					if (err) { logger.error(err); };
+					logger.error(JSON.stringify(user));
+					done(err, user);
+				});
+			}
+		));
 }

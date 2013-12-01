@@ -104,12 +104,26 @@ for (var url in services.rest) {
 logger.warn("REST routes activated.");
 
 // Authentification & Sessions:
-require("./authentication")(passport, modelUser);
+require("./authentication")(passport, modelUser, config);
 
 html.post('/login',
   passport.authenticate('local', { successRedirect: '/',
                                    failureRedirect: '/login',
                                    failureFlash: true }));
+
+html.post('/auth/openid',
+	passport.authenticate('openid', { failureRedirect: '/openid' }),
+	function(req, res) {
+		res.redirect('/');
+	});
+
+html.get('/auth/openid/return',
+	passport.authenticate('openid', { failureRedirect: '/openid' }),
+	function(req, res) {
+		res.redirect('/');
+	});                           
+                                   
+                                   
 html.get('/logout', function(req, res){
 	req.logout();
 	res.redirect('/');
@@ -120,6 +134,7 @@ viewHandler = {};
 viewHandler["/(index)?"] = {handler: views.index, secured: true};
 viewHandler["/signin"] = {handler: views.signin, secured: false};
 viewHandler["/login"] = {handler: views.login, secured: false};
+viewHandler["/openid"] = {handler: views.openid, secured: false};
 viewHandler["/help"] = {handler: views.help, secured: false};
 viewHandler["/gallery"] = {handler: views.gallery, secured: true};
 viewHandler["/profile"] = {handler: views.profile, secured: true};
