@@ -13,7 +13,7 @@ var config = {
 	},
 	"security" : {
 		"ssl" : false,
-		"auth" : false
+		"auth" : true
 	},
 	"http" : {
 		"port" : process.env.PORT || 8080

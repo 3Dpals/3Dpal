@@ -65,12 +65,13 @@ html.configure(function() {
 	html.engine('ejs', engine);
 	html.use(express.bodyParser());
 	html.use(express.methodOverride());
-	html.use(html.router);
+	html.use( express.cookieParser() );
 	html.use(express.session({ secret: config.getProperty("session.secret"), cookie: { maxAge: 60000 } }));
 	html.use(flash());
 	html.use(passport.initialize());
 	html.use(passport.session());
 	html.use(express.static(__dirname + '/public'));
+	html.use(html.router);
 	html.set('views', __dirname + '/views');
 	html.set('view engine', 'ejs');
 });
@@ -79,19 +80,19 @@ html.configure(function() {
 for (var url in services.rest) {
 	for (var action in services.rest[url]) {
 		if (action == 'POST') {
-			html.post('/api/'+url, passport.authenticate('basic', { session: false }), services.rest[url][action]);
+			html.post('/api/'+url, services.rest[url][action]);
 			logger.debug('REST routing - '+url+' / POST defined');
 		}
 		else if (action == 'GET') {
-			html.get('/api/'+url, passport.authenticate('basic', { session: false }), services.rest[url][action]);
+			html.get('/api/'+url, services.rest[url][action]);
 			logger.debug('REST routing - '+url+' / GET defined');
 		}
 		else if (action == 'PUT') {
-			html.put('/api/'+url, passport.authenticate('basic', { session: false }), services.rest[url][action]);
+			html.put('/api/'+url, services.rest[url][action]);
 			logger.debug('REST routing - '+url+' / PUT defined');
 		}
 		else if (action == 'DELETE') {
-			html.delete('/api/'+url, passport.authenticate('basic', { session: false }), services.rest[url][action]);
+			html.delete('/api/'+url, services.rest[url][action]);
 			logger.debug('REST routing - '+url+' / DELETE defined');
 		}
 		else {
@@ -103,6 +104,7 @@ for (var url in services.rest) {
 logger.warn("REST routes activated.");
 
 // Authentification & Sessions:
+require("./authentication")(passport, modelUser);
 
 html.post('/login',
   passport.authenticate('local', { successRedirect: '/',
@@ -115,8 +117,9 @@ html.get('/logout', function(req, res){
 
 // Different views of the HTML server :
 viewHandler = {};
-viewHandler["/(index)?"] = {handler: views.index, secured: false};
+viewHandler["/(index)?"] = {handler: views.index, secured: true};
 viewHandler["/signin"] = {handler: views.signin, secured: false};
+viewHandler["/login"] = {handler: views.login, secured: false};
 viewHandler["/help"] = {handler: views.help, secured: false};
 viewHandler["/gallery"] = {handler: views.gallery, secured: true};
 viewHandler["/profile"] = {handler: views.profile, secured: true};

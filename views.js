@@ -13,8 +13,8 @@ var logger = require("./logger");
  * VIEW Index
  */
 function viewIndex(req, res) {
-	logger.debug("<View> Viewing index (User "+(req.user?req.user.username:'Unknown')+").");
-	res.render('index', {title: "Main", username: (req.user?req.user.username:null)});
+	logger.debug("<View> Viewing index (User "+req.user.username+").");
+	res.render('index', {title: "Main", username: req.user.username});
 }
 
 /*
@@ -22,7 +22,7 @@ function viewIndex(req, res) {
  */
 function viewSignin(req, res) {
 	logger.debug("<View> Viewing signin.");
-	res.render('signin', {title: "Sign-In"});
+	res.render('signin', {title: "Sign-In", username: (req.user? req.user.username: '')});
 }
 
 
@@ -32,7 +32,7 @@ function viewSignin(req, res) {
 function viewLogin(req, res) {
 	next = req.param("next", null);
 	logger.info("<View> Viewing login page. Next is : " + next);
-	res.render('login', {title: "Login", next: next, error: null});
+	res.render('login', {title: "Login", next: next, error: null, username: (req.user? req.user.username: '')});
 }
 
 /*
@@ -41,7 +41,7 @@ function viewLogin(req, res) {
 function viewApi(req, res) {
 	next = req.param("next", null);
 	logger.info("<View> Viewing API");
-	res.render('api', {title: "API"});
+	res.render('api', {title: "API", username: (req.user? req.user.username: '')});
 }
 
 function dateToString(date) {
@@ -68,12 +68,12 @@ function twoDigits(nb) {
 
 function viewNotfound(req, res) {
 	logger.warn("<View> View not found : " + req.url);
-	res.render('404', {title: "Page not found"});
+	res.render('404', {title: "Page not found", username: (req.user? req.user.username: '')});
 }
 
 function viewHelp(req, res) {
 	logger.info("<View> Viewing help page.");
-	res.render('help', {title: "Help"});
+	res.render('help', {title: "Help", username: (req.user? req.user.username: '')});
 }
 
 /*
@@ -83,7 +83,7 @@ function viewGallery(req, res) {
 	logger.info("<View> Viewing gallery.");
 
 //	res.render('gallery', {title: "Gallery", rest: rest});
-	res.render('gallery', {title: "Gallery", rest: [{id:"00",name:"name00"},{id:"01",name:"name01"},{id:"02",name:"name02"},{id:"03",name:"name03"}]});
+	res.render('gallery', {title: "Gallery", username: (req.user? req.user.username: ''), rest: [{id:"00",name:"name00"},{id:"01",name:"name01"},{id:"02",name:"name02"},{id:"03",name:"name03"}]});
 }
 
 /*
@@ -96,7 +96,7 @@ function viewProfile(req, res) {
 	email = email.toLowerCase();
 	var emailHash = require('crypto').createHash('md5').update(email).digest("hex");
 //	res.render('profile', {title: "Profile", rest: rest});
-	res.render('profile', {title: "Profile", rest: {id:"00",name:"Johannes Baldinger",email:email,emailHash :emailHash }});
+	res.render('profile', {title: "Profile", username: (req.user? req.user.username: ''), rest: {id:"00",name:"Johannes Baldinger",email:email,emailHash :emailHash }});
 }
 
 exports.index = viewIndex;

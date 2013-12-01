@@ -41,6 +41,7 @@ module.exports = function(mongoose) {
 	});
 
 	UserSchema.methods.comparePassword = function(candidatePassword, cb) {
+		console.log("<XXXXXX>"+candidatePassword + "||" + this.password);
 		bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
 			if (err) return cb(err);
 			cb(null, isMatch);
