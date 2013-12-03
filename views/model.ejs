@@ -1,0 +1,50 @@
+<% layout('layout') -%>
+<script type="text/javascript">
+
+</script>
+
+<section>
+	<div>
+		  <div class="thumbnail">
+		  <div class="caption">
+			 <h3><%= rest.name %></h3>
+		  </div>
+			<img width="400px" hight="400px"  src="thumbnail/<%= rest.id %>.png"> 
+		   
+			  <p>created by XXX </p>
+			  <p>Created on XXX </p>
+			  <button class="btn btn-primary" role="button">Edit &raquo;</button></p>
+			</div>
+	</div>
+	<div>
+		<strong>Comments</strong> <button class="btn btn-default" role="button">+</button></p>
+		<div id="comments">
+			<div class="panel panel-default">
+			  <div class="panel-heading">
+				<h3 class="panel-title">Comment 1 by user X</h3>
+			  </div>
+			  <div class="panel-body">
+				comment 1 text
+			  </div>
+			</div>
+			<div class="panel panel-default">
+			  <div class="panel-heading">
+				<h3 class="panel-title">Comment 2 by user Y</h3>
+			  </div>
+			  <div class="panel-body">
+				comment 2 text
+					<div class="panel panel-default">
+					  <div class="panel-heading">
+						<h3 class="panel-title">Comment 2.resp by user Z</h3>
+					  </div>
+					  <div class="panel-body">
+						comment 3 text
+					  </div>
+					</div>
+			  </div>
+			</div>
+			
+		</div>
+	<div>
+</section>
+

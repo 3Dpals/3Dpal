@@ -21,7 +21,7 @@ function convertJSONinHTML(html){
 			returnVal+='</p><a class="btn btn-default" href="model/';
 			returnVal+=myObjects[i].id;
 			returnVal+='" role="button">View details &raquo;</a></p></div></div></div>';
-			noOfModels =+1
+			noOfModels+=1;
 		}
 		window.sessionStorage.setItem("noOfItems", noOfModels);
 	}
@@ -33,7 +33,6 @@ $(window).scroll(function()
 {
     if(($(window).scrollTop() == $(document).height() - $(window).height()) && window.sessionStorage.getItem("LoadMoreModels")=="true")
     {	
-		console.log(window.sessionStorage.getItem("LoadMoreModels"));
 		var offset = window.sessionStorage.getItem("noOfItems");
         $('div#loadmoreajaxloader').show();
         $.ajax({
@@ -74,7 +73,7 @@ jQuery(document).ready(function() {
 </script>
 
 
-
+<!-- Not yet possible
 <div class="container">
 <form class="form-inline  form-horizontal " role="form">
   <div class="form-group">
@@ -97,6 +96,7 @@ jQuery(document).ready(function() {
   <button type="button" class="btn btn-primary">Search</button>
 </form>
 </div>
+-->
 
 <section>
 <div id="postswrapper">
@@ -112,7 +112,7 @@ jQuery(document).ready(function() {
 		  <div class="caption">
 			  <h3><%= rest[i].name %></h3>
 			  <p>created by user on date ... </p>
-			  <a class="btn btn-default" href="model/<%= rest[i].id %>" role="button">View details &raquo;</a></p>
+			  <a class="btn btn-default" href="model?id=<%= rest[i].id %>" role="button">View details &raquo;</a></p>
 			</div>
 			</div>
 			</div>

@@ -83,7 +83,8 @@ html.configure(function() {
 	html.engine('ejs', engine);
 	html.use(express.bodyParser());
 	html.use(express.methodOverride());
-	html.use(html.router);
+//JB 02.12.2013 This line breaks quite a lot
+//	html.use(html.router);
 	html.use(express.static(__dirname + '/public'));
 	html.set('views', __dirname + '/views');
 	html.set('view engine', 'ejs');
@@ -130,6 +131,7 @@ viewHandler["/help"] = views.help;
 viewHandler["/gallery"] = views.gallery;
 viewHandler["/profile"] = views.profile;
 viewHandler["/api"] = views.api;
+viewHandler["/model"] = views.model;
 viewHandler["*"] = views.notfound;
 
 for (var url in viewHandler) {

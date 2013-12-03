@@ -91,12 +91,22 @@ function viewGallery(req, res) {
  */
 function viewProfile(req, res) {
 	logger.info("<View> Viewing User Profile.");
+//How will we get the current data here?
 	var email = "johannes.baldinger@googlemail.com";
 	email = email.trim();
 	email = email.toLowerCase();
 	var emailHash = require('crypto').createHash('md5').update(email).digest("hex");
 //	res.render('profile', {title: "Profile", rest: rest});
-	res.render('profile', {title: "Profile", rest: {id:"00",name:"Johannes Baldinger",email:email,emailHash :emailHash }});
+	res.render('profile', {title: "Profile", rest: {id:"00",name:"hallo",email:email,emailHash :emailHash }});
+}
+
+/*
+ * VIEW Model
+ */
+function viewModel(req, res) {
+	logger.info("<View> Viewing Model ("+req.url+")");
+//	res.render('model', {title: "Model", rest: rest});
+	res.render('model', {title: "Model", rest: {id:"00",name:"name00"}});
 }
 
 exports.index = viewIndex;
@@ -107,3 +117,4 @@ exports.api = viewApi;
 exports.help = viewHelp;
 exports.gallery = viewGallery;
 exports.profile = viewProfile;
+exports.model = viewModel;
