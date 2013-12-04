@@ -80,7 +80,10 @@ html.configure(function() {
 for (var url in services.rest) {
 	for (var action in services.rest[url]) {
 		if (action == 'POST') {
-			html.post('/api/'+url, services.rest[url][action]);
+			html.post('/api/'+url, /*PERMISSION:		function(req, resp) {
+				user = seq.session.user || modelUser.getUserPerAPIKey(....);
+				services.rest[url][action](req, resp, userId); }); */ services.rest[url][action]);
+			
 			logger.debug('REST routing - '+url+' / POST defined');
 		}
 		else if (action == 'GET') {

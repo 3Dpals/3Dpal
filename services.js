@@ -1172,6 +1172,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 */
 	function addReadRight(modelId, username, cb) {
 		getUserId(username, function(err, id){
+			logger.error(JSON.stringify(id));
 			if (err) { return cb(err, null); }
 			if (!id) { return cb(null, 'User doesn\'t exist'); }
 			id = id._id;
@@ -1273,7 +1274,8 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 *	- modelId (String): 		ID of the model				- required
 	 *	- username (String): 			ID of the user				- required
 	 */
-	function serviceRemoveRight(req, resp) {
+	function serviceRemoveRight(req, resp, userId) {
+// PERMISSION:		if (!hasPermissionRight(1, userId)) { return ERROR }
 		logger.info("<Service> RemoveRight.");
 		var objectsData = parseRequest(req, ['modelId', 'username', 'rightToWrite']);
 		
@@ -2254,9 +2256,9 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 *	- cb (Function(bool)):		Callback
 	 */
 	function createFile(content, cb) {
-		var comment = new modelFile({content: content});
-		comment.save(function(err) {
-			cb (err, 'ok');
+		var file = new modelFile({content: content});
+		file.save(function(err) {
+			cb (err, file.id);
 		});
 	}
 	/**
@@ -2272,9 +2274,9 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var userData = parseRequest(req, ['content']);
 		
 		writeHeaders(resp);
-		createFile(userData.content, function(err, status) {
+		createFile(userData.content, function(err, id) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status }));
+			else resp.end(JSON.stringify({ status: 'ok', id: id }));
 		});
 	}
 	 
@@ -2607,11 +2609,11 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	
 	this.rest['files'] = {
 		'POST'	: serviceCreateFile,
-		'GET'	: serviceGetFile
+		'GET'	: serviceGetFiles
 	};
 	this.rest['file/:id'] = {
 		'GET'	: serviceGetFile,
-		'DELETE': serviceDeleteFile,
+		'DELETE': serviceDeleteFile
 	};
 	this.rest['file/:id/content'] = {
 		'GET'	: serviceGetFileContent,
