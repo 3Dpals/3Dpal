@@ -13,10 +13,11 @@ module.exports = function(mongoose) {
 	var Schema = mongoose.Schema;
 	var UserSchema = new Schema({
 		username: { type: String, required: true, index: { unique: true } },	// Unique username
-		password: { type: String, required: true, select: false },				// Protected password
+		password: { type: String, required: false, select: false },				// Protected password
 		email: { type: String, required: true },								// Email (also use to retrieve Gravatar's pic)
 		writeModels: [{ type: Schema.Types.ObjectId, ref: 'Model' }],			// Models the User got personally the right to edit
-		readModels: [{ type: Schema.Types.ObjectId, ref: 'Model' }]				// Models the User got personally the right to read
+		readModels: [{ type: Schema.Types.ObjectId, ref: 'Model' }],			// Models the User got personally the right to read
+		openId: { type: String, required: false}								// OpenID
 	});
 
 	UserSchema.pre('save', function(next) {
@@ -41,6 +42,7 @@ module.exports = function(mongoose) {
 	});
 
 	UserSchema.methods.comparePassword = function(candidatePassword, cb) {
+		console.log("<XXXXXX>"+candidatePassword + "||" + this.password);
 		bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
 			if (err) return cb(err);
 			cb(null, isMatch);
