@@ -47,23 +47,41 @@
                 </div>
                 <div class="navbar-collapse collapse">
                         <ul class="nav navbar-nav">
-                                <li class="active">
-                                <a href="index" class="active">
-                                Home </a>
+<% 
+var mainActive ="";
+var galleryActive="";
+var modelActive="";
+var profileActive="";
+var helpActive ="";
+switch (title) {
+    case "Main":
+		 mainActive = 'active';  break;
+    case "Gallery":
+        galleryActive = 'active'; break;
+	case "My Models":
+        modelActive = 'active'; break;
+    case "Profile":
+        profileActive = 'active';  break;
+    case "Help":
+        helpActive = 'active';  break;
+}; %>								
+                                <li class="<%= mainActive %>">
+                                <a href="index">
+                                Main </a>
                                 </li>
-                                <li>
+                                <li class="<%= galleryActive %>">
                                 <a href="gallery">
                                 Gallery </a>
                                 </li>
-                                <li>
-                                <a href="gallery">
+                                <li class="<%= modelActive %>">
+                                <a href="gallery" >
                                 My Models </a>
                                 </li>
-                                <li>
+                                <li class="<%= profileActive %>">
                                 <a href="profile">
                                 Profile </a>
                                 </li>
-                                <li>
+                                <li class="<%= helpActive %>">
                                 <a href="help">
                                 Help </a>
                                 </li>

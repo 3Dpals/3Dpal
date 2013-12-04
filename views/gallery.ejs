@@ -1,6 +1,10 @@
 <% layout('layout') -%>
 <script type="text/javascript">
+
 window.sessionStorage.setItem("LoadMoreModels", "true");
+window.sessionStorage.setItem("noOfItems", 0);
+getMoreModels();
+
 function convertJSONinHTML(html){
 	var myObjects = JSON.parse(html).objects;
 	var returnVal = "";
@@ -18,8 +22,8 @@ function convertJSONinHTML(html){
 			returnVal+=myObjects[i].creator;
 			returnVal+=' on ';
 			returnVal+=myObjects[i].creationDate;
-			returnVal+='</p><a class="btn btn-default" href="model/';
-			returnVal+=myObjects[i].id;
+			returnVal+='</p><a class="btn btn-default" href="model?id=';
+			returnVal+=myObjects[i]._id;
 			returnVal+='" role="button">View details &raquo;</a></p></div></div></div>';
 			noOfModels+=1;
 		}
@@ -28,30 +32,35 @@ function convertJSONinHTML(html){
 	return returnVal;
 }
 
+function getMoreModels(){
+	var offset = window.sessionStorage.getItem("noOfItems");
+	$('div#loadmoreajaxloader').show();
+	$.ajax({
+	url: "api/models?limi=12&offset="+offset,
+	success: function(html)
+	{
+		if(html)
+		{
+			$("#postswrapper").append(convertJSONinHTML(html));
+			$('div#loadmoreajaxloader').hide();
+		}else
+		{
+			$('div#loadmoreajaxloader').html('<center>No more posts to show.</center>');
+		}
+	}
+	});
+}
 
 $(window).scroll(function()
 {
     if(($(window).scrollTop() == $(document).height() - $(window).height()) && window.sessionStorage.getItem("LoadMoreModels")=="true")
     {	
-		var offset = window.sessionStorage.getItem("noOfItems");
-        $('div#loadmoreajaxloader').show();
-        $.ajax({
-        url: "api/models?limi=12&offset="+offset,
-        success: function(html)
-        {
-            if(html)
-            {
-                $("#postswrapper").append(convertJSONinHTML(html));
-                $('div#loadmoreajaxloader').hide();
-            }else
-            {
-                $('div#loadmoreajaxloader').html('<center>No more posts to show.</center>');
-            }
-        }
-        });
+		getMoreModels();
     }
 });
 
+
+//
 jQuery(document).ready(function() {
     var offset = 220;
     var duration = 500;
@@ -100,29 +109,10 @@ jQuery(document).ready(function() {
 
 <section>
 <div id="postswrapper">
-  
-  
 
-
-<% var size=0; for(var i=0; (i<rest.length & i<12); i++) { %>
-
-	<div class="col-xs-6 col-sm-6 col-md-4 col-lg-3">
-		  <div class="thumbnail">
-		  <img width="200px" hight="200px"  src="thumbnail/<%= rest[i].id %>.png"> 
-		  <div class="caption">
-			  <h3><%= rest[i].name %></h3>
-			  <p>created by user on date ... </p>
-			  <a class="btn btn-default" href="model?id=<%= rest[i].id %>" role="button">View details &raquo;</a></p>
-			</div>
-			</div>
-			</div>
-<%  size=i;} %>
 </div>
 <div id="loadmoreajaxloader" style="display:none;"><center><img src="image/ajax-loader.gif" /></center></div>
 
-<script>
-window.sessionStorage.setItem("noOfItems", <%= size+1 %>);
-</script>
 <a href="#" class="back-to-top">Back to Top</a>        
 
 </section>

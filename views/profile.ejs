@@ -13,6 +13,7 @@
     }
 	function saveEmail(id){
 		var newEmail = $('#inputEmail').val();
+		if ( validateEmail(newEmail) ){
 		$.ajax({
 		   url: 'api/user/'+id+'/email',
 		   type: 'PUT',
@@ -20,31 +21,55 @@
 		   success: function(html) {
 				if(html)
 				{	var myObjects = JSON.parse(html);
-					$('div#returnstatus').append('<div class="alert alert-success"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> Email changed ('+myObjects.status+').</div>');
+					$('div#returnstatus').append('<div class="alert alert-success alert-dismissable"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> Email changed ('+myObjects.status+').</div>');
 				}else
 				{
-					$('div#returnstatus').append('<div class="alert alert-error"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> Problem occured</div>');
+					$('div#returnstatus').append('<div class="alert alert-danger alert-dismissable"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> Problem occured</div>');
 				}
 			}
 		});
+		}else{
+			$('div#returnstatus').append('<div class="alert alert-danger alert-dismissable"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Not valid!</strong> Email not valid.</div>');
+		}
 	}
 	
 	function savePassword(id){
 		var newPassword = $('#inputPassword').val();
-		$.ajax({
-		   url: 'api/user/'+id+'/password',
-		   type: 'PUT',
-		   data: { password: newPassword},
-		   success: function(html) {
-				if(html)
-				{	var myObjects = JSON.parse(html);
-					$('div#returnstatus').append('<div class="alert alert-success"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> Password changed ('+myObjects.status+').</div>');
-				}else
-				{
-					$('div#returnstatus').append('<div class="alert alert-error"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> Problem occured</div>');
+		if (validatePassword(newPassword,$('#inputPassword2').val() ) ) {
+			$.ajax({
+			   url: 'api/user/'+id+'/password',
+			   type: 'PUT',
+			   data: { password: newPassword},
+			   success: function(html) {
+					if(html)
+					{	var myObjects = JSON.parse(html);
+						$('div#returnstatus').append('<div class="alert alert-success alert-dismissable"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> Password changed ('+myObjects.status+').</div>');
+					}else
+					{
+						$('div#returnstatus').append('<div class="alert alert-danger alert-dismissable"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> Problem occured</div>');
+					}
 				}
-			}
-		});
+			});
+		}else{
+				$('div#returnstatus').append('<div class="alert alert-danger alert-dismissable"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Not valid!</strong> Please check that you have entered and confirmed your password!</div>');
+		}
+	}
+	
+	function validateEmail(email){
+		var atpos=email.indexOf("@");
+		var dotpos=email.lastIndexOf(".");
+		if (atpos<1 || dotpos<atpos+2 || dotpos+2>=email.length)
+		  {
+		  return false;
+		  }
+		return true;
+		}
+		
+	function validatePassword(pwd1,pwd2)	{
+		if(pwd1== "" || pwd1 != pwd2) {
+		  return false;
+		}
+		return true;
 	}
 </script> 
 
@@ -88,17 +113,37 @@
     <div class="form-group">
     <label for="inputEmail" class="col-sm-2 control-label">Email</label>
     <div class="col-sm-8">
+	<div class="input-group">
       <input type="email" class="form-control" id="inputEmail" value="<%= rest.email %>">
+      <span class="input-group-btn">
+		<button type="button" class="btn btn-default" onclick="return saveEmail('<%= rest.name %>');" ><span class="glyphicon glyphicon-floppy-save"> </span></button>
+      </span>
     </div>
-	<button type="button" class="btn btn-default" onclick="return saveEmail('<%= rest.name %>');" >-&gt;</button>
+    </div>
   </div>
   
    <div class="form-group">
     <label for="inputPassword" class="col-sm-2 control-label">Password</label>
     <div class="col-sm-8">
+	<div class="input-group">
       <input type="password" class="form-control" id="inputPassword" placeholder="Password">
+	  <span class="input-group-btn">
+	  <button type="button" class="btn btn-default invisible "><span class="glyphicon glyphicon-floppy-save"> </span></button>
+	  </span>
+	 </div>
     </div>
-	<button type="button" class="btn btn-default" onclick="return savePassword('<%= rest.name %>');" >-&gt;</button>
+  </div>
+  <div class="form-group">
+    <label for="inputPassword2" class="col-sm-2 control-label">Repeat Password</label>
+    <div class="col-sm-8">
+		<div class="input-group">
+      <input type="password" class="form-control" id="inputPassword2" placeholder="Password">
+	  <span class="input-group-btn">
+		<button type="button" class="btn btn-default" onclick="return savePassword('<%= rest.name %>');" ><span class="glyphicon glyphicon-floppy-save"> </span></button>
+	  </span>
+    </div>
+	
+	</div>
   </div>
   
     <div class="form-group">
