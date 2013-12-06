@@ -148,6 +148,7 @@ viewHandler["/login"] = {handler: views.login, secured: false};
 viewHandler["/openid"] = {handler: views.openid, secured: false};
 viewHandler["/help"] = {handler: views.help, secured: false};
 viewHandler["/gallery"] = {handler: views.gallery, secured: true};
+viewHandler["/mymodels"] = {handler: views.myModels, secured: true};
 viewHandler["/model"] = {handler: views.model, secured: true};
 viewHandler["/profile"] = {handler: views.profile, secured: true};
 viewHandler["/api"] = {handler: views.api, secured: false};

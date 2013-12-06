@@ -1,50 +1,158 @@
 <% layout('layout') -%>
-<script type="text/javascript">
 
-</script>
+<script type="text/javascript" src="script/lib/md5.js"></script>
+<script type="text/javascript" src="script/lib/model.js"></script>
+<script type="text/javascript" src="script/lib/jquery.tokeninput.js"></script>
+									<link rel="stylesheet" type="text/css" href="css/token-input.css" />
 
+									<script type="text/javascript">
+										$(document).ready(function () {
+											$(".usertypeahead").tokenInput("api/users",{
+												  propertyToSearch: "username",
+												 minChars:1,
+												 prePopulate: JSON.parse(window.sessionStorage.getItem("prepopulate")),
+												 jsonContainer:"users",
+												  resultsFormatter: function(item){ return "<li>" + "<img src='http://www.gravatar.com/avatar/"+md5(item.email) + "' title='" + item.username + "' height='25px' width='25px' />" + "<div style='display: inline-block; padding-left: 10px;'><div class='full_name'>" + item.username+ "</div><div class='email'>" + item.email + "</div></div></li>" }
+              
+											});
+										});
+									</script>
 <section>
-	<div>
-		  <div class="thumbnail">
-		  <div class="caption">
-			 <h3><%= rest.name %></h3>
-		  </div>
-			<img width="400px" hight="400px"  src="thumbnail/<%= rest.id %>.png"> 
-		   
-			  <p>created by XXX </p>
-			  <p>Created on XXX </p>
-			  <button class="btn btn-primary" role="button">Edit &raquo;</button></p>
-			</div>
+<div class="well">
+	<div class="caption">
+		<h3 id="name"></h3>
 	</div>
-	<div>
-		<strong>Comments</strong> <button class="btn btn-default" role="button">+</button></p>
-		<div id="comments">
-			<div class="panel panel-default">
-			  <div class="panel-heading">
-				<h3 class="panel-title">Comment 1 by user X</h3>
-			  </div>
-			  <div class="panel-body">
-				comment 1 text
-			  </div>
+	<img width="200px" hight="200px" src="thumbnail/00.png"><button class="btn btn-primary" role="button">Edit &raquo;</button><br>
+	<br>
+	<div class="panel-group" id="accordion">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h4 class="panel-title">
+				<a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+				Properties </a>
+				</h4>
 			</div>
-			<div class="panel panel-default">
-			  <div class="panel-heading">
-				<h3 class="panel-title">Comment 2 by user Y</h3>
-			  </div>
-			  <div class="panel-body">
-				comment 2 text
-					<div class="panel panel-default">
-					  <div class="panel-heading">
-						<h3 class="panel-title">Comment 2.resp by user Z</h3>
-					  </div>
-					  <div class="panel-body">
-						comment 3 text
-					  </div>
-					</div>
-			  </div>
+			<div id="collapseOne" class="panel-collapse collapse">
+				<div class="panel-body">
+					<form class="form-horizontal" role="form">
+						<div class="show" id="PropertiesShow">
+							
+							<div class="form-group">
+								<label class="col-sm-2 control-label">Created by</label>
+								<div class="col-sm-10">
+									<p class="form-control-static" id="createdBy">
+										 'loading'
+									</p>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label">Created on</label>
+								<div class="col-sm-10">
+									<p class="form-control-static" id="createdOn">
+										 'loading'
+									</p>
+								</div>
+							</div>
+							<div class="form-group formEdit" style="display:none;">
+								<label class="col-sm-2 control-label">Name</label>
+								<div class="col-sm-10">
+									<input type="text" id="editName" style="width: 398px;">
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label">Read public</label>
+								<div class="col-sm-10">
+									<p class="form-control-static formShow" id="showReadPublic">
+										 Yes/No
+									</p>
+									 <div class="checkbox formEdit"  style="display:none;">
+										<label>
+										  <input id="editReadPublic" type="checkbox">
+										</label>
+									  </div>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label">Write public</label>
+								<div class="col-sm-10">
+									<p class="form-control-static  formShow" id="showWritePublic">
+										 Yes/No
+									</p>
+									 <div class="checkbox formEdit"  style="display:none;">
+										<label>
+										  <input id="editWritePublic" type="checkbox">
+										</label>
+									  </div>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label">Read access</label>
+								<div class="col-sm-10">
+									<p class="form-control-static formShow" id="showReadAccess">
+										 List of users
+									</p>
+									<p class="formEdit" style="display:none;">
+									<input type="text" class="usertypeahead" id="editReadAccess" >
+									</p>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label">Write access</label>
+								<div class="col-sm-10">
+									<p class="form-control-static formShow" id="showWriteAccess">
+										 List of users
+									</p>
+									<p class="formEdit" style="display:none;">
+									<input type="text" class="usertypeahead" id="editReadAccess">
+									</p>	
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-sm-offset-2 col-sm-10">
+									<button class="btn btn-primary formShow" role="button" onclick="return edit()">Edit Properties &raquo;</button> <button class="btn btn-primary formEdit" role="button" style="display:none;" onclick="return save()">Save &raquo;</button>
+								</div>
+							</div>
+						</div>
+					</form>
+				</div>
 			</div>
-			
 		</div>
-	<div>
+	</div>
+</div>
+<form class="well form-horizontal">
+	<div class="panel-group" id="accordion2">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h4 class="panel-title">
+				<a data-toggle="collapse" data-parent="#accordion2" href="#collapseOne2">
+				New Comment </a>
+				</h4>
+			</div>
+			<div id="collapseOne2" class="panel-collapse collapse">
+				<div class="panel-body">
+				<div id="CommentReturnstatus"></div>
+					<div class="control-group">
+						<div class="controls">
+							<textarea id="NewComment" name="NewComment" required="required" rows="5" cols="50">Write whatever you like ...</textarea>
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label" for="Save"></label>
+						<div class="controls">
+							<button id="Save" name="Save" class="btn btn-primary" onclick="saveNewComment()" type="button">Save</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+<div id="comments" class="well">
+	<h3>Comments</h3>
+	<div id="loadmoreajaxloader" style="display:none;">
+		<center><img src="image/ajax-loader.gif"/></center>
+	</div>
+</div>
 </section>
-
+									
+	

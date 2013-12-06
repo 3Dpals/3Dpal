@@ -1737,7 +1737,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var objData = parseRequest(req, ['id', 'publicRead']);
 		
 		writeHeaders(resp);
-		updateModelPublicRead(objData.id, objData.tags, function(err, status) {
+		updateModelPublicRead(objData.id, objData.publicRead, function(err, status) {
 			if (err) error(2, resp);
 			else resp.end(JSON.stringify({ status: status })); 
 		});
@@ -1771,7 +1771,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var objData = parseRequest(req, ['id', 'publicWrite']);
 		
 		writeHeaders(resp);
-		updateModelPublicWrite(objData.id, objData.tags, function(err, status) {
+		updateModelPublicWrite(objData.id, objData.publicWrite, function(err, status) {
 			if (err) error(2, resp);
 			else resp.end(JSON.stringify({ status: status })); 
 		});
@@ -1797,7 +1797,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 *	- cb (Function(bool)):		Callback
 	 */
 	function createComment(modelId, author, text, postedDate, parentId, cb) {
-		var slug = author+postedDate.toISOString();
+		var slug = author+postedDate;
 		if (parentId) {
 			modelComment.findById(parentId).exec(function(err, parentCom) {
 				if (err) { error(2, resp); return; }

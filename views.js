@@ -94,6 +94,14 @@ function viewGallery(req, res) {
 }
 
 /*
+ * VIEW My Models Gallery
+ */
+function viewMyModels(req, res) {
+	logger.info("<View> Viewing My Models.");
+	res.render('mymodels', {title: "My Models", username: (req.user? req.user.username: '')});
+}
+
+/*
  * VIEW User Profile
  */
 function viewProfile(req, res) {
@@ -117,5 +125,6 @@ exports.notfound = viewNotfound;
 exports.api = viewApi;
 exports.help = viewHelp;
 exports.gallery = viewGallery;
+exports.myModels = viewMyModels;
 exports.profile = viewProfile;
 exports.model = viewModel;

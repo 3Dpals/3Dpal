@@ -1,98 +1,34 @@
 <% layout('layout') -%>
 
-<script> 
-    function edit() { 
-	   document.getElementById('ProfileEdit').className='show';
-	   document.getElementById('ProfileShow').className='hidden';         
-       return false;
-    } 
-    function back() { 
-       document.getElementById('ProfileEdit').className='hidden';
-	   document.getElementById('ProfileShow').className='show';         
-       return true;
-    }
-	function saveEmail(id){
-		var newEmail = $('#inputEmail').val();
-		if ( validateEmail(newEmail) ){
-		$.ajax({
-		   url: 'api/user/'+id+'/email',
-		   type: 'PUT',
-		   data: { email: newEmail},
-		   success: function(html) {
-				if(html)
-				{	var myObjects = JSON.parse(html);
-					$('div#returnstatus').append('<div class="alert alert-success alert-dismissable"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> Email changed ('+myObjects.status+').</div>');
-				}else
-				{
-					$('div#returnstatus').append('<div class="alert alert-danger alert-dismissable"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> Problem occured</div>');
-				}
-			}
-		});
-		}else{
-			$('div#returnstatus').append('<div class="alert alert-danger alert-dismissable"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Not valid!</strong> Email not valid.</div>');
-		}
-	}
-	
-	function savePassword(id){
-		var newPassword = $('#inputPassword').val();
-		if (validatePassword(newPassword,$('#inputPassword2').val() ) ) {
-			$.ajax({
-			   url: 'api/user/'+id+'/password',
-			   type: 'PUT',
-			   data: { password: newPassword},
-			   success: function(html) {
-					if(html)
-					{	var myObjects = JSON.parse(html);
-						$('div#returnstatus').append('<div class="alert alert-success alert-dismissable"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> Password changed ('+myObjects.status+').</div>');
-					}else
-					{
-						$('div#returnstatus').append('<div class="alert alert-danger alert-dismissable"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> Problem occured</div>');
-					}
-				}
-			});
-		}else{
-				$('div#returnstatus').append('<div class="alert alert-danger alert-dismissable"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Not valid!</strong> Please check that you have entered and confirmed your password!</div>');
-		}
-	}
-	
-	function validateEmail(email){
-		var atpos=email.indexOf("@");
-		var dotpos=email.lastIndexOf(".");
-		if (atpos<1 || dotpos<atpos+2 || dotpos+2>=email.length)
-		  {
-		  return false;
-		  }
-		return true;
-		}
-		
-	function validatePassword(pwd1,pwd2)	{
-		if(pwd1== "" || pwd1 != pwd2) {
-		  return false;
-		}
-		return true;
-	}
-</script> 
+<script type="text/javascript" src="script/lib/profile.js"></script>
+<script type="text/javascript" src="script/lib/md5.js"></script>
 
 <section>
-<div id="returnstatus">
+<div id="returnstatus"></div>
 
-</div>
 <div class="col-sm-offset-2 col-sm-10">
-	<img src="http://www.gravatar.com/avatar/<%= rest.emailHash %>" class="profileImg"/>
+	<img src="http://www.gravatar.com/avatar/" class="profileImg" id="profileImage"/>
 </div>
 <form class="form-horizontal" role="form">
 <div class="show" id="ProfileShow">
  <div class="form-group">
     <label class="col-sm-2 control-label">Name</label>
     <div class="col-sm-10">
-      <p class="form-control-static"><%= rest.name %></p>
+      <p class="form-control-static" id="showUsername"><%= username %></p>
     </div>
   </div>
   
  <div class="form-group">
     <label class="col-sm-2 control-label">Email</label>
     <div class="col-sm-10">
-      <p class="form-control-static"><%= rest.email %></p>
+      <p class="form-control-static" id="showEmail"></p>
+    </div>
+  </div>
+  
+  <div class="form-group">
+    <label class="col-sm-2 control-label">API Key</label>
+    <div class="col-sm-10">
+      <p class="form-control-static" id="showAPIKey"></p>
     </div>
   </div>
   
@@ -102,11 +38,12 @@
     </div>
   </div>
 </div>
+
 <div class="hidden" id="ProfileEdit">
     <div class="form-group">
     <label class="col-sm-2 control-label">Name</label>
     <div class="col-sm-10">
-      <p class="form-control-static"><%= rest.name %></p>
+      <p class="form-control-static" id="editUsername"><%= username %></p>
     </div>
   </div>
   
@@ -114,9 +51,9 @@
     <label for="inputEmail" class="col-sm-2 control-label">Email</label>
     <div class="col-sm-8">
 	<div class="input-group">
-      <input type="email" class="form-control" id="inputEmail" value="<%= rest.email %>">
+      <input type="email" class="form-control" id="inputEmail" value="">
       <span class="input-group-btn">
-		<button type="button" class="btn btn-default" onclick="return saveEmail('<%= rest.name %>');" ><span class="glyphicon glyphicon-floppy-save"> </span></button>
+		<button type="button" class="btn btn-default" onclick="return saveEmail(username);" ><span class="glyphicon glyphicon-floppy-save"> </span></button>
       </span>
     </div>
     </div>
@@ -137,22 +74,25 @@
     <label for="inputPassword2" class="col-sm-2 control-label">Repeat Password</label>
     <div class="col-sm-8">
 		<div class="input-group">
-      <input type="password" class="form-control" id="inputPassword2" placeholder="Password">
-	  <span class="input-group-btn">
-		<button type="button" class="btn btn-default" onclick="return savePassword('<%= rest.name %>');" ><span class="glyphicon glyphicon-floppy-save"> </span></button>
-	  </span>
-    </div>
-	
+		  <input type="password" class="form-control" id="inputPassword2" placeholder="Password">
+		  <span class="input-group-btn">
+			<button type="button" class="btn btn-default" onclick="return savePassword(username);" ><span class="glyphicon glyphicon-floppy-save"> </span></button>
+		  </span>
+		</div>
 	</div>
   </div>
-  
-    <div class="form-group">
+  <div class="form-group">
+    <label class="col-sm-2 control-label">API Key</label>
+    <div class="col-sm-10">
+      <p class="form-control-static" id="editAPIKey"></p>
+    </div>
+  </div>
+  <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
       <button type="reset" class="btn btn-primary" onclick="return back();" >Back</button>
     </div>
   </div>
 </div>
 </form>
-
 
 </section>
