@@ -1,0 +1,29 @@
+---
+layout: post
+title: Third Sprint
+---
+
+h1. {{ page.title }}
+
+p(meta). 05 Dec 2011 - Luleå
+
+Close to the end. The sprint meeting is over again and we have a basic version running.
+ 
+h2. Our results from the third sprint:
+* Front-End: Dynamic Data loading for the website. All data is gathered dynamicly from the back-end API. 
+* Login realized with Passport
+* API Documentation is half way done
+* Application is running on heroku 
+
+h2. Open Problems:
+* no
+
+h2. ToDos for the third sprint:
+* API authentication via an api key as additional parameter
+* Implement the graphical 3D editor for read and write access
+* File handling for 3D Models als thumbnails
+* Bug fixing the API
+* Back-End right management
+
+Stay tuned.
+
