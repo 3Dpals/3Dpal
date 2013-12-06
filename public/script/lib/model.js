@@ -82,7 +82,7 @@ function saveNewComment() {
 			modelId : id,
 			author : username,
 			text : newComment,
-			postedDate : Date.now()
+			postedDate : new Date()
 		},
 		success : function (html) {
 			if (html) {

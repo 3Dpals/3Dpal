@@ -3,6 +3,28 @@ window.sessionStorage.setItem("LoadMoreModels", "true");
 window.sessionStorage.setItem("noOfItems", 0);
 getMoreModels();
 
+//create a new model and redirect to edit
+function NewModel() {
+	var curDate = new Date();
+	console.log(curDate);
+	$.ajax({
+		url : 'api/models',
+		type : 'POST',
+		data : {
+			name : "New Model",
+			file : "undefined",
+			creator	: username,
+			creationDate :  curDate,
+			thumbnail : "undefined"
+		},
+		success : function (html) {
+			var id = JSON.parse(html).id;
+			var url = "model?id="+id;    
+			$(location).attr('href',url);	
+		}
+	});
+}
+
 //Loading 12 more models from the api
 function getMoreModels() {
 	var offset = window.sessionStorage.getItem("noOfItems");
@@ -40,7 +62,7 @@ function convertJSONinHTML(html) {
 			returnVal += myObjects[i].name;
 			returnVal += '</h3><p>created by ';
 			returnVal += myObjects[i].creator;
-			returnVal += ' on ';
+			returnVal += ' <br>on ';
 			returnVal += myObjects[i].creationDate;
 			returnVal += '</p><a class="btn btn-default" href="model?id=';
 			returnVal += myObjects[i]._id;
