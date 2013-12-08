@@ -57,6 +57,14 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 
 	/*
 	 * ------------------------------------------
+	 * PERMISSION CHECKING METHODS
+	 * ------------------------------------------
+	 */	
+
+	//function hasPermissionUser(user
+
+	/*
+	 * ------------------------------------------
 	 * USERS Services
 	 * ------------------------------------------
 	 */
@@ -75,10 +83,26 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 *	- cb (Function(bool)):		Callback
 	 */
 	function createUser(username, password, email, openId, facebookId, googleId, cb) {
+		
+		
 		var user = new modelUser({username: username, password: password, email: email, openId: openId, facebookId: facebookId, googleId: googleId, email: email});
-		user.save(function(err) {
-			cb (err, 'ok');
-		})
+		
+		// generate API token:
+		bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
+			if (err) { logger.error(err); return cb(err, null); }
+			var token = user.id + username + (new Date().toString());
+			logger.debug(user.id);
+
+			// hash the password using our new salt
+			bcrypt.hash(token, salt, function(err, hash) {
+				if (err) { logger.error(err); return cb(err, null); }
+
+				user.apiToken = encodeURIComponent(hash);
+				user.save(function(err) {
+					cb (err, 'ok');
+				})
+			});
+		});	
 	}
 	/**
 	 * serviceCreateUser
@@ -236,6 +260,37 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		getUserEmail(getData.userId, function (err, user) {
 			if (err) error(2, resp);
 			else resp.end(JSON.stringify({ email: user.email })); 
+		});
+	}
+	 
+	 
+	/**
+	 * getUserApiToken
+	 * ====
+	 * Returns the User's apiToken
+	 * Parameters:
+	 *	- userId (String): 				ID
+	 *	- cb (Function(err, User[])):	Callback
+	 */
+	function getUserApiToken(userId, cb) {
+		modelUser.findById(userId).select('apiToken').lean().exec(cb);
+	}
+	/**
+	 * serviceGetUserApiToken
+	 * ====
+	 * Request Var:
+	 * 		- userId (string)		ID
+	 * Request Parameters:
+	 *		-none
+	 */
+	function serviceGetUserApiToken(req, resp) {
+		logger.info("<Service> GetUserApiToken.");
+		var getData = parseRequest(req, ['userId']);
+		
+		writeHeaders(resp);
+		getUserApiToken(getData.userId, function (err, user) {
+			if (err) error(2, resp);
+			else resp.end(JSON.stringify({ apiToken: user.apiToken })); 
 		});
 	}
 	 
@@ -2705,6 +2760,9 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	this.rest['user/:userId/googleId'] = {
 		'GET'	: serviceGetUserGoogleId,
 		'PUT'	: serviceUpdateUserGoogleId
+	};
+	this.rest['user/:userId/apiToken'] = {
+		'GET'	: serviceGetUserApiToken
 	};
 	
 	

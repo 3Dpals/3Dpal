@@ -20,6 +20,7 @@ module.exports = function(mongoose) {
 		openId: { type: String, required: false},								// OpenID
 		googleId: { type: String, required: false},								// Google ID
 		facebookId: { type: String, required: false},							// Facebook ID
+		apiToken: { type: String, required: true, select: false, unique: true }	// Token to access the API
 	});
 
 	UserSchema.pre('save', function(next) {
