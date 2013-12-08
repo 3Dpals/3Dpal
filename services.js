@@ -29,6 +29,9 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 			case 2:
 				result.error.msg = "DB error";
 				break;
+			case 3:
+				result.error.msg = "Operation denied";
+				break;
 			default:
 				result.error.msg = customMsg?customMsg:"Unknow error";
 		}
@@ -61,7 +64,93 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 * ------------------------------------------
 	 */	
 
-	//function hasPermissionUser(user
+	/**
+	 * hasPermissionUser
+	 * ====
+	 * Returns if the User can execute her/his operation on the chosen User instance.
+	 * Parameters:
+	 *	- writeFlag (bool): 		Write Flag - true if write operation asked, false if read only
+	 *	- user (User): 				User
+	 *	- userId (String): 			ID of the target User instance
+	 *	- cb (Function(bool)):		Callback
+	 */
+	function hasPermissionUser(writeFlag, user, userId, cb) {
+		cb((!writeFlag) || (user.id == userId)); // An User can read info about any other user, but can only edit its own.
+	}
+	
+	/**
+	 * hasPermissionModel
+	 * ====
+	 * Returns if the User can execute her/his operation on the chosen Model instance.
+	 * Parameters:
+	 *	- writeFlag (bool): 		Write Flag - true if write operation asked, false if read only
+	 *	- user (User): 				User
+	 *	- modelId (String): 		ID of the Model
+	 *	- cb (Function(bool)):		Callback
+	 */
+	 function hasPermissionModel(writeFlag, user, modelId, cb) {
+		modelModel.findById(modelId).exec(function(err, model) {
+			if (err || !model) { cb(false); return; }
+			
+			cb(
+				(model.creator == user.id)? // If the user is the creator, nothing else to check...
+					true
+				:
+					writeFlag? 	// If permission to write asked
+						model.publicWrite?
+							true	// if writing is public, then OK
+						:	(model.writers.indexOf(user.id) > -1)	// else we check if personal write right given
+					:			// Else if only permission to read asked
+						model.publicRead? 
+							true 	// if reading is public, then OK
+						:	(model.readers.indexOf(user.id) > -1)	// else we check if personal read right given
+			);
+		});
+	}
+	
+	/**
+	 * hasPermissionComment
+	 * ====
+	 * Returns if the User can execute her/his operation on the chosen Comment instance.
+	 * Parameters:
+	 *	- writeFlag (bool): 		Write Flag - true if write operation asked, false if read only
+	 *	- user (User): 				User
+	 *	- commentId (String): 		ID of the target Comment instance
+	 *	- modelId (String): 		ID of the Model the Comment is about
+	 *	- cb (Function(bool)):		Callback
+	 */
+	 function hasPermissionComment(writeFlag, user, commentId, modelId, cb) {
+		modelComment.findById(commentId).exec(function(err, comment) {
+			if (err || !comment) { cb(false); return; }
+			
+			if (!modelId) modelId = comment.modelId;
+			if (writeFlag) { // If permission to write asked, we check if (s)he is the author:
+				cb(user.id == comment.author);
+			} else { // Else we just check if (s)he can access the model the comments are about:
+				hasPermissionModel(false, user, modelId, cb);
+			}
+		});
+	}
+	
+	/**
+	 * hasPermissionFile
+	 * ====
+	 * Returns if the User can execute her/his operation on the chosen File instance.
+	 * Parameters:
+	 *	- writeFlag (bool): 		Write Flag - true if write operation asked, false if read only
+	 *	- user (User): 				User
+	 *	- fileId (String): 			ID of the target File instance
+	 *	- modelId (String): 		ID of the Model the File is for
+	 *	- cb (Function(bool)):		Callback
+	 */
+	 function hasPermissionFile(writeFlag, user, fileId, modelId, cb) {
+		modelFile.findById(commentId).exec(function(err, file) {
+			if (err || !file) { cb(false); return; }
+			
+			if (!modelId) modelId = file.modelId;
+			hasPermissionModel(writeFlag, user, modelId, cb);
+		});
+	}
 
 	/*
 	 * ------------------------------------------
@@ -83,26 +172,13 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 *	- cb (Function(bool)):		Callback
 	 */
 	function createUser(username, password, email, openId, facebookId, googleId, cb) {
-		
-		
 		var user = new modelUser({username: username, password: password, email: email, openId: openId, facebookId: facebookId, googleId: googleId, email: email});
-		
-		// generate API token:
-		bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
-			if (err) { logger.error(err); return cb(err, null); }
-			var token = user.id + username + (new Date().toString());
-			logger.debug(user.id);
-
-			// hash the password using our new salt
-			bcrypt.hash(token, salt, function(err, hash) {
-				if (err) { logger.error(err); return cb(err, null); }
-
-				user.apiToken = encodeURIComponent(hash);
-				user.save(function(err) {
-					cb (err, 'ok');
-				})
-			});
-		});	
+		user.generateToken(function(err, token){
+			user.token = token;
+			user.save(function(err) {
+				cb (err, 'ok');
+			})
+		});
 	}
 	/**
 	 * serviceCreateUser
@@ -121,9 +197,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var userData = parseRequest(req, ['username', 'password', 'email', 'openId', 'facebookId', 'googleId']);
 		
 		writeHeaders(resp);
-		createUser(userData.username, userData.password, userData.email, userData.openId, userData.facebookId, userData.googleId, function(err, status) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status }));
+		hasPermissionUser(false, req.user, null, function(permOk) {
+			if (permOk) {
+				createUser(userData.username, userData.password, userData.email, userData.openId, userData.facebookId, userData.googleId, function(err, status) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status }));
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 	 
@@ -159,9 +241,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['limit', 'offset']);
 		
 		writeHeaders(resp);
-		getUsers(getData.limit, getData.offset, function (err, users) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ users: users })); 
+		hasPermissionUser(false, req.user, null, function(permOk) {
+			if (permOk) {
+				getUsers(getData.limit, getData.offset, function (err, users) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ users: users })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 
@@ -197,10 +285,17 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['userId']);
 		
 		writeHeaders(resp);
-		getUser(getData.userId, function (err, user) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify(user)); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getUser(getData.userId, function (err, user) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify(user)); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
+		
 	}
 	 
 	/**
@@ -227,9 +322,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['userId']);
 		
 		writeHeaders(resp);
-		getUserUsername(getData.userId, function (err, user) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ id: user._id })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getUserUsername(getData.userId, function (err, user) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ username: user.username })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 	 
@@ -257,40 +358,53 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['userId']);
 		
 		writeHeaders(resp);
-		getUserEmail(getData.userId, function (err, user) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ email: user.email })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getUserEmail(getData.userId, function (err, user) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ email: user.email })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
+		
 	}
 	 
 	 
 	/**
-	 * getUserApiToken
+	 * getUserToken
 	 * ====
-	 * Returns the User's apiToken
+	 * Returns the User's token
 	 * Parameters:
 	 *	- userId (String): 				ID
 	 *	- cb (Function(err, User[])):	Callback
 	 */
-	function getUserApiToken(userId, cb) {
-		modelUser.findById(userId).select('apiToken').lean().exec(cb);
+	function getUserToken(userId, cb) {
+		modelUser.findById(userId).select('token').lean().exec(cb);
 	}
 	/**
-	 * serviceGetUserApiToken
+	 * serviceGetUserToken
 	 * ====
 	 * Request Var:
 	 * 		- userId (string)		ID
 	 * Request Parameters:
 	 *		-none
 	 */
-	function serviceGetUserApiToken(req, resp) {
-		logger.info("<Service> GetUserApiToken.");
+	function serviceGetUserToken(req, resp) {
+		logger.info("<Service> GetUserToken.");
 		var getData = parseRequest(req, ['userId']);
 		
 		writeHeaders(resp);
-		getUserApiToken(getData.userId, function (err, user) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ apiToken: user.apiToken })); 
+		hasPermissionUser(true, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getUserToken(getData.userId, function (err, user) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ token: user.token })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 	 
@@ -318,9 +432,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['userId']);
 		
 		writeHeaders(resp);
-		getUserOpenId(getData.userId, function (err, user) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ openId: user.openId })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getUserOpenId(getData.userId, function (err, user) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ openId: user.openId })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 	
@@ -2761,8 +2881,8 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		'GET'	: serviceGetUserGoogleId,
 		'PUT'	: serviceUpdateUserGoogleId
 	};
-	this.rest['user/:userId/apiToken'] = {
-		'GET'	: serviceGetUserApiToken
+	this.rest['user/:userId/token'] = {
+		'GET'	: serviceGetUserToken
 	};
 	
 	

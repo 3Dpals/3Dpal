@@ -8,7 +8,8 @@
 var LocalStrategy = require('passport-local').Strategy,
 	OpenIDStrategy = require('passport-openid').Strategy,
 	FacebookStrategy = require('passport-facebook').Strategy,
-	GoogleStrategy = require('passport-google').Strategy;
+	GoogleStrategy = require('passport-google').Strategy,
+	LocalAPIKeyStrategy = require('passport-localapikey').Strategy;
 	logger = require("./logger");
 
 module.exports = function(passport, modelUser, config) {
@@ -50,10 +51,13 @@ module.exports = function(passport, modelUser, config) {
 			},
 			function(identifier, profile, done) {
 				modelUser.findOneAndUpdate({ openId: identifier }, { email: profile.emails[0].value }, {upsert: true}, function(err, user) {
-					if (err) { logger.error(err); };
+					if (err) { return done(err); };
 					if (!user.username) {
 						user.username = identifier;
-						user.save(function(err) { if (err) { logger.error(err); }; });
+						user.generateToken(function(err, token){
+							user.token = token;
+							user.save(function(err) { if (err) { return done(err); }; });
+						});
 					}
 					done(err, user);
 				});
@@ -66,12 +70,14 @@ module.exports = function(passport, modelUser, config) {
 			callbackURL: config.getProperty("http.address")+":"+config.getProperty("http.port")+'/auth/facebook/callback'
 		},
 		function(accessToken, refreshToken, profile, done) {
-			logger.error(JSON.stringify(profile));
 			modelUser.findOneAndUpdate({ facebookId: profile.id }, { email: profile.emails[0].value }, {upsert: true}, function(err, user) {
-				if (err) { logger.error(err); };
+				if (err) { return done(err); };
 				if (!user.username) {
 					user.username = profile.username;
-					user.save(function(err) { if (err) { logger.error(err); }; });
+					user.generateToken(function(err, token){
+						user.token = token;
+						user.save(function(err) { if (err) { return done(err); }; });
+					});
 				}
 				done(err, user);
 			});
@@ -105,12 +111,14 @@ module.exports = function(passport, modelUser, config) {
 			realm: config.getProperty("http.address")+":"+config.getProperty("http.port")
 		},
 		function(identifier, profile, done) {
-			logger.error(JSON.stringify(profile));
 			modelUser.findOneAndUpdate({ googleId: identifier }, { email: profile.emails[0].value }, {upsert: true}, function(err, user) {
-				if (err) { logger.error(err); };
+				if (err) { return done(err); };
 				if (!user.username) {
 					user.username = profile.displayName;
-					user.save(function(err) { if (err) { logger.error(err); }; });
+					user.generateToken(function(err, token){
+						user.token = token;
+						user.save(function(err) { if (err) { return done(err); }; });
+					});
 				}
 				done(err, user);
 			});
@@ -152,5 +160,16 @@ module.exports = function(passport, modelUser, config) {
 //				}
 //			});;
 		  }
+	));
+	
+	passport.use(new LocalAPIKeyStrategy(
+		{ apiKeyField: 'token' },
+		function(apikey, done) {
+			modelUser.findOne({ token: apikey }, function (err, user) {
+			  if (err) { return done(err); }
+			  if (!user) { return done(null, false); }
+			  return done(null, user);
+			});
+		}
 	));
 }
