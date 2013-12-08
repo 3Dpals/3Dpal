@@ -1797,6 +1797,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 *	- cb (Function(bool)):		Callback
 	 */
 	function createComment(modelId, author, text, postedDate, parentId, cb) {
+		if (!postedDate) { postedDate = new Date(); }
 		var slug = author+postedDate.toISOString();
 		if (parentId) {
 			modelComment.findById(parentId).exec(function(err, parentCom) {
@@ -1824,17 +1825,17 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 *	- modelId (String): 		Model the comment is associated with	- required
 	 *	- author (String): 			User ID of the author					- required
 	 *	- text (String): 			Content									- required
-	 *	- postedDate (Date): 		Date of creation						- required
-	 * 	- parentId (String)			ID of the parent comment (optional)		- o
+	 *	- postedDate (Date): 		Date of creation						- optional
+	 * 	- parentId (String)			ID of the parent comment (optional)		- optional
 	 *	- cb (Function(bool)):		Callback								- required
 	 */
 	function serviceCreateComment(req, resp) {
 		logger.info("<Service> CreateComment.");
-		var userData = parseRequest(req, ['modelId', 'author', 'text', 'postedDate', 'parentId']);
+		var commentData = parseRequest(req, ['modelId', 'author', 'text', 'postedDate', 'parentId']);
 		
 		writeHeaders(resp);
-		createComment(userData.username, userData.password, userData.email, function(err, status) {
-			if (err) error(2, resp);
+		createComment(commentData.modelId, commentData.author, commentData.text, commentData.postedDate, commentData.parentId, function(err, status) {
+			if (err) { logger.error(err); error(2, resp); }
 			else resp.end(JSON.stringify({ status: status }));
 		});
 	}
