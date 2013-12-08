@@ -1873,7 +1873,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		writeHeaders(resp);
 		getComments(getData.limit, getData.offset, function (err, users) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ users: users })); 
+			else resp.end(JSON.stringify({ comments: users })); 
 		});
 	}
 
@@ -2315,7 +2315,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		writeHeaders(resp);
 		getFiles(getData.limit, getData.offset, function (err, users) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ users: users })); 
+			else resp.end(JSON.stringify({ files: users })); 
 		});
 	}
  	
