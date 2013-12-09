@@ -1430,25 +1430,35 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 * Returns the models created by an User
 	 * Parameters:
 	 *	- userId (String): 				ID
+	 *	- limit (int): 					Number max of Models to return
+	 *	- offset (int): 				Number of the Model to start with
 	 *	- cb (Function(err, Model[])):	Callback
 	 */
-	function getUserModels(userId, cb) {
-		modelModel.find({creator: userId}, {__v:0}).lean().exec(cb);
+	function getUserModels(userId, limit, offset, cb) {
+		
+		if (!offset) offset = 0;
+		if (limit) {
+			modelModel.find({creator: userId}, {__v:0}).sort({name: 1}).skip(offset).limit(limit).lean().exec(cb);
+		}
+		else {
+			modelModel.find({creator: userId}, {__v:0}).skip(offset).lean().exec(cb);
+		}
 	}
 	/**
 	 * serviceGetUserModels
 	 * ====
 	 * Request Var:
-	 * 		- name (string)		name
+	 * 		- userId (string)	User ID
 	 * Request Parameters:
-	 *		-none
+	 *	- limit (int): 			Number max of Models to return		- required
+	 *	- offset (int): 		Number of the Model to start with	- required
 	 */
 	function serviceGetUserModels(req, resp) {
 		logger.info("<Service> GetUserModels.");
-		var getData = parseRequest(req, ['userId']);
+		var getData = parseRequest(req, ['userId', 'limit', 'offset']);
 		
 		writeHeaders(resp);
-		getUserModels(getData.userId, function (err, objects) {
+		getUserModels(getData.userId, getData.limit, getData.offset, function (err, objects) {
 			if (err) error(2, resp);
 			else resp.end(JSON.stringify({models: objects})); 
 		});
