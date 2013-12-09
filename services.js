@@ -214,17 +214,28 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 * ====
 	 * Returns a list of users, ordered by userId.
 	 * Parameters:
+	 *	- contain (String): 			String the usernames must contain (Regex - can be left null)
 	 *	- limit (int): 					Number max of users to return
 	 *	- offset (int): 				Number of the user to start with
 	 *	- cb (Function(err, User[])):	Callback
 	 */
-	function getUsers(limit, offset, cb) {
+	function getUsers(contain, limit, offset, cb) {
 		if (!offset) offset = 0;
-		if (limit) {
-			modelUser.find({}, {__v:0}).sort({userId: 1}).skip(offset).limit(limit).lean().exec(cb);
-		}
-		else {
-			modelUser.find({}, {__v:0}).sort({userId: 1}).skip(offset).lean().exec(cb);
+		if (contain) {
+			var regex = new RegExp(contain, 'i');
+			if (limit) {
+				modelUser.find({username: regex}, {__v:0}).sort({username: 1}).skip(offset).limit(limit).lean().exec(cb);
+			}
+			else {
+				modelUser.find({username: regex}, {__v:0}).sort({username: 1}).skip(offset).lean().exec(cb);
+			}
+		} else {
+			if (limit) {
+				modelUser.find({}, {__v:0}).sort({username: 1}).skip(offset).limit(limit).lean().exec(cb);
+			}
+			else {
+				modelUser.find({}, {__v:0}).sort({username: 1}).skip(offset).lean().exec(cb);
+			}
 		}
 	}
 	/**
@@ -233,17 +244,18 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 * Request Var:
 	 * 		none
 	 * Request Parameters:
+	 *		- contain (String): String the usernames must contain	- optional
 	 *		- limit (int): 		Number max to return				- optional
 	 *		- offset (int): 	Number of the user to start with	- optional
 	 */
 	function serviceGetUsers(req, resp) {
 		logger.info("<Service> GetUsers.");
-		var getData = parseRequest(req, ['limit', 'offset']);
+		var getData = parseRequest(req, ['contain', 'limit', 'offset']);
 		
 		writeHeaders(resp);
 		hasPermissionUser(false, req.user, null, function(permOk) {
 			if (permOk) {
-				getUsers(getData.limit, getData.offset, function (err, users) {
+				getUsers(getData.contain, getData.limit, getData.offset, function (err, users) {
 					if (err) error(2, resp);
 					else resp.end(JSON.stringify({ users: users })); 
 				});
