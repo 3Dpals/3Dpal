@@ -1,0 +1,3 @@
+[submodule "public/sculptgl"]
+	path = public/sculptgl
+	url = https://github.com/3Dpals/sculptgl.git
