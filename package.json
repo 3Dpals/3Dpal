@@ -17,6 +17,7 @@
     "passport-local": "~0.1.6",
     "passport-openid": "~0.3.1",
     "passport-facebook": "~1.0.2",
-    "passport-google": "~0.3.0"
+    "passport-google": "~0.3.0",
+    "passport-localapikey": "0.0.3"
   }
 }
