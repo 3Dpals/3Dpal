@@ -1,37 +1,57 @@
-//initiallize
+//initialize
 window.sessionStorage.setItem("LoadMoreModels", "true");
 window.sessionStorage.setItem("noOfItems", 0);
-getMoreModels();
-
 
 //create a new model and redirect to edit
 function NewModel() {
 	var curDate = new Date();
-	console.log(curDate);
+
 	$.ajax({
 		url : 'api/models',
 		type : 'POST',
 		data : {
 			name : "New Model",
 			file : "undefined",
-			creator	: username,
-			creationDate :  curDate,
+			creator : username,
+			creationDate : curDate,
 			thumbnail : "undefined"
 		},
 		success : function (html) {
 			var id = JSON.parse(html).id;
-			var url = "model?id="+id;    
-			$(location).attr('href',url);	
+			newFile(id, "file");
+			newFile(id, "thumbnail");
+			var url = "model?edit=true&id=" + id;
+			$(location).attr('href', url);
+		}
+	});
+}
+
+function newFile(modelID, field) {
+	$.ajax({
+		url : 'api/files',
+		type : 'POST',
+		data : {
+			content : getImageText()
+		},
+		success : function (html) {
+			var fileID = JSON.parse(html).id;
+			$.ajax({
+				url : 'api/model/' + modelID + "/" + field,
+				type : 'PUT',
+				data : field + "=" + fileID,
+				success : function (html) {
+				}
+			});
 		}
 	});
 }
 
 //Loading 12 more models from the api
-function getMoreModels() {
+function getMoreModels(galleryURL) {
 	var offset = window.sessionStorage.getItem("noOfItems");
 	$('div#loadmoreajaxloader').show();
 	$.ajax({
-		url : "api/models/publicRead?limit=12&offset=" + offset,
+		url : galleryURL + "?limit=12&offset=" + offset,
 		success : function (html) {
 			if (html) {
 				$("#postswrapper").append(convertJSONinHTML(html));
@@ -49,11 +69,11 @@ function convertJSONinHTML(html) {
 	var returnVal = "";
 	if (myObjects == null || myObjects.length == 0) {
 		window.sessionStorage.setItem("LoadMoreModels", "false");
-		console.log("No more public Models to load.");
+		console.log("No more Models to load.");
 		returnVal = '<div class="col-md-11 col-lg-11 col-sm-11"><center><h3>No more Models</h3></center><br></div>';
 	} else {
-		var noOfModels = window.sessionStorage.getItem("noOfItems");
-		console.log("Loaded " + myObjects.length + " public Models.");
+		var noOfModels = parseInt(window.sessionStorage.getItem("noOfItems"));
+		console.log("Loaded " + myObjects.length + " Models.");
 		for (var i = 0; i < myObjects.length; i++) {
 			returnVal += '<div class="col-xs-6 col-sm-6 col-md-4 col-lg-3"><div class="thumbnail"><a href="model?id=';
 			returnVal += myObjects[i]._id;
@@ -63,22 +83,38 @@ function convertJSONinHTML(html) {
 			returnVal += myObjects[i].name;
 			returnVal += '</h3><p>created by ';
 			returnVal += myObjects[i].creator;
-			returnVal += ' on ';
-			returnVal += myObjects[i].creationDate;
+			returnVal += ' <br>on ';
+			returnVal += printDate(myObjects[i].creationDate);
 			returnVal += '</p><a class="btn btn-default" href="model?id=';
 			returnVal += myObjects[i]._id;
 			returnVal += '" role="button">View details &raquo;</a></p></div></div></div>';
-			noOfModels += 1;
+			noOfModels = parseInt(noOfModels)+ 1;
 		}
 		window.sessionStorage.setItem("noOfItems", noOfModels);
 	}
 	return returnVal;
 }
 
+//Date to nice string
+function printDate(newdate) {
+	var temp = new Date(newdate);
+	var dateStr =
+		padStr(temp.getDate()) + "." +
+		padStr(1 + temp.getMonth()) + "." +
+		padStr(temp.getFullYear()) + " " +
+		padStr(temp.getHours()) + ":" +
+		padStr(temp.getMinutes());
+	return dateStr;
+}
+
+function padStr(i) {
+	return (i < 10) ? "0" + i : "" + i;
+}
+
 //Event listening to the scrolling to load more models (endless scrolling)
 $(window).scroll(function () {
 	if (($(window).scrollTop() == $(document).height() - $(window).height()) && window.sessionStorage.getItem("LoadMoreModels") == "true") {
-		getMoreModels();
+		getMoreModels(galleryURL);
 	}
 });
 

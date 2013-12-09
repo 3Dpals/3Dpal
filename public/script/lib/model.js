@@ -4,55 +4,96 @@ var id = GetURLParameter('id');
 //Load all comments
 window.sessionStorage.setItem("LoadMoreComments", "true");
 window.sessionStorage.setItem("noOfItems", 0);
+getModelProperties();
 getMoreComments();
 
 //get model properties
-$('div#loadmoreajaxloader').show();
-$.ajax({
-	url : "api/model/" + id,
-	success : function (html) {
-		if (html) {
-			var myObjects = JSON.parse(html);
-			$("#name").html(myObjects.name);
-			$("#createdOn").html(myObjects.creationDate);
-			$("#createdBy").html(myObjects.creator);
-			$("#editName").attr('value', myObjects.name);
-			$("#editReadPublic").prop('checked', myObjects.publicRead);
-			$("#editWritePublic").prop('checked', myObjects.publicWrite);
-			$("#showReadPublic").html( (myObjects.publicRead) ? "yes" : "no" );
-			$("#showWritePublic").html( (myObjects.publicWrite) ? "yes" : "no");
-			$("#showReadAccess").html(myObjects.readers);
-			$("#showWriteAccess").html(myObjects.writers);
-			var returnVal = new Array();
-			for(var i=0; i<myObjects.readers.length; i++){
-				var user = new Object();
-				user.username= myObjects.readers[i];
-				returnVal.push(user);
+function getModelProperties() {
+	$('div#loadmoreajaxloader').show();
+	$.ajax({
+		url : "api/model/" + id,
+		success : function (html) {
+			if (html) {
+				var myObjects = JSON.parse(html);
+				$("#thumbnail").attr('src', "thumbnail/" + myObjects.thumbnail + ".png");
+				$("#name").html(myObjects.name);
+				$("#createdOn").html(printDate(myObjects.creationDate));
+				$("#createdBy").html(myObjects.creator);
+				$("#editName").attr('value', myObjects.name);
+				$("#editReadPublic").prop('checked', myObjects.publicRead);
+				$("#editWritePublic").prop('checked', myObjects.publicWrite);
+				$("#showReadPublic").html((myObjects.publicRead) ? "yes" : "no");
+				$("#showWritePublic").html((myObjects.publicWrite) ? "yes" : "no");
+				getAccessUsers(myObjects);
+				$("#editName").data("oldVal", myObjects.name);
+				$("#editReadPublic").data("oldVal", myObjects.publicRead);
+				$("#editWritePublic").data("oldVal", myObjects.publicWrite);
+				$('div#loadmoreajaxloader').hide();
+			} else {
+				$('div#loadmoreajaxloader').html('<center>Error.</center>');
 			}
-			
-			
-			window.sessionStorage.setItem("prepopulate", JSON.stringify(returnVal));
-			$('div#loadmoreajaxloader').hide();
-		} else {
-			$('div#loadmoreajaxloader').html('<center>Error.</center>');
 		}
+	});
+}
+
+function arrayObjectIndexOf(on, value) {
+	for (var i = 0, len = on.length; i < len; i++) {
+		if (on[i] == value)
+			return i;
 	}
-});
+	return -1;
+}
+
+function getAccessUsers(myObjects) {
+	readerList = myObjects.readers;
+	writerList = myObjects.writers;
+	var returnVal = new Array();
+	for (var i = 0; i < readerList.length; i++) {
+		var user = new Object();
+		user.username = readerList[i];
+		returnVal.push(user);
+	}
+	window.sessionStorage.setItem("prepopulateRead", JSON.stringify(returnVal));
+	var returnVal = new Array();
+	for (var i = 0; i < writerList.length; i++) {
+		var user = new Object();
+		user.username = writerList[i];
+		returnVal.push(user);
+	}
+	window.sessionStorage.setItem("prepopulateWrite", JSON.stringify(returnVal));
+	$("#showReadAccess").html(readerList);
+	$("#showWriteAccess").html(writerList);
+}
 
 
-function edit(){
+//Date to nice string
+function printDate(newdate) {
+	var temp = new Date(newdate);
+	var dateStr =
+		padStr(temp.getDate()) + "." +
+		padStr(1 + temp.getMonth()) + "." +
+		padStr(temp.getFullYear()) + " " +
+		padStr(temp.getHours()) + ":" +
+		padStr(temp.getMinutes());
+	return dateStr;
+}
+
+function padStr(i) {
+	return (i < 10) ? "0" + i : "" + i;
+}
+
+function edit() {
 	$('.formEdit').show();
 	$('.formShow').hide();
 	return false;
 }
 
-function save(){
+function save() {
+	saveModel();
 	$('.formEdit').hide();
 	$('.formShow').show();
 	return false;
 }
-
-
 
 //get URL parameter
 function GetURLParameter(sParam) {
@@ -93,8 +134,8 @@ function saveNewComment() {
 				$('div#CommentReturnstatus').append('<div class="alert alert-danger alert-dismissable"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> Problem occured(' + html.status + ').</div>');
 			}
 		},
-		error : function (jqXHR,  textStatus,  errorThrown ){
-				$('div#CommentReturnstatus').append('<div class="alert alert-danger alert-dismissable"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> Server Error(' + textStatus + ', +' +  errorThrown + ').</div>');
+		error : function (jqXHR, textStatus, errorThrown) {
+			$('div#CommentReturnstatus').append('<div class="alert alert-danger alert-dismissable"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> Server Error(' + textStatus + ', +' + errorThrown + ').</div>');
 		}
 	});
 }
@@ -165,3 +206,129 @@ jQuery(document).ready(function () {
 		return false;
 	})
 });
+
+//Typeahead
+
+$(document).ready(function () {
+	$(".usertypeaheadRead").tokenInput("api/users", {
+		propertyToSearch : "username",
+		minChars : 1,
+		prePopulate : JSON.parse(window.sessionStorage.getItem("prepopulateRead")),
+		jsonContainer : "users",
+		resultsFormatter : function (item) {
+			return "<li>" + "<img src='http://www.gravatar.com/avatar/" + md5(item.email) + "' title='" + item.username + "' height='25px' width='25px' />" + "<div style='display: inline-block; padding-left: 10px;'><div class='full_name'>" + item.username + "</div><div class='email'>" + item.email + "</div></div></li>"
+		},
+		onAdd : function (item) {
+			saveModelAccess("readers", item);
+		},
+		onDelete : function (item) {
+			removeModelAccess("readers", item);
+		}
+
+	});
+	$(".usertypeaheadWrite").tokenInput("api/users", {
+		propertyToSearch : "username",
+		minChars : 1,
+		prePopulate : JSON.parse(window.sessionStorage.getItem("prepopulateWrite")),
+		jsonContainer : "users",
+		resultsFormatter : function (item) {
+			return "<li>" + "<img src='http://www.gravatar.com/avatar/" + md5(item.email) + "' title='" + item.username + "' height='25px' width='25px' />" + "<div style='display: inline-block; padding-left: 10px;'><div class='full_name'>" + item.username + "</div><div class='email'>" + item.email + "</div></div></li>"
+		},
+		onAdd : function (item) {
+			saveModelAccess("writers", item);
+		},
+		onDelete : function (item) {
+			removeModelAccess("writers", item);
+		}
+
+	});
+});
+
+//Save the existing model
+function saveModel() {
+
+	if ($("#editName").data("oldVal") != $("#editName").val()) {
+		saveModelProperty("name", $("#editName").val())
+	}
+	if ($("#editReadPublic").data("oldVal") != $("#editReadPublic").prop('checked')) {
+		saveModelProperty("publicRead", $("#editReadPublic").prop('checked'))
+	}
+	if ($("#editWritePublic").data("oldVal") != $("#editWritePublic").prop('checked')) {
+		saveModelProperty("publicWrite", $("#editWritePublic").prop('checked'))
+	}
+	//TODO: Reload current values in the doc, do not load it external via api.
+	getModelProperties();
+}
+
+function saveModelProperty(propertyName, value) {
+	$.ajax({
+		url : 'api/model/' + id + "/" + propertyName,
+		type : 'PUT',
+		data : propertyName + "=" + value,
+		success : function (html) {
+			var status = JSON.parse(html).status;
+			if (status == "ok") {
+				console.log(propertyName + ": changed");
+			} else {
+				console.log(propertyName + ": change, Error:" + html);
+			}
+		}
+
+	});
+}
+
+function saveModelAccess(propertyName, newItem) {
+	var rightToWrite = (propertyName == "readers") ? false : true;
+	$.ajax({
+		url : 'api/model/' + id + "/" + propertyName,
+		type : 'POST',
+		data : {
+			username : newItem.username,
+			rightToWrite : true
+		},
+		success : function (html) {
+			var status = JSON.parse(html).status;
+			if (status == "ok") {
+				console.log(propertyName + ": changed");
+			} else {
+				console.log(propertyName + ": change, Error:" + html);
+			}
+		}
+
+	});
+
+}
+function removeModelAccess(propertyName, newItem) {
+	$.ajax({
+		url : 'api/model/' + id + "/" + propertyName + "/" + newItem.username,
+		type : 'DELETE',
+		success : function (html) {
+			var status = JSON.parse(html).status;
+			if (status == "ok") {
+				console.log(propertyName + ": deleted");
+			} else {
+				console.log(propertyName + ": delete, Error:" + html);
+			}
+		}
+
+	});
+
+}
+
+function deleteModel() {
+	$.ajax({
+		url : 'api/model/' + id,
+		type : 'DELETE',
+		success : function (html) {
+			var status = JSON.parse(html).status;
+			if (status == "ok") {
+				console.log("Model: deleted");
+				$(location).attr('href', "mymodels");
+			} else {
+				console.log("Model: delete, Error:" + html);
+			}
+		}
+
+	});
+	return false;
+}

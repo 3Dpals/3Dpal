@@ -4,8 +4,9 @@
 	<h2>Welcome!</h2>
 	<form class="well form-vertical">
 		<p>
-		<span id="errorMsg"></span><br />
+		<div id="errorMsg"></div><br />
 		<input type="text" class="input-medium" name="username" id="username" required="required" placeholder="Username"/></span><br />
+		<input type="email" class="input-medium" name="email" id="email" required="required" placeholder="Email"/></span><br />
 		<input type="password" class="input-medium" name="password" id="password" required="required" placeholder="Password"/></span><br />
 		<input type="password" class="input-medium" name="password2" id="password2" required="required" placeholder="Password Confirmation"/><br />
 		<button type="submit" class="btn btn-primary">Sign</button>
@@ -24,46 +25,40 @@
 		var username = $('#username').val();
 		var password = $('#password').val();
 		var password2 = $('#password2').val();
-		
+		var email = $('#email').val();
 		if (!username) {
-			$('#errorMsg').text('Empty Username!');
+		$('#errorMsg').append('<div class="alert alert-danger alert-dismissable"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Warning!</strong> Empty Username!</div>');
 			return;
 		}
 		if (!password) {
-			$('#errorMsg').text('Empty Password!');
+			$('#errorMsg').append('<div class="alert alert-danger alert-dismissable"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Warning!</strong> Empty Password!</div>');
 			return;
 		}
 		if (!password2) {
-			$('#errorMsg').text('Empty Confirmation!');
+			$('#errorMsg').append('<div class="alert alert-danger alert-dismissable"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Warning!</strong> Empty Confirmation!</div>');
 			return;
 		}
 		if (password != password2) {
-			$('#errorMsg').text('Passwords don\'t match!');
+			$('#errorMsg').append('<div class="alert alert-danger alert-dismissable"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Warning!</strong> Passwords don\'t match!</div>');
+			return;
+		}
+		if (!email) {
+			$('#errorMsg').append('<div class="alert alert-danger alert-dismissable"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Warning!</strong> Empty Email!</div>');
 			return;
 		}
 		
-		$('#userCreation').append('<div class="modalDialog"><p>Processing...</p></div>');
-		$('.modalDialog').css('opacity', 1);
-		
 		$.ajax({
 			type: 'POST',
-			url: rest+'/createUser',
-			data: {username: username, password: password},
+			url: 'api/users',
+			data: {username: username, password: password, email:email },
 			success: function(data) {
-				if (data.success) {
-					$('.modalDialog > p').text('Success! Welcome aboard!');
-					 setTimeout(function(){window.location.href = '/login'}, 1000);
+				if (JSON.parse(data).status =="ok") {
+					setTimeout(function(){window.location.href = '/login'}, 1000);
 				}
 				else {
-					$('.modalDialog').css('opacity', 0);
-					 setTimeout(function(){$('.modalDialog').remove()}, 400);
-					 $('#errorLogin').text('Already used, sorry.');
-					 $('#username').focus();
-					 $('#username').select();
+					 $('#errorMsg').append('<div class="alert alert-danger alert-dismissable"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> Username already used, sorry.</div>');
 				}
-			},
-			dataType: 'json',
-			async:true
+			}
 		});     
 	}
 </script>

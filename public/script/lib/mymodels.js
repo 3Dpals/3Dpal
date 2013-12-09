@@ -6,7 +6,11 @@ getMoreModels();
 //create a new model and redirect to edit
 function NewModel() {
 	var curDate = new Date();
-	console.log(curDate);
+	
+	//create an empty file and put the id in the file
+	
+	// the same for the thumbnail
+	
 	$.ajax({
 		url : 'api/models',
 		type : 'POST',
@@ -19,7 +23,7 @@ function NewModel() {
 		},
 		success : function (html) {
 			var id = JSON.parse(html).id;
-			var url = "model?id="+id;    
+			var url = "model?edit=true&id="+id;    
 			$(location).attr('href',url);	
 		}
 	});
@@ -51,7 +55,7 @@ function convertJSONinHTML(html) {
 		console.log("No more Models to load.");
 		returnVal = '<div class="col-md-11 col-lg-11 col-sm-11"><center><h3>No more Models</h3></center><br></div>';
 	} else {
-		var noOfModels = window.sessionStorage.getItem("noOfItems");
+		var noOfModels = parseInt(window.sessionStorage.getItem("noOfItems"));
 		console.log("Loaded " + myObjects.length + " Models.");
 		for (var i = 0; i < myObjects.length; i++) {
 			returnVal += '<div class="col-xs-6 col-sm-6 col-md-4 col-lg-3"><div class="thumbnail"><a href="model?id=';
@@ -63,15 +67,31 @@ function convertJSONinHTML(html) {
 			returnVal += '</h3><p>created by ';
 			returnVal += myObjects[i].creator;
 			returnVal += ' <br>on ';
-			returnVal += myObjects[i].creationDate;
+			returnVal += printDate(myObjects[i].creationDate);
 			returnVal += '</p><a class="btn btn-default" href="model?id=';
 			returnVal += myObjects[i]._id;
 			returnVal += '" role="button">View details &raquo;</a></p></div></div></div>';
-			noOfModels += 1;
+			noOfModels = parseInt(noOfModels)+ 1;
 		}
 		window.sessionStorage.setItem("noOfItems", noOfModels);
 	}
 	return returnVal;
+}
+
+//Date to nice string
+function printDate(newdate) {
+    var temp = new Date(newdate);
+    var dateStr = 
+                  padStr(temp.getDate()) + "."+
+                  padStr(1 + temp.getMonth()) + "."+
+				  padStr(temp.getFullYear()) + " "+
+                  padStr(temp.getHours()) + ":"+
+                  padStr(temp.getMinutes());
+    return dateStr ;
+}
+
+function padStr(i) {
+    return (i < 10) ? "0" + i : "" + i;
 }
 
 //Event listening to the scrolling to load more models (endless scrolling)

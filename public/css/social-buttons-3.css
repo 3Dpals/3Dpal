@@ -9,8 +9,10 @@
 .btn-facebook {
   color: #ffffff;
   background-color: #133783;
+  background-image: url("../image/facebook.png");
+  background-repeat:no-repeat;
   border-color: #133783;
-  width: 200px !important;
+  width: 220px !important;
   margin-top: 5px;
 }
 
@@ -50,53 +52,14 @@ fieldset[disabled] .btn-facebook.active {
 }
 
 
-.btn-github {
-  color: #000000;
-  background-color: #fafafa;
-  border-color: #cccccc;
-}
-
-.btn-github:hover,
-.btn-github:focus,
-.btn-github:active,
-.btn-github.active,
-.open .dropdown-toggle.btn-github {
-  color: #000000;
-  background-color: #e6e6e6;
-  border-color: #adadad;
-}
-
-.btn-github:active,
-.btn-github.active,
-.open .dropdown-toggle.btn-github {
-  background-image: none;
-}
-
-.btn-github.disabled,
-.btn-github[disabled],
-fieldset[disabled] .btn-github,
-.btn-github.disabled:hover,
-.btn-github[disabled]:hover,
-fieldset[disabled] .btn-github:hover,
-.btn-github.disabled:focus,
-.btn-github[disabled]:focus,
-fieldset[disabled] .btn-github:focus,
-.btn-github.disabled:active,
-.btn-github[disabled]:active,
-fieldset[disabled] .btn-github:active,
-.btn-github.disabled.active,
-.btn-github[disabled].active,
-fieldset[disabled] .btn-github.active {
-  background-color: #fafafa;
-  border-color: #cccccc;
-}
-
 .btn-google-plus {
   color: #ffffff;
   background-color: #dd4b39;
   border-color: #c53727;
-  width: 200px !important;
+  width: 220px !important;
   margin-top: 5px;
+  background-image: url("../image/googleplus.png");
+  background-repeat:no-repeat;
   }
 
 .btn-google-plus:hover,
@@ -139,8 +102,10 @@ fieldset[disabled] .btn-google-plus.active {
   color: #ffffff;
   background-color: #FF6200;
   border-color: #FF6200;
-  width: 200px !important;
+  width: 220px !important;
   margin-top: 5px;
+  background-image: url("../image/openid.png");
+  background-repeat: no-repeat;
 }
 
 .btn-openID:hover,
