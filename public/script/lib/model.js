@@ -1,4 +1,5 @@
 //init
+initUsernameCache()
 var id = GetURLParameter('id');
 
 //Load all comments
@@ -18,16 +19,23 @@ function getModelProperties() {
 				$("#thumbnail").attr('src', "thumbnail/" + myObjects.thumbnail + ".png");
 				$("#name").html(myObjects.name);
 				$("#createdOn").html(printDate(myObjects.creationDate));
-				$("#createdBy").html(myObjects.creator);
+				$("#createdBy").html(getUsername(myObjects.creator)) ;
 				$("#editName").attr('value', myObjects.name);
 				$("#editReadPublic").prop('checked', myObjects.publicRead);
 				$("#editWritePublic").prop('checked', myObjects.publicWrite);
 				$("#showReadPublic").html((myObjects.publicRead) ? "yes" : "no");
 				$("#showWritePublic").html((myObjects.publicWrite) ? "yes" : "no");
-				getAccessUsers(myObjects);
+				var accessLevel = getAccessUsers(myObjects);
 				$("#editName").data("oldVal", myObjects.name);
 				$("#editReadPublic").data("oldVal", myObjects.publicRead);
 				$("#editWritePublic").data("oldVal", myObjects.publicWrite);
+				if (accessLevel>=3){
+					$("#EditProperties").show();
+				}
+				if (accessLevel>=2){
+					$("#EditFile").show();
+				}
+				
 				$('div#loadmoreajaxloader').hide();
 			} else {
 				$('div#loadmoreajaxloader').html('<center>Error.</center>');
@@ -36,33 +44,39 @@ function getModelProperties() {
 	});
 }
 
-function arrayObjectIndexOf(on, value) {
-	for (var i = 0, len = on.length; i < len; i++) {
-		if (on[i] == value)
-			return i;
-	}
-	return -1;
-}
-
 function getAccessUsers(myObjects) {
+	var accessLevel = 0;
 	readerList = myObjects.readers;
 	writerList = myObjects.writers;
 	var returnVal = new Array();
+	var returnString = "";
 	for (var i = 0; i < readerList.length; i++) {
 		var user = new Object();
-		user.username = readerList[i];
+		user.id = readerList[i];
+		user.username = getUsername(readerList[i]);
+		returnString +=getUsername(readerList[i]) + "<br>";
 		returnVal.push(user);
+		if(readerList[i]==userId) accessLevel = 1;
 	}
 	window.sessionStorage.setItem("prepopulateRead", JSON.stringify(returnVal));
+	$("#showReadAccess").html(returnString);
+	
 	var returnVal = new Array();
+	var returnString = "";
 	for (var i = 0; i < writerList.length; i++) {
 		var user = new Object();
-		user.username = writerList[i];
+		user.id = writerList[i];
+		user.username = getUsername(writerList[i]);
+		returnString +=getUsername(writerList[i]) + "<br>";
 		returnVal.push(user);
+		if(writerList[i]==userId) accessLevel = 2;
 	}
 	window.sessionStorage.setItem("prepopulateWrite", JSON.stringify(returnVal));
-	$("#showReadAccess").html(readerList);
-	$("#showWriteAccess").html(writerList);
+	$("#showWriteAccess").html(returnString);
+	addTypeahead();
+	if(myObjects.publicWrite) accessLevel = 2 ;
+	if(myObjects.creator==userId)accessLevel = 3;
+	return accessLevel;
 }
 
 
@@ -128,10 +142,10 @@ function saveNewComment() {
 		success : function (html) {
 			if (html) {
 				$('div#NoMoreComments').remove();
-				$('div#CommentReturnstatus').append('<div class="alert alert-success alert-dismissable"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> Comment saved (' + html.status + ').</div>');
+				$('div#CommentReturnstatus').append('<div class="alert alert-success alert-dismissable"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> Comment saved (' + JSON.parse(html).status + ').</div>');
 				getMoreComments();
 			} else {
-				$('div#CommentReturnstatus').append('<div class="alert alert-danger alert-dismissable"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> Problem occured(' + html.status + ').</div>');
+				$('div#CommentReturnstatus').append('<div class="alert alert-danger alert-dismissable"> <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> Problem occured(' + JSON.parse(html).status + ').</div>');
 			}
 		},
 		error : function (jqXHR, textStatus, errorThrown) {
@@ -141,22 +155,22 @@ function saveNewComment() {
 }
 //convert JSON to html
 function convertJSONinHTML(html) {
-	var myObjects = JSON.parse(html).objects;
+	var myObjects = JSON.parse(html).comments;
 	var returnVal = "";
 	if (myObjects == null || myObjects.length == 0) {
 		window.sessionStorage.setItem("LoadMoreComments", "false");
 		returnVal = '<div class="col-md-11 col-lg-11 col-sm-11" id="NoMoreComments"><center><h3>No more comments</h3></center><br></div>';
 	} else {
-		var noOfComments = window.sessionStorage.getItem("noOfItems");
+		var noOfComments = parseInt(window.sessionStorage.getItem("noOfItems"));
 		for (var i = 0; i < myObjects.length; i++) {
 			returnVal += '<div class="panel panel-default"><div class="panel-heading"><h3 class="panel-title"><strong>';
 			returnVal += myObjects[i].author;
 			returnVal += '</strong> (';
-			returnVal += myObjects[i].postedDate;
+			returnVal += printDate(myObjects[i].postedDate);
 			returnVal += ')</h3></div><div class="panel-body">';
 			returnVal += myObjects[i].text;
 			returnVal += '</div></div>';
-			noOfComments += 1;
+			noOfComments = parseInt(noOfComments)+ 1;
 		}
 		window.sessionStorage.setItem("noOfItems", noOfComments);
 	}
@@ -208,8 +222,7 @@ jQuery(document).ready(function () {
 });
 
 //Typeahead
-
-$(document).ready(function () {
+function addTypeahead(){
 	$(".usertypeaheadRead").tokenInput("api/users", {
 		propertyToSearch : "username",
 		minChars : 1,
@@ -222,7 +235,7 @@ $(document).ready(function () {
 			saveModelAccess("readers", item);
 		},
 		onDelete : function (item) {
-			removeModelAccess("readers", item);
+			removeModelAccess("reader", item);
 		}
 
 	});
@@ -238,11 +251,11 @@ $(document).ready(function () {
 			saveModelAccess("writers", item);
 		},
 		onDelete : function (item) {
-			removeModelAccess("writers", item);
+			removeModelAccess("writer", item);
 		}
 
 	});
-});
+}
 
 //Save the existing model
 function saveModel() {
@@ -283,7 +296,7 @@ function saveModelAccess(propertyName, newItem) {
 		url : 'api/model/' + id + "/" + propertyName,
 		type : 'POST',
 		data : {
-			username : newItem.username,
+			userId : newItem._id,
 			rightToWrite : true
 		},
 		success : function (html) {
@@ -300,7 +313,7 @@ function saveModelAccess(propertyName, newItem) {
 }
 function removeModelAccess(propertyName, newItem) {
 	$.ajax({
-		url : 'api/model/' + id + "/" + propertyName + "/" + newItem.username,
+		url : 'api/model/' + id + "/" + propertyName + "/" + newItem.id,
 		type : 'DELETE',
 		success : function (html) {
 			var status = JSON.parse(html).status;
@@ -332,3 +345,29 @@ function deleteModel() {
 	});
 	return false;
 }
+
+
+function getUsername(id){
+	var cached = window.sessionStorage.getItem("User"+id);
+	return cached;
+}
+
+function initUsernameCache(){
+	var cached = window.sessionStorage.getItem("User"+userId);
+	if (cached == null){
+	$.ajax({
+			url : "api/users",
+			success : function (html) {
+				var users = JSON.parse(html).users;
+				for(var i=0; i<users.length; i++) {
+					window.sessionStorage.setItem("User"+users[i]._id, users[i].username);
+				}
+				console.log("user cached");
+			}
+		});
+	}else{
+	console.log("user already cached");
+	}
+}
+
+

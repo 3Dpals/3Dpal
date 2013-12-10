@@ -295,8 +295,6 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	function serviceGetUser(req, resp) {
 		logger.info("<Service> GetUser.");
 		var getData = parseRequest(req, ['userId']);
-		logger.debug("<Service> Get User: "+ getData.userId);
-
 		writeHeaders(resp);
 		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
 			if (permOk) {
@@ -1189,7 +1187,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 *	- cb (Function(err, Model[])):	Callback
 	 */ 
 	function updateModel(id, name, file, creator, creationDate, thumbnail, tags, cb) {
-		modelModel.findByIdAndUpdate(_id, {name: name, file: file, creator: creator,  creationDate: creationDate,  thumbnail: thumbnail,  tags: tags}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+		modelModel.findByIdAndUpdate(id, {name: name, file: file, creator: creator,  creationDate: creationDate,  thumbnail: thumbnail,  tags: tags}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 			if (err) { logger.error(err); return cb(err, raw); }
 			else { return cb(err, 'ok'); }
 		});	
@@ -1224,7 +1222,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 *	- cb (Function(err, User[])):	Callback
 	 */ 
 	function updateModelName(id, name, cb) {
-			modelModel.findByIdAndUpdate(_id, {name: name}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+			modelModel.findByIdAndUpdate(id, {name: name}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
 					else { return cb(err, 'ok'); }
 			});
@@ -1258,7 +1256,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 *	- cb (Function(err, User[])):	Callback
 	 */ 
 	function updateModelFile(id, name, cb) {
-			modelModel.findByIdAndUpdate(_id, {file: file}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+			modelModel.findByIdAndUpdate(id, {file: file}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
 					else { return cb(err, 'ok'); }
 			});
@@ -1292,7 +1290,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 *	- cb (Function(err, User[])):	Callback
 	 */ 
 	function updateModelCreator(id, name, cb) {
-			modelModel.findByIdAndUpdate(_id, {creator: creator}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+			modelModel.findByIdAndUpdate(id, {creator: creator}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
 					else { return cb(err, 'ok'); }
 			});
@@ -1326,7 +1324,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 *	- cb (Function(err, User[])):	Callback
 	 */ 
 	function updateModelCreationDate(id, name, cb) {
-			modelModel.findByIdAndUpdate(_id, {creationDate: creationDate}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+			modelModel.findByIdAndUpdate(id, {creationDate: creationDate}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
 					else { return cb(err, 'ok'); }
 			});
@@ -1360,7 +1358,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 *	- cb (Function(err, User[])):	Callback
 	 */ 
 	function updateModelThumbnail(id, name, cb) {
-			modelModel.findByIdAndUpdate(_id, {thumbnail: thumbnail}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+			modelModel.findByIdAndUpdate(id, {thumbnail: thumbnail}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
 					else { return cb(err, 'ok'); }
 			});
@@ -1394,7 +1392,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 *	- cb (Function(err, User[])):	Callback
 	 */ 
 	function updateModelTags(id, name, cb) {
-			modelModel.findByIdAndUpdate(_id, {tags: tags}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+			modelModel.findByIdAndUpdate(id, {tags: tags}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
 					else { return cb(err, 'ok'); }
 			});
@@ -2123,7 +2121,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 *	- cb (Function(err, User[])):	Callback
 	 */ 
 	function updateModelPublicRead(id, flag, cb) {
-			modelModel.findByIdAndUpdate(_id, {publicRead: flag}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+			modelModel.findByIdAndUpdate(id, {publicRead: flag}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
 					else { return cb(err, 'ok'); }
 			});
@@ -2157,7 +2155,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 *	- cb (Function(err, User[])):	Callback
 	 */ 
 	function updateModelPublicWrite(id, flag, cb) {
-			modelModel.findByIdAndUpdate(_id, {publicWrite: flag}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+			modelModel.findByIdAndUpdate(id, {publicWrite: flag}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
 					else { return cb(err, 'ok'); }
 			});
@@ -2201,7 +2199,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 *	- cb (Function(bool)):		Callback
 	 */
 	function createComment(modelId, author, text, postedDate, parentId, cb) {
-		if (!postedDate) { postedDate = new Date(); }
+		if (!postedDate || typeof postedDate.toISOString != 'function') { postedDate = new Date(postedDate); }
 		var slug = author+postedDate.toISOString();
 		if (parentId) {
 			modelComment.findById(parentId).exec(function(err, parentCom) {
@@ -2508,7 +2506,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 *	- cb (Function(err, User[])):	Callback
 	 */ 
 	function updateCommentText(id, name, cb) {
-			modelComment.findByIdAndUpdate(_id, {text: text}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+			modelComment.findByIdAndUpdate(id, {text: text}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
 					else { return cb(err, 'ok'); }
 			});
@@ -2604,7 +2602,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		writeHeaders(resp);
 		getUserComments(getData.userId, function (err, objects) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({models: objects})); 
+			else resp.end(JSON.stringify({comments: objects})); 
 		});
 	}
 
@@ -2623,8 +2621,14 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 *	- modelId (String): 			Model's ID
 	 *	- cb (Function(err, Model[])):	Callback
 	 */
-	function getModelComments(modelId, cb) {
-		modelComment.find({modelId: modelId}, {__v:0}).lean().exec(cb);
+	function getModelComments(modelId, limit, offset, cb) {
+		if (!offset) offset = 0;
+		if (limit) {
+			modelComment.find({modelId: modelId}, {__v:0}).skip(offset).limit(limit).lean().exec(cb);
+		}
+		else {
+			modelComment.find({modelId: modelId}, {__v:0}).skip(offset).lean().exec(cb);
+		}
 	}
 	/**
 	 * serviceGetModelComments
@@ -2633,15 +2637,17 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 * 		- modelId (string)		modelId
 	 * Request Parameters:
 	 *		-none
+	 *	- limit (int): 					Number max of comments to return
+	 *	- offset (int): 				Number of the comments to start with
 	 */
 	function serviceGetModelComments(req, resp) {
 		logger.info("<Service> GetModelComments.");
-		var getData = parseRequest(req, ['modelId']);
-		
+		var getData = parseRequest(req, ['modelId','limit', 'offset']);
+
 		writeHeaders(resp);
-		getModelComments(getData.modelId, function (err, objects) {
+		getModelComments(getData.modelId, getData.limit, getData.offset, function (err, objects) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({models: objects})); 
+			else resp.end(JSON.stringify({comments: objects})); 
 		});
 	}
 		
@@ -2718,9 +2724,9 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['limit', 'offset']);
 		
 		writeHeaders(resp);
-		getFiles(getData.limit, getData.offset, function (err, users) {
+		getFiles(getData.limit, getData.offset, function (err, files) {
 			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ files: users })); 
+			else resp.end(JSON.stringify({ files: files })); 
 		});
 	}
  	
@@ -2801,7 +2807,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 *	- cb (Function(err, User[])):	Callback
 	 */ 
 	function updateFileContent(id, name, cb) {
-			modelFile.findByIdAndUpdate(_id, {content: content}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
+			modelFile.findByIdAndUpdate(id, {content: content}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
 					else { return cb(err, 'ok'); }
 			});

@@ -66,7 +66,7 @@ html.configure(function() {
 	html.use(express.bodyParser());
 	html.use(express.methodOverride());
 	html.use( express.cookieParser() );
-	html.use(express.session({ secret: config.getProperty("session.secret"), cookie: { maxAge: 60000 } }));
+	html.use(express.session({ secret: config.getProperty("session.secret"), cookie: { maxAge: 600000 } }));//changed from 1 min to 10 min.
 	html.use(flash());
 	html.use(passport.initialize());
 	html.use(passport.session());
