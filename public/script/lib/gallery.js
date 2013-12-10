@@ -12,7 +12,7 @@ function NewModel() {
 		data : {
 			name : "New Model",
 			file : "undefined",
-			creator : username,
+			creator : userId,
 			creationDate : curDate,
 			thumbnail : "undefined"
 		},

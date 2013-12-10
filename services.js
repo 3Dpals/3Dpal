@@ -295,7 +295,8 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	function serviceGetUser(req, resp) {
 		logger.info("<Service> GetUser.");
 		var getData = parseRequest(req, ['userId']);
-		
+		logger.debug("<Service> Get User: "+ getData.userId);
+
 		writeHeaders(resp);
 		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
 			if (permOk) {

@@ -14,7 +14,7 @@ var logger = require("./logger");
  */
 function viewIndex(req, res) {
 	logger.debug("<View> Viewing index (User "+req.user.username+").");
-	res.render('index', {title: "Main", username: req.user.username, userId: req.user.userId});
+	res.render('index', {title: "Main", username: req.user.username, userId: req.user.id});
 }
 
 /*
@@ -22,7 +22,7 @@ function viewIndex(req, res) {
  */
 function viewSignin(req, res) {
 	logger.debug("<View> Viewing signin.");
-	res.render('signin', {title: "Sign-In", username: (req.user? req.user.username: ''), userId: (req.user? req.user.userId: '')});
+	res.render('signin', {title: "Sign-In", username: (req.user? req.user.username: ''), userId: (req.user? req.user.id: '')});
 }
 
 
@@ -32,7 +32,7 @@ function viewSignin(req, res) {
 function viewLogin(req, res) {
 	next = req.param("next", null);
 	logger.info("<View> Viewing login page.");
-	res.render('login', {title: "Login", next: next, error: null, username: (req.user? req.user.username: ''), userId: (req.user? req.user.userId: '')});
+	res.render('login', {title: "Login", next: next, error: null, username: (req.user? req.user.username: ''), userId: (req.user? req.user.id: '')});
 }
 
 /*
@@ -41,7 +41,7 @@ function viewLogin(req, res) {
 function viewOpenID(req, res) {
 	next = req.param("next", null);
 	logger.info("<View> Viewing OpenID login page.");
-	res.render('openid', {title: "OpenID Authentification", next: next, error: null, username: (req.user? req.user.username: ''), userId: (req.user? req.user.userId: '')});
+	res.render('openid', {title: "OpenID Authentification", next: next, error: null, username: (req.user? req.user.username: ''), userId: (req.user? req.user.id: '')});
 }
 
 /*
@@ -50,7 +50,7 @@ function viewOpenID(req, res) {
 function viewApi(req, res) {
 	next = req.param("next", null);
 	logger.info("<View> Viewing API");
-	res.render('api', {title: "API", username: (req.user? req.user.username: ''), userId: (req.user? req.user.userId: '')});
+	res.render('api', {title: "API", username: (req.user? req.user.username: ''), userId: (req.user? req.user.id: '')});
 }
 
 function dateToString(date) {
@@ -77,12 +77,12 @@ function twoDigits(nb) {
 
 function viewNotfound(req, res) {
 	logger.warn("<View> View not found : " + req.url);
-	res.render('404', {title: "Page not found", username: (req.user? req.user.username: ''), userId: (req.user? req.user.userId: '')});
+	res.render('404', {title: "Page not found", username: (req.user? req.user.username: ''), userId: (req.user? req.user.id: '')});
 }
 
 function viewHelp(req, res) {
 	logger.info("<View> Viewing help page.");
-	res.render('help', {title: "Help", username: (req.user? req.user.username: ''), userId: (req.user? req.user.userId: '')});
+	res.render('help', {title: "Help", username: (req.user? req.user.username: ''), userId: (req.user? req.user.id: '')});
 }
 
 /*
@@ -90,7 +90,7 @@ function viewHelp(req, res) {
  */
 function viewGallery(req, res) {
 	logger.info("<View> Viewing gallery.");
-	res.render('gallery', {title: "Gallery", username: (req.user? req.user.username: ''), userId: (req.user? req.user.userId: '')});
+	res.render('gallery', {title: "Gallery", username: (req.user? req.user.username: ''), userId: (req.user? req.user.id: '')});
 }
 
 /*
@@ -98,7 +98,7 @@ function viewGallery(req, res) {
  */
 function viewMyModels(req, res) {
 	logger.info("<View> Viewing My Models.");
-	res.render('mymodels', {title: "My Models", username: (req.user? req.user.username: ''), userId: (req.user? req.user.userId: '')});
+	res.render('mymodels', {title: "My Models", username: (req.user? req.user.username: ''), userId: (req.user? req.user.id: '')});
 }
 
 /*
@@ -106,7 +106,7 @@ function viewMyModels(req, res) {
  */
 function viewProfile(req, res) {
 	logger.info("<View> Viewing User Profile.");
-	res.render('profile', {title: "Profile", username: (req.user? req.user.username: ''), userId: (req.user? req.user.userId: '')});
+	res.render('profile', {title: "Profile", username: (req.user? req.user.username: ''), userId: (req.user? req.user.id: '')});
 }
 
 /*
@@ -114,7 +114,7 @@ function viewProfile(req, res) {
  */
 function viewModel(req, res) {
 	logger.info("<View> Viewing Model ("+req.url+")");
-	res.render('model', {title: "Model", username: (req.user? req.user.username: ''), userId: (req.user? req.user.userId: '')});
+	res.render('model', {title: "Model", username: (req.user? req.user.username: ''), userId: (req.user? req.user.id: '')});
 }
 
 exports.index = viewIndex;

@@ -1,7 +1,7 @@
 <% layout('layout') -%>
 
-<script type="text/javascript" src="script/lib/profile.js"></script>
 <script type="text/javascript" src="script/lib/md5.js"></script>
+<script type="text/javascript" src="script/lib/profile.js"></script>
 
 <section>
 <div id="returnstatus"></div>
@@ -28,7 +28,7 @@
   <div class="form-group">
     <label class="col-sm-2 control-label">API Key</label>
     <div class="col-sm-10">
-      <p class="form-control-static" id="showAPIKey"></p>
+      <p class="form-control-static" id="showAPIKey"><a onclick="getToken();">Show api key</a></p>
     </div>
   </div>
   
@@ -84,7 +84,7 @@
   <div class="form-group">
     <label class="col-sm-2 control-label">API Key</label>
     <div class="col-sm-10">
-      <p class="form-control-static" id="editAPIKey"></p>
+      <p class="form-control-static" id="editAPIKey"><a onclick="getToken();">Show api key</a></p>
     </div>
   </div>
   <div class="form-group">
