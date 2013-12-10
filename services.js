@@ -173,7 +173,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 */
 	function createUser(username, password, email, openId, facebookId, googleId, cb) {
 		var user = new modelUser({username: username, password: password, email: email, openId: openId, facebookId: facebookId, googleId: googleId, email: email});
-		user.generateToken(function(err, token){
+		user.generateToken(username, function(err, token){
 			user.token = token;
 			user.save(function(err) {
 				cb (err, 'ok');
