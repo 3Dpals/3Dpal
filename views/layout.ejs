@@ -12,17 +12,17 @@
 <meta name="description" content="Collaborative 3D Suite">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
-<link rel="stylesheet" href="css/normalize.css">
-<link rel="stylesheet" type="text/css" href="css/main.css"/>
-<link rel="stylesheet" type="text/css" href="css/screen.css"/>
-<link href="css/bootstrap.min.css" rel="stylesheet">
+<!-- Still neede? <link rel="stylesheet" href="css/normalize.css">-->
+<!-- Still neede? <link rel="stylesheet" type="text/css" href="css/main.css"/>-->
+<!-- Still neede? <link rel="stylesheet" type="text/css" href="css/screen.css"/>-->
+<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="css/social-buttons-3.css"/>
 <link rel="stylesheet" type="text/css" href="css/user.css"/>
 <script src="script/lib/modernizr-2.6.2.min.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-<script>window.jQuery || document.write('<script src="js/vendor/jquery-1.10.2.min.js"><\/script>')</script>
+<!-- Still needed? <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.10.2.min.js"><\/script>')</script>-->
+<script>var username = "<%=username%>";</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- Bootstrap -->
-
 </head>
 <body>
 <!--[if lt IE 7]>
@@ -42,54 +42,70 @@
                         <span class="icon-bar">
                         </span>
                         </button>
-                        <a class="navbar-brand" href="#">
+                        <a class="navbar-brand" href="index">
                         3Dpal</a>
                 </div>
                 <div class="navbar-collapse collapse">
                         <ul class="nav navbar-nav">
-                                <li class="active">
-                                <a href="index" class="active">
-                                Home </a>
+<% 
+var mainActive ="";
+var galleryActive="";
+var mymodelActive="";
+var profileActive="";
+var helpActive ="";
+var loginActive  ="";
+switch (title) {
+    case "Main":
+		 mainActive = 'active';  break;
+    case "Gallery":
+        galleryActive = 'active'; break;
+	case "My Models":
+        mymodelActive = 'active'; break;
+    case "Profile":
+        profileActive = 'active';  break;
+    case "Help":
+        helpActive = 'active';  break;
+	case "Login":
+		loginActive = 'active'; break;
+};
+
+ %>								
+                                <li class="<%= mainActive %>">
+                                <a href="index">
+                                Main </a>
                                 </li>
-                                <li>
+                                <li class="<%= galleryActive %>">
                                 <a href="gallery">
                                 Gallery </a>
                                 </li>
-                                <li>
-                                <a href="gallery">
+                                <li class="<%= mymodelActive %>">
+                                <a href="mymodels" >
                                 My Models </a>
                                 </li>
-                                <li>
+                                <li class="<%= profileActive %>">
                                 <a href="profile">
                                 Profile </a>
                                 </li>
-                                <li>
+                                <li class="<%= helpActive %>">
                                 <a href="help">
                                 Help </a>
                                 </li>
                         </ul>
-                        <!--<form class="navbar-form navbar-right">
-              <div class="form-group">
-                <input type="text" placeholder="Email" class="form-control">
-              </div>
-              <div class="form-group">
-                <input type="password" placeholder="Password" class="form-control">
-              </div>
-              <button type="submit" class="btn btn-success">
-                Sign in
-              </button>
-			  <a href="/signin" title="Sign in!" style="text-decoration: underline;">
-            Not a member yet? Sign in!
-          </a>
-            </form>-->
                         <ul class="nav navbar-nav navbar-right">
+							<% if (username != null && username != "" ) { %>						
                                 <li>
-                                <a href="profile">Hello Username</a>
+                                <a href="profile">Hello <%= username %></a>
                                 </li>
                                 <li>
                                 <a href="logout">
                                 Log Out </a>
                                 </li>
+							<% } else { %>
+							<li class="<%= loginActive %>">
+                                <a href="login">
+                                Log In</a>
+                                </li>
+							<% } %>
                         </ul>
                 </div>
                 <!--/.navbar-collapse -->

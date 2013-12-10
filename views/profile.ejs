@@ -1,73 +1,98 @@
 <% layout('layout') -%>
 
-<script> 
-    function edit() { 
-	   document.getElementById('ProfileEdit').className='show';
-	   document.getElementById('ProfileShow').className='hidden';         
-       return false;
-    } 
-    function save() { 
-       document.getElementById('ProfileEdit').className='hidden';
-	   document.getElementById('ProfileShow').className='show';         
-       return false;
-    }   
-</script> 
+<script type="text/javascript" src="script/lib/profile.js"></script>
+<script type="text/javascript" src="script/lib/md5.js"></script>
 
 <section>
+<div id="returnstatus"></div>
+
 <div class="col-sm-offset-2 col-sm-10">
-	<img src="http://www.gravatar.com/avatar/<%= rest.emailHash %>" class="profileImg"/>
+	<img src="http://www.gravatar.com/avatar/" class="profileImg" id="profileImage"/>
 </div>
 <form class="form-horizontal" role="form">
 <div class="show" id="ProfileShow">
  <div class="form-group">
     <label class="col-sm-2 control-label">Name</label>
     <div class="col-sm-10">
-      <p class="form-control-static"><%= rest.name %></p>
+      <p class="form-control-static" id="showUsername"><%= username %></p>
     </div>
   </div>
   
  <div class="form-group">
     <label class="col-sm-2 control-label">Email</label>
     <div class="col-sm-10">
-      <p class="form-control-static"><%= rest.email %></p>
+      <p class="form-control-static" id="showEmail"></p>
+    </div>
+  </div>
+  
+  <div class="form-group">
+    <label class="col-sm-2 control-label">API Key</label>
+    <div class="col-sm-10">
+      <p class="form-control-static" id="showAPIKey"></p>
     </div>
   </div>
   
   <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
-      <button type="submit" class="btn btn-default" onclick="return edit();">Edit</button>
+      <button type="submit" class="btn btn-primary" onclick="return edit();">Edit</button>
     </div>
   </div>
 </div>
+
 <div class="hidden" id="ProfileEdit">
     <div class="form-group">
-    <label for="inputName" class="col-sm-2 control-label">Name</label>
+    <label class="col-sm-2 control-label">Name</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" id="inputName" value="<%= rest.name %>">
+      <p class="form-control-static" id="editUsername"><%= username %></p>
     </div>
   </div>
   
     <div class="form-group">
-    <label for="inputEmail3" class="col-sm-2 control-label">Email</label>
-    <div class="col-sm-10">
-      <input type="email" class="form-control" id="inputEmail3" value="<%= rest.email %>">
+    <label for="inputEmail" class="col-sm-2 control-label">Email</label>
+    <div class="col-sm-8">
+	<div class="input-group">
+      <input type="email" class="form-control" id="inputEmail" value="">
+      <span class="input-group-btn">
+		<button type="button" class="btn btn-default" onclick="return saveEmail(username);" ><span class="glyphicon glyphicon-floppy-save"> </span></button>
+      </span>
+    </div>
     </div>
   </div>
   
    <div class="form-group">
-    <label for="inputPassword3" class="col-sm-2 control-label">Password</label>
-    <div class="col-sm-10">
-      <input type="password" class="form-control" id="inputPassword3" placeholder="Password">
+    <label for="inputPassword" class="col-sm-2 control-label">Password</label>
+    <div class="col-sm-8">
+	<div class="input-group">
+      <input type="password" class="form-control" id="inputPassword" placeholder="Password">
+	  <span class="input-group-btn">
+	  <button type="button" class="btn btn-default invisible "><span class="glyphicon glyphicon-floppy-save"> </span></button>
+	  </span>
+	 </div>
     </div>
   </div>
-  
-    <div class="form-group">
+  <div class="form-group">
+    <label for="inputPassword2" class="col-sm-2 control-label">Repeat Password</label>
+    <div class="col-sm-8">
+		<div class="input-group">
+		  <input type="password" class="form-control" id="inputPassword2" placeholder="Password">
+		  <span class="input-group-btn">
+			<button type="button" class="btn btn-default" onclick="return savePassword(username);" ><span class="glyphicon glyphicon-floppy-save"> </span></button>
+		  </span>
+		</div>
+	</div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">API Key</label>
+    <div class="col-sm-10">
+      <p class="form-control-static" id="editAPIKey"></p>
+    </div>
+  </div>
+  <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
-      <button type="submit" class="btn btn-default" onclick="return save();" >Save</button>
+      <button type="reset" class="btn btn-primary" onclick="return back();" >Back</button>
     </div>
   </div>
 </div>
 </form>
-
 
 </section>

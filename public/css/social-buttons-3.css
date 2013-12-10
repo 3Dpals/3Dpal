@@ -1,0 +1,144 @@
+/*!
+ * Social Buttons for Twitter Bootstrap v1.0.0
+ *
+ * Copyright 2013 Adam Neumann
+ * Licensed under the Apache License v2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
+ */
+
+.btn-facebook {
+  color: #ffffff;
+  background-color: #133783;
+  background-image: url("../image/facebook.png");
+  background-repeat:no-repeat;
+  border-color: #133783;
+  width: 220px !important;
+  margin-top: 5px;
+}
+
+.btn-facebook:hover,
+.btn-facebook:focus,
+.btn-facebook:active,
+.btn-facebook.active,
+.open .dropdown-toggle.btn-facebook {
+  color: #ffffff;
+  background-color: #0e285f;
+  border-color: #0b214e;
+}
+
+.btn-facebook:active,
+.btn-facebook.active,
+.open .dropdown-toggle.btn-facebook {
+  background-image: none;
+}
+
+.btn-facebook.disabled,
+.btn-facebook[disabled],
+fieldset[disabled] .btn-facebook,
+.btn-facebook.disabled:hover,
+.btn-facebook[disabled]:hover,
+fieldset[disabled] .btn-facebook:hover,
+.btn-facebook.disabled:focus,
+.btn-facebook[disabled]:focus,
+fieldset[disabled] .btn-facebook:focus,
+.btn-facebook.disabled:active,
+.btn-facebook[disabled]:active,
+fieldset[disabled] .btn-facebook:active,
+.btn-facebook.disabled.active,
+.btn-facebook[disabled].active,
+fieldset[disabled] .btn-facebook.active {
+  background-color: #133783;
+  border-color: #133783;
+}
+
+
+.btn-google-plus {
+  color: #ffffff;
+  background-color: #dd4b39;
+  border-color: #c53727;
+  width: 220px !important;
+  margin-top: 5px;
+  background-image: url("../image/googleplus.png");
+  background-repeat:no-repeat;
+  }
+
+.btn-google-plus:hover,
+.btn-google-plus:focus,
+.btn-google-plus:active,
+.btn-google-plus.active,
+.open .dropdown-toggle.btn-google-plus {
+  color: #ffffff;
+  background-color: #ca3523;
+  border-color: #92291d;
+}
+
+.btn-google-plus:active,
+.btn-google-plus.active,
+.open .dropdown-toggle.btn-google-plus {
+  background-image: none;
+}
+
+.btn-google-plus.disabled,
+.btn-google-plus[disabled],
+fieldset[disabled] .btn-google-plus,
+.btn-google-plus.disabled:hover,
+.btn-google-plus[disabled]:hover,
+fieldset[disabled] .btn-google-plus:hover,
+.btn-google-plus.disabled:focus,
+.btn-google-plus[disabled]:focus,
+fieldset[disabled] .btn-google-plus:focus,
+.btn-google-plus.disabled:active,
+.btn-google-plus[disabled]:active,
+fieldset[disabled] .btn-google-plus:active,
+.btn-google-plus.disabled.active,
+.btn-google-plus[disabled].active,
+fieldset[disabled] .btn-google-plus.active {
+  background-color: #dd4b39;
+  border-color: #c53727;
+}
+
+
+.btn-openID {
+  color: #ffffff;
+  background-color: #FF6200;
+  border-color: #FF6200;
+  width: 220px !important;
+  margin-top: 5px;
+  background-image: url("../image/openid.png");
+  background-repeat: no-repeat;
+}
+
+.btn-openID:hover,
+.btn-openID:focus,
+.btn-openID:active,
+.btn-openID.active,
+.open .dropdown-toggle.btn-openID {
+  color: #ffffff;
+  background-color: #C64C00;
+  border-color: #C64C00;
+}
+
+.btn-openID:active,
+.btn-openID.active,
+.open .dropdown-toggle.btn-openID {
+  background-image: none;
+}
+
+.btn-openID.disabled,
+.btn-openID[disabled],
+fieldset[disabled] .btn-openID,
+.btn-openID.disabled:hover,
+.btn-openID[disabled]:hover,
+fieldset[disabled] .btn-openID:hover,
+.btn-openID.disabled:focus,
+.btn-openID[disabled]:focus,
+fieldset[disabled] .btn-openID:focus,
+.btn-openID.disabled:active,
+.btn-openID[disabled]:active,
+fieldset[disabled] .btn-openID:active,
+.btn-openID.disabled.active,
+.btn-openID[disabled].active,
+fieldset[disabled] .btn-openID.active {
+  background-color: #FF6200;
+  border-color: #FF6200;
+}

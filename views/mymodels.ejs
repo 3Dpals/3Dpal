@@ -2,11 +2,12 @@
 <script type="text/javascript" src="script/lib/thumbnail.js"></script>
 <script type="text/javascript" src="script/lib/gallery.js"></script>
 <script>
-var galleryURL = "api/models/publicRead";
+var galleryURL = "api/user/" + username + "/models";
 getMoreModels(galleryURL);
 </script>
 
 <section>
+
 <div id="postswrapper">
 	<div>
 	<button id="NewModel" class="btn btn-default" onclick="NewModel()" type="button">Create new Model</button><br><br>

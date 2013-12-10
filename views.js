@@ -13,8 +13,8 @@ var logger = require("./logger");
  * VIEW Index
  */
 function viewIndex(req, res) {
-	logger.debug("<View> Viewing index (User "+req.session.username+").");
-	res.render('index', {title: "Main", username: req.session.username});
+	logger.debug("<View> Viewing index (User "+req.user.username+").");
+	res.render('index', {title: "Main", username: req.user.username, userId: req.user.userId});
 }
 
 /*
@@ -22,7 +22,7 @@ function viewIndex(req, res) {
  */
 function viewSignin(req, res) {
 	logger.debug("<View> Viewing signin.");
-	res.render('signin', {title: "Sign-In"});
+	res.render('signin', {title: "Sign-In", username: (req.user? req.user.username: ''), userId: (req.user? req.user.userId: '')});
 }
 
 
@@ -31,8 +31,17 @@ function viewSignin(req, res) {
  */
 function viewLogin(req, res) {
 	next = req.param("next", null);
-	logger.info("<View> Viewing login page. Next is : " + next);
-	res.render('login', {title: "Login", next: next, error: null});
+	logger.info("<View> Viewing login page.");
+	res.render('login', {title: "Login", next: next, error: null, username: (req.user? req.user.username: ''), userId: (req.user? req.user.userId: '')});
+}
+
+/*
+ * VIEW OpenID
+ */
+function viewOpenID(req, res) {
+	next = req.param("next", null);
+	logger.info("<View> Viewing OpenID login page.");
+	res.render('openid', {title: "OpenID Authentification", next: next, error: null, username: (req.user? req.user.username: ''), userId: (req.user? req.user.userId: '')});
 }
 
 /*
@@ -41,7 +50,7 @@ function viewLogin(req, res) {
 function viewApi(req, res) {
 	next = req.param("next", null);
 	logger.info("<View> Viewing API");
-	res.render('api', {title: "API"});
+	res.render('api', {title: "API", username: (req.user? req.user.username: ''), userId: (req.user? req.user.userId: '')});
 }
 
 function dateToString(date) {
@@ -68,12 +77,12 @@ function twoDigits(nb) {
 
 function viewNotfound(req, res) {
 	logger.warn("<View> View not found : " + req.url);
-	res.render('404', {title: "Page not found"});
+	res.render('404', {title: "Page not found", username: (req.user? req.user.username: ''), userId: (req.user? req.user.userId: '')});
 }
 
 function viewHelp(req, res) {
 	logger.info("<View> Viewing help page.");
-	res.render('help', {title: "Help"});
+	res.render('help', {title: "Help", username: (req.user? req.user.username: ''), userId: (req.user? req.user.userId: '')});
 }
 
 /*
@@ -81,9 +90,15 @@ function viewHelp(req, res) {
  */
 function viewGallery(req, res) {
 	logger.info("<View> Viewing gallery.");
+	res.render('gallery', {title: "Gallery", username: (req.user? req.user.username: ''), userId: (req.user? req.user.userId: '')});
+}
 
-//	res.render('gallery', {title: "Gallery", rest: rest});
-	res.render('gallery', {title: "Gallery", rest: [{id:"00",name:"name00"},{id:"01",name:"name01"},{id:"02",name:"name02"},{id:"03",name:"name03"}]});
+/*
+ * VIEW My Models Gallery
+ */
+function viewMyModels(req, res) {
+	logger.info("<View> Viewing My Models.");
+	res.render('mymodels', {title: "My Models", username: (req.user? req.user.username: ''), userId: (req.user? req.user.userId: '')});
 }
 
 /*
@@ -91,19 +106,25 @@ function viewGallery(req, res) {
  */
 function viewProfile(req, res) {
 	logger.info("<View> Viewing User Profile.");
-	var email = "johannes.baldinger@googlemail.com";
-	email = email.trim();
-	email = email.toLowerCase();
-	var emailHash = require('crypto').createHash('md5').update(email).digest("hex");
-//	res.render('profile', {title: "Profile", rest: rest});
-	res.render('profile', {title: "Profile", rest: {id:"00",name:"Johannes Baldinger",email:email,emailHash :emailHash }});
+	res.render('profile', {title: "Profile", username: (req.user? req.user.username: ''), userId: (req.user? req.user.userId: '')});
+}
+
+/*
+ * VIEW Model
+ */
+function viewModel(req, res) {
+	logger.info("<View> Viewing Model ("+req.url+")");
+	res.render('model', {title: "Model", username: (req.user? req.user.username: ''), userId: (req.user? req.user.userId: '')});
 }
 
 exports.index = viewIndex;
 exports.signin = viewSignin;
 exports.login = viewLogin;
+exports.openid = viewOpenID;
 exports.notfound = viewNotfound;
 exports.api = viewApi;
 exports.help = viewHelp;
 exports.gallery = viewGallery;
+exports.myModels = viewMyModels;
 exports.profile = viewProfile;
+exports.model = viewModel;
