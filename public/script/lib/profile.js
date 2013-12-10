@@ -16,11 +16,11 @@ function back() {
 }
 
 //save the EMail via the API
-function saveEmail(username) {
+function saveEmail(userId) {
 	var newEmail = $('#inputEmail').val();
 	if (validateEmail(newEmail)) {
 		$.ajax({
-			url : 'api/user/' + username + '/email',
+			url : 'api/user/' + userId + '/email',
 			type : 'PUT',
 			data : {
 				email : newEmail
@@ -41,11 +41,11 @@ function saveEmail(username) {
 }
 
 //save the password via the api
-function savePassword(username) {
+function savePassword(userId) {
 	var newPassword = $('#inputPassword').val();
 	if (validatePassword(newPassword, $('#inputPassword2').val())) {
 		$.ajax({
-			url : 'api/user/' + username + '/password',
+			url : 'api/user/' + userId + '/password',
 			type : 'PUT',
 			data : {
 				password : newPassword
@@ -84,7 +84,7 @@ function validatePassword(pwd1, pwd2) {
 
 function loadUserData() {
 	$.ajax({
-		url : 'api/user/' + username,
+		url : 'api/user/' + userId,
 		type : 'GET',
 		success : function (html) {
 			if (html) {
@@ -98,9 +98,6 @@ function loadUserData() {
 }
 
 function populateHTML(user) {
-	console.log(user);
-	$('#showAPIKey').html(user.apikey);
-	$('#editAPIKey').html(user.apikey);
 	refreshEmail(user.email);
 }
 
@@ -108,5 +105,20 @@ function refreshEmail(email) {
 	$('#profileImage').attr('src', "http://www.gravatar.com/avatar/" + md5(email));
 	$('#showEmail').html(email);
 	$('#inputEmail').attr('value', email);
+}
+
+function getToken(){
+$.ajax({
+		url : 'api/user/' + userId+"/token",
+		type : 'GET',
+		success : function (html) {
+			if (html) {
+				var myObjects = JSON.parse(html);
+					$('#showAPIKey').html(myObjects.token);
+					$('#editAPIKey').html(myObjects.token);
+			}
+		}
+	});
 
 }
+
