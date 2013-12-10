@@ -18,8 +18,9 @@ function NewModel() {
 		},
 		success : function (html) {
 			var id = JSON.parse(html).id;
-			newFile(id, "file");
-			newFile(id, "thumbnail");
+			//ToDo: update those fields, when api works
+			//newFile(id, "file");
+			//newFile(id, "thumbnail");
 			var url = "model?edit=true&id=" + id;
 			$(location).attr('href', url);
 		}

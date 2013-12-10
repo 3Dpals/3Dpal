@@ -2190,12 +2190,8 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 *	- cb (Function(bool)):		Callback
 	 */
 	function createComment(modelId, author, text, postedDate, parentId, cb) {
-<<<<<<< HEAD
-		var slug = author+postedDate;
-=======
 		if (!postedDate) { postedDate = new Date(); }
 		var slug = author+postedDate.toISOString();
->>>>>>> f325d798cedac0d39c8cedd6d4cd212c557c7018
 		if (parentId) {
 			modelComment.findById(parentId).exec(function(err, parentCom) {
 				if (err) { error(2, resp); return; }
