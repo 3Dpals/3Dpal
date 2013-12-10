@@ -172,4 +172,25 @@ module.exports = function(passport, modelUser, config) {
 			});
 		}
 	));
+	
+	passport.ensureAuthenticatedAndRedirectNext = function(req, res, next) {
+		return function(err, user, info){
+			// This is the default destination upon successful login.
+			var redirectUrl = '/';
+
+			if (err) { return next(err); }
+			if (!user) { return res.redirect('/login'); }
+
+			
+			req.logIn(user, function(err){
+				if (err) { return next(err); }
+				// If we have previously stored a redirectUrl, use that, otherwise, use the default.
+				if (req.session.redirectUrl) {
+					redirectUrl = req.session.redirectUrl;
+					req.session.redirectUrl = null;
+				}
+				return res.redirect(redirectUrl);
+			});
+		};	              
+	};
 }
