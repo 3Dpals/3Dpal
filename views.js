@@ -31,7 +31,7 @@ function viewSignin(req, res) {
  */
 function viewLogin(req, res) {
 	next = req.param("next", null);
-	logger.info("<View> Viewing login page. Next is : " + next);
+	logger.info("<View> Viewing login page.");
 	res.render('login', {title: "Login", next: next, error: null, username: (req.user? req.user.username: ''), userId: (req.user? req.user.userId: '')});
 }
 
@@ -40,7 +40,7 @@ function viewLogin(req, res) {
  */
 function viewOpenID(req, res) {
 	next = req.param("next", null);
-	logger.info("<View> Viewing OpenID login page. Next is : " + next);
+	logger.info("<View> Viewing OpenID login page.");
 	res.render('openid', {title: "OpenID Authentification", next: next, error: null, username: (req.user? req.user.username: ''), userId: (req.user? req.user.userId: '')});
 }
 
