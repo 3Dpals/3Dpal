@@ -1,5 +1,4 @@
 //init
-initUsernameCache()
 var id = GetURLParameter('id');
 
 //Load all comments
@@ -8,6 +7,18 @@ window.sessionStorage.setItem("noOfItems", 0);
 getModelProperties();
 getMoreComments();
 
+//after everything is loaded
+function callOnce(){
+	if ($("body").data("calledOnce") != "true") {
+		var editMode = GetURLParameter('edit');
+		if (editMode=="true"){
+		$('#collapseOne').addClass('in');
+			edit();
+		}
+		addTypeahead();	
+		$("body").data("calledOnce","true")
+	}
+}
 //get model properties
 function getModelProperties() {
 	$('div#loadmoreajaxloader').show();
@@ -16,7 +27,8 @@ function getModelProperties() {
 		success : function (html) {
 			if (html) {
 				var myObjects = JSON.parse(html);
-				$("#thumbnail").attr('src', "thumbnail/" + myObjects.thumbnail + ".png");
+				$("#thumbnail").attr('id', myObjects.thumbnail );
+				getImage(myObjects.thumbnail);
 				$("#name").html(myObjects.name);
 				$("#createdOn").html(printDate(myObjects.creationDate));
 				$("#createdBy").html(getUsername(myObjects.creator)) ;
@@ -29,6 +41,7 @@ function getModelProperties() {
 				$("#editName").data("oldVal", myObjects.name);
 				$("#editReadPublic").data("oldVal", myObjects.publicRead);
 				$("#editWritePublic").data("oldVal", myObjects.publicWrite);
+				//modify acces rights
 				if (accessLevel>=3){
 					$("#EditProperties").show();
 				}
@@ -40,6 +53,7 @@ function getModelProperties() {
 			} else {
 				$('div#loadmoreajaxloader').html('<center>Error.</center>');
 			}
+			callOnce();
 		}
 	});
 }
@@ -73,27 +87,10 @@ function getAccessUsers(myObjects) {
 	}
 	window.sessionStorage.setItem("prepopulateWrite", JSON.stringify(returnVal));
 	$("#showWriteAccess").html(returnString);
-	addTypeahead();
+
 	if(myObjects.publicWrite) accessLevel = 2 ;
 	if(myObjects.creator==userId)accessLevel = 3;
 	return accessLevel;
-}
-
-
-//Date to nice string
-function printDate(newdate) {
-	var temp = new Date(newdate);
-	var dateStr =
-		padStr(temp.getDate()) + "." +
-		padStr(1 + temp.getMonth()) + "." +
-		padStr(temp.getFullYear()) + " " +
-		padStr(temp.getHours()) + ":" +
-		padStr(temp.getMinutes());
-	return dateStr;
-}
-
-function padStr(i) {
-	return (i < 10) ? "0" + i : "" + i;
 }
 
 function edit() {
@@ -198,27 +195,6 @@ $(window).scroll(function () {
 	if (($(window).scrollTop() == $(document).height() - $(window).height()) && window.sessionStorage.getItem("LoadMoreComments") == "true") {
 		getMoreComments();
 	}
-});
-
-//back to top button
-jQuery(document).ready(function () {
-	var offset = 220;
-	var duration = 500;
-	jQuery(window).scroll(function () {
-		if (jQuery(this).scrollTop() > offset) {
-			jQuery('.back-to-top').fadeIn(duration);
-		} else {
-			jQuery('.back-to-top').fadeOut(duration);
-		}
-	});
-
-	jQuery('.back-to-top').click(function (event) {
-		event.preventDefault();
-		jQuery('html, body').animate({
-			scrollTop : 0
-		}, duration);
-		return false;
-	})
 });
 
 //Typeahead
@@ -347,27 +323,6 @@ function deleteModel() {
 }
 
 
-function getUsername(id){
-	var cached = window.sessionStorage.getItem("User"+id);
-	return cached;
-}
 
-function initUsernameCache(){
-	var cached = window.sessionStorage.getItem("User"+userId);
-	if (cached == null){
-	$.ajax({
-			url : "api/users",
-			success : function (html) {
-				var users = JSON.parse(html).users;
-				for(var i=0; i<users.length; i++) {
-					window.sessionStorage.setItem("User"+users[i]._id, users[i].username);
-				}
-				console.log("user cached");
-			}
-		});
-	}else{
-	console.log("user already cached");
-	}
-}
 
 
