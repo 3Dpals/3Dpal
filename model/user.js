@@ -66,13 +66,11 @@ module.exports = function(mongoose) {
 	 * Parameters:
 	 *	- cb (Function(err, User)):		Callback
 	 */
-	UserSchema.methods.generateToken = function(cb) {
+	UserSchema.methods.generateToken = function(username, cb) {
 		// generate API token:
 		bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
 			if (err) { return cb(err, null); }
-			var token = this.id + (new Date().toString());
-			console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX');
-			console.log(token);
+			var token = username + (new Date().toString());
 			// hash the password using our new salt
 			bcrypt.hash(token, salt, function(err, hash) {
 				if (err) { logger.error(err); return cb(err, null); }
