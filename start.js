@@ -85,11 +85,13 @@ function ensureLoggedInApi(req, res, next) {
 		ensureLoggedIn()(req, res, next);
 }
 
+// Exception: Allow anonymous access to the API for POST /api/users :
+html.post('/api/users', services.rest['users']['POST']);
+
 for (var url in services.rest) {
 	for (var action in services.rest[url]) {
 		if (action == 'POST') {
 			html.post('/api/'+url, ensureLoggedInApi, services.rest[url][action]);
-			
 			logger.debug('REST routing - '+url+' / POST defined');
 		}
 		else if (action == 'GET') {
