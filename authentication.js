@@ -61,7 +61,7 @@ module.exports = function(passport, modelUser, config) {
 							if (err) { return done(err); };
 							if (!user.username) {
 								user.username = identifier;
-								user.generateToken(function(err, token){
+								user.generateToken(identifier, function(err, token){
 									user.token = token;
 									user.save(function(err) { if (err) { return done(err); }; });
 								});
@@ -71,7 +71,7 @@ module.exports = function(passport, modelUser, config) {
 					} else {
 						if (!user.username) {
 							user.username = identifier;
-							user.generateToken(function(err, token){
+							user.generateToken(identifier, function(err, token){
 								user.token = token;
 								user.save(function(err) { if (err) { return done(err); }; });
 							});
@@ -90,12 +90,13 @@ module.exports = function(passport, modelUser, config) {
 		function(accessToken, refreshToken, profile, done) {
 			modelUser.findOneAndUpdate({ email: profile.emails[0].value }, { facebookId: profile.id }, {upsert: false}, function(err, user) {
 				if (err) { return done(err); };
+				logger.error(JSON.stringify(user));
 				if (!user) {
 					modelUser.findOneAndUpdate({ facebookId: profile.id }, { email: profile.emails[0].value }, {upsert: true}, function(err, user) {
 						if (err) { return done(err); };
 						if (!user.username) {
 							user.username = profile.username;
-							user.generateToken(function(err, token){
+							user.generateToken(profile.username, function(err, token){
 								user.token = token;
 								user.save(function(err) { if (err) { return done(err); }; });
 							});
@@ -105,7 +106,7 @@ module.exports = function(passport, modelUser, config) {
 				} else {
 					if (!user.username) {
 						user.username = profile.username;
-						user.generateToken(function(err, token){
+						user.generateToken(profile.username, function(err, token){
 							user.token = token;
 							user.save(function(err) { if (err) { return done(err); }; });
 						});
@@ -151,7 +152,7 @@ module.exports = function(passport, modelUser, config) {
 						if (err) { return done(err); };
 						if (!user.username) {
 							user.username = profile.displayName;
-							user.generateToken(function(err, token){
+							user.generateToken(profile.displayName, function(err, token){
 								user.token = token;
 								user.save(function(err) { if (err) { return done(err); }; });
 							});
@@ -161,7 +162,7 @@ module.exports = function(passport, modelUser, config) {
 				} else {
 					if (!user.username) {
 						user.username = profile.displayName;
-						user.generateToken(function(err, token){
+						user.generateToken(profile.displayName, function(err, token){
 							user.token = token;
 							user.save(function(err) { if (err) { return done(err); }; });
 						});

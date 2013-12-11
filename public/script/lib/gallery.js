@@ -5,31 +5,7 @@ window.sessionStorage.setItem("noOfItems", 0);
 //create a new model and redirect to edit
 function NewModel() {
 	var curDate = new Date();
-<<<<<<< HEAD
-	newFile('', function (fid) {
-		newFile(getImageText(), function (tid) {
-			$.ajax({
-				url : 'api/models',
-				type : 'POST',
-				data : {
-					name : "New Model",
-					file : fid,
-					creator : userId,
-					creationDate : curDate,
-					thumbnail : tid
-				},
-				success : function (html) {
-					var id = JSON.parse(html).id;
-					var url = "model?edit=true&id=" + id;
-					$(location).attr('href', url);
-				}
-			});
-		});
-	});
-}
 
-function newFile(content, cb) {
-=======
 	$.ajax({
 		url : 'api/models',
 		type : 'POST',
@@ -44,25 +20,22 @@ function newFile(content, cb) {
 			console.log(html);
 			var id = JSON.parse(html).id;
 			var url = "model?edit=true&id=" + id;
-			newFile("file", id);
-			newFile("thumbnail", id);
-			$(location).attr('href', url);
+			newFile('', "file", id, function() {
+				newFile(getImageText(), "thumbnail", id, function() {
+					$(location).attr('href', url);
+				});
+			});
 		}
 	});
 }
 
-function newFile(field, modelId) {
->>>>>>> master
+function newFile(content, field, modelId, cb) {
 	$.ajax({
 		url : 'api/files',
 		type : 'POST',
 		data : {
-<<<<<<< HEAD
-			content : content
-=======
-			content : getImageText(),
+			content : content,
 			modelId : modelId
->>>>>>> master
 		},
 		success : function (html) {
 			var fileID = JSON.parse(html).id;
@@ -72,6 +45,7 @@ function newFile(field, modelId) {
 				data : field + "=" + fileID,
 				success : function (html) {
 					console.log(html);
+					cb()
 				}
 			});
 		}

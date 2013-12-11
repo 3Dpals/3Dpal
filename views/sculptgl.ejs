@@ -10,9 +10,9 @@
   <script src='sculptgl/lib/jquery.mousewheel.js'></script>
   <script>
 	'use strict';
+	var modelId = GetURLParameter('id');
 	$(document).ready(function ()
 	{
-		var modelId = GetURLParameter('id');
 		var sculptgl = new SculptGL();
 		sculptgl.start(modelId);
 	});

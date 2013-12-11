@@ -30,14 +30,13 @@ function getModelProperties() {
 		url : "api/model/" + id,
 		success : function (html) {
 			if (html) {
-<<<<<<< HEAD
 				model = JSON.parse(html);
 				
 				var sculptgl = new SculptGL();
 				sculptgl.start(model);
 	
 				//$("#thumbnail").attr('id', model.thumbnail );
-				//getImage(model.thumbnail);
+				//getImage(model.thumbnail, id);
 				$("#name").html(model.name);
 				$("#createdOn").html(printDate(model.creationDate));
 				$("#createdBy").html(getUsername(model.creator)) ;
@@ -50,23 +49,7 @@ function getModelProperties() {
 				$("#editName").data("oldVal", model.name);
 				$("#editReadPublic").data("oldVal", model.publicRead);
 				$("#editWritePublic").data("oldVal", model.publicWrite);
-=======
-				var myObjects = JSON.parse(html);
-				$("#thumbnail").attr('id', myObjects.thumbnail );
-				getImage(myObjects.thumbnail, id );
-				$("#name").html(myObjects.name);
-				$("#createdOn").html(printDate(myObjects.creationDate));
-				$("#createdBy").html(getUsername(myObjects.creator)) ;
-				$("#editName").attr('value', myObjects.name);
-				$("#editReadPublic").prop('checked', myObjects.publicRead);
-				$("#editWritePublic").prop('checked', myObjects.publicWrite);
-				$("#showReadPublic").html((myObjects.publicRead) ? "yes" : "no");
-				$("#showWritePublic").html((myObjects.publicWrite) ? "yes" : "no");
-				var accessLevel = getAccessUsers(myObjects);
-				$("#editName").data("oldVal", myObjects.name);
-				$("#editReadPublic").data("oldVal", myObjects.publicRead);
-				$("#editWritePublic").data("oldVal", myObjects.publicWrite);
->>>>>>> master
+
 				//modify acces rights
 				if (accessLevel>=3){
 					$("#EditProperties").show();
