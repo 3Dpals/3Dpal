@@ -1,8 +1,17 @@
 <% layout('layout') -%>
+<script type="text/javascript" src="script/lib/thumbnail.js"></script>
 <script type="text/javascript" src="script/lib/gallery.js"></script>
+<script>
+var galleryURL = "api/models/publicRead";
+getMoreModels(galleryURL);
+</script>
 
 <section>
-<div id="postswrapper"></div>
+<div id="postswrapper">
+	<div style="padding-left: 15px;">
+	<button id="NewModel" class="btn btn-default" onclick="NewModel()" type="button">Create new Model</button><br><br>
+	</div>
+</div>
 
 <div id="loadmoreajaxloader" style="display:none;"><center><img src="image/ajax-loader.gif" /></center></div>
 
