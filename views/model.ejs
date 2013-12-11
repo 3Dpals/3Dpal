@@ -4,6 +4,7 @@
 <script type="text/javascript" src="script/lib/jquery.tokeninput.js"></script>
 <script type="text/javascript" src="script/lib/md5.js"></script>
 <script type="text/javascript" src="script/lib/model.js"></script>
+<script src='sculptgl/lib/jquery.mousewheel.js'></script>
 
 									
 <section>
@@ -11,7 +12,14 @@
 	<div class="caption" style="margin-bottom:1em;">
 		<h3 id="name" style="display:inline;margin-right:1em;"></h3><a class="btn btn-primary" href="" role="button" id="EditFile" style="display:none;">Edit &raquo;</a><br>
 	</div>
-	<img width="200px" hight="200px" src="image/ajax-loader.gif" id="thumbnail"><br>
+	
+	<input type='file' id='fileopen' style='display: none'/>
+	<input type='file' id='backgroundopen' style='display: none'/>
+	<canvas id='canvas-viewer'></canvas>
+
+	<!-- wacom tablet plugin -->
+	<object id="tablet-plugin" type="application/x-wacomtabletplugin"></object>
+	
 	<br>
 	<div class="panel-group" id="accordion">
 		<div class="panel panel-default">
@@ -144,5 +152,38 @@
 		<center><img src="image/ajax-loader.gif"/></center>
 	</div>
 </div>
+
+
+<!-- 3rd party libraries -->
+<script src='sculptgl/lib/dat.gui.min.js'></script>
+<script src='sculptgl/lib/filesaver.min.js'></script>
+<script src='sculptgl/lib/gl-matrix-min.js'></script>
+<script src='sculptgl/lib/poly2tri.min.js'></script>
+
+<!-- 3D and math stuffs -->
+<script src='sculptgl/math3d/camera.js'></script>
+<script src='sculptgl/math3d/geometry.js'></script>
+<script src='sculptgl/math3d/picking.js'></script>
+
+<!-- mesh related stuffs -->
+<script src='sculptgl/object/mesh.js'></script>
+<script src='sculptgl/object/aabb.js'></script>
+<script src='sculptgl/object/triangle.js'></script>
+<script src='sculptgl/object/vertex.js'></script>
+<script src='sculptgl/object/octree.js'></script>
+<script src='sculptgl/object/render.js'></script>
+<script src='sculptgl/object/states.js'></script>
+<script src='sculptgl/object/background.js'></script>
+
+<!-- misc -->
+<script src='sculptgl/misc/export.js'></script>
+<script src='sculptgl/misc/import.js'></script>
+<script src='sculptgl/misc/utils.js'></script>
+
+<!-- misc -->
+<script src='sculptgl/gui/gui-viewer.js'></script>
+
+<!-- main -->
+<script src='sculptgl/sculptgl-viewer.js'></script>
 </section>								
 	
