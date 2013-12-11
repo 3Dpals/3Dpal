@@ -2313,7 +2313,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 */
 	function serviceGetModelPublicRead(req, resp) {
 		logger.info("<Service> GetModelPublicRead.");
-		var reqData = parseRequest(req, ['id']);
+		var reqData = parseRequest(req, ['id', 'modelId']);
 		
 		writeHeaders(resp);
 		hasPermissionModel(false, req.user, reqData.modelId, function(permOk) {
@@ -2349,7 +2349,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 */
 	function serviceGetModelPublicWrite(req, resp) {
 		logger.info("<Service> GetModelPublicWrite.");
-		var reqData = parseRequest(req, ['id']);
+		var reqData = parseRequest(req, ['id', 'modelId']);
 		
 		writeHeaders(resp);
 		hasPermissionModel(false, req.user, reqData.modelId, function(permOk) {
@@ -2389,7 +2389,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 */
 	function serviceUpdateModelPublicRead(req, resp) {
 		logger.info("<Service> UpdateModelPublicRead.");
-		var reqData = parseRequest(req, ['id', 'publicRead']);
+		var reqData = parseRequest(req, ['id', 'publicRead', 'modelId']);
 		
 		writeHeaders(resp);
 		hasPermissionModel(true, req.user, reqData.modelId, function(permOk) {
@@ -2429,7 +2429,7 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 */
 	function serviceUpdateModelPublicWrite(req, resp) {
 		logger.info("<Service> UpdateModelPublicWrite.");
-		var reqData = parseRequest(req, ['id', 'publicWrite']);
+		var reqData = parseRequest(req, ['id', 'publicWrite', 'modelId']);
 		
 		writeHeaders(resp);
 		hasPermissionModel(true, req.user, reqData.modelId, function(permOk) {
