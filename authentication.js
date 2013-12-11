@@ -50,8 +50,8 @@ module.exports = function(passport, modelUser, config) {
 
 	passport.use(new OpenIDStrategy(
 			{
-				returnURL: config.getProperty("http.address")+":"+config.getProperty("http.port")+'/auth/openid/return',
-				realm: config.getProperty("http.address")+":"+config.getProperty("http.port")
+				returnURL: config.getProperty("http.address")+'/auth/openid/return',
+				realm: config.getProperty("http.address")
 			},
 			function(identifier, profile, done) {
 				modelUser.findOneAndUpdate({ email: profile.emails[0].value }, { openId: identifier }, {upsert: false}, function(err, user) {
@@ -85,7 +85,7 @@ module.exports = function(passport, modelUser, config) {
 	passport.use(new FacebookStrategy({
 			clientID: config.getProperty("facebook.id"),
 			clientSecret: config.getProperty("facebook.secret"),
-			callbackURL: config.getProperty("http.address")+":"+config.getProperty("http.port")+'/auth/facebook/callback'
+			callbackURL: config.getProperty("http.address")+'/auth/facebook/callback'
 		},
 		function(accessToken, refreshToken, profile, done) {
 			modelUser.findOneAndUpdate({ email: profile.emails[0].value }, { facebookId: profile.id }, {upsert: false}, function(err, user) {
@@ -141,8 +141,8 @@ module.exports = function(passport, modelUser, config) {
 
 	
 	passport.use(new GoogleStrategy({
-			returnURL: config.getProperty("http.address")+":"+config.getProperty("http.port")+'/auth/google/return',
-			realm: config.getProperty("http.address")+":"+config.getProperty("http.port")
+			returnURL: config.getProperty("http.address")+'/auth/google/return',
+			realm: config.getProperty("http.address")
 		},
 		function(identifier, profile, done) {
 			modelUser.findOneAndUpdate({ email: profile.emails[0].value }, { googleId: identifier }, {upsert: false}, function(err, user) {
