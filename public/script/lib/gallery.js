@@ -5,38 +5,45 @@ window.sessionStorage.setItem("noOfItems", 0);
 //create a new model and redirect to edit
 function NewModel() {
 	var curDate = new Date();
-	newFile("file", function (fid) {
-		newFile("thumbnail", function (tid) {
-			$.ajax({
-				url : 'api/models',
-				type : 'POST',
-				data : {
-					name : "New Model",
-					file : fid,
-					creator : userId,
-					creationDate : curDate,
-					thumbnail : tid
-				},
-				success : function (html) {
-					var id = JSON.parse(html).id;
-					var url = "model?edit=true&id=" + id;
-					$(location).attr('href', url);
-				}
-			});
-		});
+	$.ajax({
+		url : 'api/models',
+		type : 'POST',
+		data : {
+			name : "New Model",
+			file : "000000000000000000000000",
+			creator : userId,
+			creationDate : curDate,
+			thumbnail : "000000000000000000000000"
+		},
+		success : function (html) {
+			console.log(html);
+			var id = JSON.parse(html).id;
+			var url = "model?edit=true&id=" + id;
+			newFile("file", id);
+			newFile("thumbnail", id);
+			$(location).attr('href', url);
+		}
 	});
 }
 
-function newFile(field, cb) {
+function newFile(field, modelId) {
 	$.ajax({
 		url : 'api/files',
 		type : 'POST',
 		data : {
-			content : getImageText()
+			content : getImageText(),
+			modelId : modelId
 		},
 		success : function (html) {
 			var fileID = JSON.parse(html).id;
-			cb(fileID);
+			$.ajax({
+				url : 'api/model/' + modelId + "/" + field,
+				type : 'PUT',
+				data : field + "=" + fileID,
+				success : function (html) {
+					console.log(html);
+				}
+			});
 		}
 	});
 }
@@ -74,7 +81,7 @@ function convertJSONinHTML(html) {
 			returnVal += myObjects[i]._id;
 			returnVal += '"><center><img width="200px" hight="200px" src="image/ajax-loader.gif" id="';
 			returnVal += myObjects[i].thumbnail;
-			getImage(myObjects[i].thumbnail);
+			getImage(myObjects[i].thumbnail, myObjects[i]._id);
 			returnVal += '"></center></a><div class="caption"><h3>';
 			returnVal += myObjects[i].name;
 			returnVal += '</h3><p>created by ';
@@ -118,4 +125,3 @@ jQuery(document).ready(function () {
 		return false;
 	})
 });
-

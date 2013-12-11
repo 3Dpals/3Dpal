@@ -1386,10 +1386,10 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 * Update the file of the Model corresponding to the given ID
 	 * Parameters:
 	 *	- id (String): 			ID
-	 *	- name (String): 		File to change
+	 *	- file (String): 		File to change
 	 *	- cb (Function(err, User[])):	Callback
 	 */ 
-	function updateModelFile(id, name, cb) {
+	function updateModelFile(id, file, cb) {
 			modelModel.findByIdAndUpdate(id, {file: file}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
 					else { return cb(err, 'ok'); }
@@ -1506,10 +1506,10 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 * Update the thumbnail of the Model corresponding to the given ID
 	 * Parameters:
 	 *	- id (String): 			ID
-	 *	- name (String): 		Thumbnail to change
+	 *	- thumbnail (String): 		Thumbnail to change
 	 *	- cb (Function(err, User[])):	Callback
 	 */ 
-	function updateModelThumbnail(id, name, cb) {
+	function updateModelThumbnail(id, thumbnail, cb) {
 			modelModel.findByIdAndUpdate(id, {thumbnail: thumbnail}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
 					else { return cb(err, 'ok'); }
@@ -3115,10 +3115,10 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 */
 	function serviceGetFile(req, resp) {
 		logger.info("<Service> GetFile.");
-		var reqData = parseRequest(req, ['id']);
+		var reqData = parseRequest(req, ['id', 'modelId']);
 		
 		writeHeaders(resp);
-		hasPermissionFile(false, req.user, reqData.id, null, function(permOk) {
+		hasPermissionFile(false, req.user, reqData.id, reqData.modelId , function(permOk) {
 			if (permOk) {
 				getFile(reqData.id, function (err, comment) {
 					if (err) error(2, resp);

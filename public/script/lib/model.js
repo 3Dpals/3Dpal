@@ -28,7 +28,7 @@ function getModelProperties() {
 			if (html) {
 				var myObjects = JSON.parse(html);
 				$("#thumbnail").attr('id', myObjects.thumbnail );
-				getImage(myObjects.thumbnail);
+				getImage(myObjects.thumbnail, id );
 				$("#name").html(myObjects.name);
 				$("#createdOn").html(printDate(myObjects.creationDate));
 				$("#createdBy").html(getUsername(myObjects.creator)) ;
