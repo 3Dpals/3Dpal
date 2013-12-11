@@ -5,6 +5,7 @@ window.sessionStorage.setItem("noOfItems", 0);
 //create a new model and redirect to edit
 function NewModel() {
 	var curDate = new Date();
+
 	$.ajax({
 		url : 'api/models',
 		type : 'POST',
@@ -19,19 +20,21 @@ function NewModel() {
 			console.log(html);
 			var id = JSON.parse(html).id;
 			var url = "model?edit=true&id=" + id;
-			newFile("file", id);
-			newFile("thumbnail", id);
-			$(location).attr('href', url);
+			newFile('', "file", id, function() {
+				newFile(getImageText(), "thumbnail", id, function() {
+					$(location).attr('href', url);
+				});
+			});
 		}
 	});
 }
 
-function newFile(field, modelId) {
+function newFile(content, field, modelId, cb) {
 	$.ajax({
 		url : 'api/files',
 		type : 'POST',
 		data : {
-			content : getImageText(),
+			content : content,
 			modelId : modelId
 		},
 		success : function (html) {
@@ -42,6 +45,7 @@ function newFile(field, modelId) {
 				data : field + "=" + fileID,
 				success : function (html) {
 					console.log(html);
+					cb()
 				}
 			});
 		}

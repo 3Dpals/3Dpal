@@ -3207,11 +3207,11 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 * ====
 	 * Update the content of the File corresponding to the given ID
 	 * Parameters:
-	 *	- id (String): 			ID
-	 *	- name (String): 		Content to change
+	 *	- id (String): 					ID
+	 *	- content (String): 			Content to change
 	 *	- cb (Function(err, User[])):	Callback
 	 */ 
-	function updateFileContent(id, name, cb) {
+	function updateFileContent(id, content, cb) {
 			modelFile.findByIdAndUpdate(id, {content: content}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
 					else { return cb(err, 'ok'); }
@@ -3227,10 +3227,10 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 */
 	function serviceUpdateFileContent(req, resp) {
 		logger.info("<Service> UpdateFileContent.");
-		var reqData = parseRequest(req, ['id', 'content']);
+		var reqData = parseRequest(req, ['id', 'content', 'modelId']);
 		
 		writeHeaders(resp);
-		hasPermissionFile(true, req.user, reqData.id, null, function(permOk) {
+		hasPermissionFile(true, req.user, reqData.id, reqData.modelId, function(permOk) {
 			if (permOk) {
 				updateFileContent(reqData.id, reqData.content, function(err, status) {
 					if (err) error(2, resp);
