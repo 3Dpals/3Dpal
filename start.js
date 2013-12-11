@@ -78,11 +78,12 @@ html.configure(function() {
 
 // Services:
 function ensureLoggedInApi(req, res, next) {
-	if(req.param('token', null))
-		logger.debug('YOUHOU'),
+	if(req.param('token', null)) {
 		passport.authenticate('localapikey', { session: false })(req, res, next);
-	 else
+	}
+	else {
 		ensureLoggedIn()(req, res, next);
+	}
 }
 
 // Exception: Allow anonymous access to the API for POST /api/users :
