@@ -479,10 +479,17 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['userId']);
 		
 		writeHeaders(resp);
-		getUserFacebookId(getData.userId, function (err, user) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ facebookId: user.facebookId })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getUserFacebookId(getData.userId, function (err, user) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ facebookId: user.facebookId })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
+		
 	}
 	 
 	/**
@@ -509,10 +516,16 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['userId']);
 		
 		writeHeaders(resp);
-		getUserGoogleId(getData.userId, function (err, user) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ googleId: user.googleId })); 
-		});
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getUserGoogleId(getData.userId, function (err, user) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ googleId: user.googleId })); 
+				})
+			} else {
+				error(3, resp);
+			}
+		});;
 	}
 	 
 	/**
@@ -548,9 +561,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['userId']);
 		
 		writeHeaders(resp);
-		deleteUser(getData.userId, function (err, user) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				deleteUser(getData.userId, function (err, user) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 	
@@ -602,9 +621,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var userData = parseRequest(req, ['userId', 'username', 'password', 'email', 'openId', 'facebookId', 'googleId']);
 		if (!userData.password) { error(10, resp, 'Password required'); return; }
 		writeHeaders(resp);
-		updateUser(userData.userId, userData.username, userData.password, userData.email, userData.openId, userData.facebookId, userData.googleId, function(err, status) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				updateUser(userData.userId, userData.username, userData.password, userData.email, userData.openId, userData.facebookId, userData.googleId, function(err, status) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 	
@@ -637,9 +662,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var userData = parseRequest(req, ['userId', 'email']);
 		
 		writeHeaders(resp);
-		updateUserEmail(userData.userId, userData.email, function(err, status) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				updateUserEmail(userData.userId, userData.email, function(err, status) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 	
@@ -672,9 +703,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var userData = parseRequest(req, ['userId', 'username']);
 		
 		writeHeaders(resp);
-		updateUserUsername(userData.userId, userData.username, function(err, status) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				updateUserUsername(userData.userId, userData.username, function(err, status) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 	
@@ -706,9 +743,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var userData = parseRequest(req, ['userId', 'openId']);
 		
 		writeHeaders(resp);
-		updateUserOpenId(userData.userId, userData.openId, function(err, status) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				updateUserOpenId(userData.userId, userData.openId, function(err, status) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 	
@@ -740,9 +783,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var userData = parseRequest(req, ['userId', 'facebookId']);
 		
 		writeHeaders(resp);
-		updateUserFacebookId(userData.userId, userData.facebookId, function(err, status) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				updateUserFacebookId(userData.userId, userData.facebookId, function(err, status) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 	
@@ -774,9 +823,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var userData = parseRequest(req, ['userId', 'googleId']);
 		
 		writeHeaders(resp);
-		updateUserGoogleId(userData.userId, userData.googleId, function(err, status) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				updateUserGoogleId(userData.userId, userData.googleId, function(err, status) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 	
@@ -818,9 +873,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var userData = parseRequest(req, ['userId', 'password']);
 		
 		writeHeaders(resp);
-		updateUserPassword(userData.userId, userData.password, function(err, status) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				updateUserPassword(userData.userId, userData.password, function(err, status) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 	 
@@ -868,9 +929,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		logger.info("<Service> CreateModel.");
 		var objectsData = parseRequest(req, ['name', 'file', 'creator', 'creationDate', 'thumbnail', 'tags']);
 		writeHeaders(resp);
-		createModel(objectsData.name, objectsData.file, objectsData.creator, objectsData.creationDate, objectsData.thumbnail, objectsData.tags, function(err, model) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: 'ok', id: model.id }));
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				createModel(objectsData.name, objectsData.file, objectsData.creator, objectsData.creationDate, objectsData.thumbnail, objectsData.tags, function(err, model) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: 'ok', id: model.id }));
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 	 
@@ -906,9 +973,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['limit', 'offset']);
 		
 		writeHeaders(resp);
-		getModels(getData.limit, getData.offset, function (err, objects) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ objects: objects })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getModels(getData.limit, getData.offset, function (err, objects) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ objects: objects })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 
@@ -944,9 +1017,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['id']);
 		
 		writeHeaders(resp);
-		getModel(getData.id, function (err, obj) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify(obj)); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getModel(getData.id, function (err, obj) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify(obj)); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 	 
@@ -974,9 +1053,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['id']);
 		
 		writeHeaders(resp);
-		getModelName(getData.id, function (err, obj) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ name: obj.name })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getModelName(getData.id, function (err, obj) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ name: obj.name })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 	 
@@ -1004,9 +1089,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['id']);
 		
 		writeHeaders(resp);
-		getModelFile(getData.id, function (err, obj) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ file: obj.file })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getModelFile(getData.id, function (err, obj) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ file: obj.file })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 	 
@@ -1037,9 +1128,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['id']);
 		
 		writeHeaders(resp);
-		getModelCreator(getData.id, function (err, obj) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({creator: obj.creator })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getModelCreator(getData.id, function (err, obj) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({creator: obj.creator })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 	 
@@ -1067,9 +1164,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['id']);
 		
 		writeHeaders(resp);
-		getModelCreationDate(getData.id, function (err, obj) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({creationDate: obj.creationDate})); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getModelCreationDate(getData.id, function (err, obj) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({creationDate: obj.creationDate})); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
  
@@ -1097,9 +1200,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['id']);
 		
 		writeHeaders(resp);
-		getModelThumbnail(getData.id, function (err, obj) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({thumbnail: obj.thumbnail})); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getModelThumbnail(getData.id, function (err, obj) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({thumbnail: obj.thumbnail})); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 
@@ -1127,9 +1236,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['id']);
 		
 		writeHeaders(resp);
-		getModelTags(getData.id, function (err, obj) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({tags: obj.tags})); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getModelTags(getData.id, function (err, obj) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({tags: obj.tags})); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 	 
@@ -1166,9 +1281,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['id']);
 		
 		writeHeaders(resp);
-		deleteModel(getData.id, function (err, status) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				deleteModel(getData.id, function (err, status) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 		
@@ -1206,9 +1327,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var objectsData = parseRequest(req, ['id', 'name', 'file', 'creator', 'creationDate', 'thumbnail', 'tags']);
 		
 		writeHeaders(resp);
-		updateModel(objectsData.id, objectsData.name, objectsData.file, objectsData.creator, objectsData.creationDate, objectsData.thumbnail, objectsData.tags, function(err, status) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				updateModel(objectsData.id, objectsData.name, objectsData.file, objectsData.creator, objectsData.creationDate, objectsData.thumbnail, objectsData.tags, function(err, status) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 	
@@ -1240,9 +1367,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var objData = parseRequest(req, ['id', 'name']);
 		
 		writeHeaders(resp);
-		updateModelName(objData.id, objData.name, function(err, status) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				updateModelName(objData.id, objData.name, function(err, status) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 		
@@ -1274,9 +1407,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var objData = parseRequest(req, ['id', 'file']);
 		
 		writeHeaders(resp);
-		updateModelFile(objData.id, objData.file, function(err, status) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				updateModelFile(objData.id, objData.file, function(err, status) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 		
@@ -1308,9 +1447,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var objData = parseRequest(req, ['id', 'creator']);
 		
 		writeHeaders(resp);
-		updateModelCreator(objData.id, objData.creator, function(err, status) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				updateModelCreator(objData.id, objData.creator, function(err, status) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 	
@@ -1342,9 +1487,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var objData = parseRequest(req, ['id', 'creationDate']);
 		
 		writeHeaders(resp);
-		updateModelCreationDate(objData.id, objData.creationDate, function(err, status) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				updateModelCreationDate(objData.id, objData.creationDate, function(err, status) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 	
@@ -1376,9 +1527,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var objData = parseRequest(req, ['id', 'thumbnail']);
 		
 		writeHeaders(resp);
-		updateModelThumbnail(objData.id, objData.thumbnail, function(err, status) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				updateModelThumbnail(objData.id, objData.thumbnail, function(err, status) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}	
 	
@@ -1410,9 +1567,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var objData = parseRequest(req, ['id', 'tags']);
 		
 		writeHeaders(resp);
-		updateModelTags(objData.id, objData.tags, function(err, status) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				updateModelTags(objData.id, objData.tags, function(err, status) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 
@@ -1457,9 +1620,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['userId', 'limit', 'offset']);
 		
 		writeHeaders(resp);
-		getUserModels(getData.userId, getData.limit, getData.offset, function (err, objects) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({models: objects})); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getUserModels(getData.userId, getData.limit, getData.offset, function (err, objects) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({models: objects})); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 
@@ -1531,9 +1700,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var objectsData = parseRequest(req, ['modelId', 'userId', 'rightToWrite']);
 		
 		writeHeaders(resp);
-		addRight(objectsData.modelId, objectsData.userId, objectsData.rightToWrite, function(err, status) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status }));
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				addRight(objectsData.modelId, objectsData.userId, objectsData.rightToWrite, function(err, status) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status }));
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 
@@ -1578,9 +1753,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var objectsData = parseRequest(req, ['modelId', 'userId']);
 		
 		writeHeaders(resp);
-		addCompleteRight(objectsData.modelId, objectsData.userId, function(err, status) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status }));
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				addCompleteRight(objectsData.modelId, objectsData.userId, function(err, status) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status }));
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 
@@ -1625,9 +1806,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var objectsData = parseRequest(req, ['modelId', 'userId']);
 		
 		writeHeaders(resp);
-		addReadRight(objectsData.modelId, objectsData.userId, function(err, status) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status }));
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				addReadRight(objectsData.modelId, objectsData.userId, function(err, status) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status }));
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 		
@@ -1687,14 +1874,19 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 *	- userId (String): 			ID of the user				- required
 	 */
 	function serviceRemoveRight(req, resp, userId) {
-// PERMISSION:		if (!hasPermissionRight(1, userId)) { return ERROR }
 		logger.info("<Service> RemoveRight.");
 		var objectsData = parseRequest(req, ['modelId', 'userId', 'rightToWrite']);
 		
 		writeHeaders(resp);
-		removeRight(objectsData.modelId, objectsData.userId, objectsData.rightToWrite, function(err, status) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status }));
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				removeRight(objectsData.modelId, objectsData.userId, objectsData.rightToWrite, function(err, status) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status }));
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 		
@@ -1738,9 +1930,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var objectsData = parseRequest(req, ['modelId', 'userId']);
 		
 		writeHeaders(resp);
-		removeCompleteRight(objectsData.modelId, objectsData.userId, objectsData.rightToWrite, function(err, status) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status }));
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				removeCompleteRight(objectsData.modelId, objectsData.userId, objectsData.rightToWrite, function(err, status) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status }));
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 		
@@ -1784,9 +1982,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var objectsData = parseRequest(req, ['modelId', 'userId']);
 		
 		writeHeaders(resp);
-		removeWriteRight(objectsData.modelId, objectsData.userId, objectsData.rightToWrite, function(err, status) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status }));
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				removeWriteRight(objectsData.modelId, objectsData.userId, objectsData.rightToWrite, function(err, status) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status }));
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 		 	 
@@ -1830,9 +2034,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['userId', 'limit', 'offset']);
 		
 		writeHeaders(resp);
-		getPersonallyReadableModels(getData.userId, getData.limit, getData.offset, function (err, objects) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ readModels: objects })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getPersonallyReadableModels(getData.userId, getData.limit, getData.offset, function (err, objects) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ readModels: objects })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
   
@@ -1876,9 +2086,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['userId', 'limit', 'offset']);
 		
 		writeHeaders(resp);
-		getPersonallyEditableModels(getData.userId, getData.limit, getData.offset, function (err, objects) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ writeModels: objects })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getPersonallyEditableModels(getData.userId, getData.limit, getData.offset, function (err, objects) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ writeModels: objects })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 
@@ -1914,9 +2130,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['limit', 'offset']);
 		
 		writeHeaders(resp);
-		getPubliclyReadableModels(getData.limit, getData.offset, function (err, objects) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ models: objects })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getPubliclyReadableModels(getData.limit, getData.offset, function (err, objects) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ models: objects })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
  	   
@@ -1952,9 +2174,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['limit', 'offset']);
 		
 		writeHeaders(resp);
-		getPubliclyEditableModels(getData.limit, getData.offset, function (err, objects) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ models: objects })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getPubliclyEditableModels(getData.limit, getData.offset, function (err, objects) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ models: objects })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
  	 	 	 	 
@@ -1998,10 +2226,16 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['modelId', 'limit', 'offset']);
 		
 		writeHeaders(resp);
-		getWriters(getData.modelId, getData.limit, getData.offset, function (err, objects) {
-			logger.error(err);
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ writers: objects })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getWriters(getData.modelId, getData.limit, getData.offset, function (err, objects) {
+					logger.error(err);
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ writers: objects })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
  	 	 	 
@@ -2045,9 +2279,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['modelId', 'limit', 'offset']);
 		
 		writeHeaders(resp);
-		getReaders(getData.modelId, getData.limit, getData.offset, function (err, objects) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ readers: objects })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getReaders(getData.modelId, getData.limit, getData.offset, function (err, objects) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ readers: objects })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 
@@ -2075,9 +2315,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['id']);
 		
 		writeHeaders(resp);
-		getModelPublicRead(getData.id, function (err, obj) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({publicRead: obj.publicRead})); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getModelPublicRead(getData.id, function (err, obj) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({publicRead: obj.publicRead})); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 
@@ -2105,9 +2351,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['id']);
 		
 		writeHeaders(resp);
-		getModelPublicWrite(getData.id, function (err, obj) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({publicWrite: obj.publicWrite})); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getModelPublicWrite(getData.id, function (err, obj) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({publicWrite: obj.publicWrite})); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 	 
@@ -2139,9 +2391,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var objData = parseRequest(req, ['id', 'publicRead']);
 		
 		writeHeaders(resp);
-		updateModelPublicRead(objData.id, objData.publicRead, function(err, status) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				updateModelPublicRead(objData.id, objData.publicRead, function(err, status) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 	 
@@ -2173,9 +2431,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var objData = parseRequest(req, ['id', 'publicWrite']);
 		
 		writeHeaders(resp);
-		updateModelPublicWrite(objData.id, objData.publicWrite, function(err, status) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				updateModelPublicWrite(objData.id, objData.publicWrite, function(err, status) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 	 	
@@ -2236,9 +2500,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var commentData = parseRequest(req, ['modelId', 'author', 'text', 'postedDate', 'parentId']);
 		
 		writeHeaders(resp);
-		createComment(commentData.modelId, commentData.author, commentData.text, commentData.postedDate, commentData.parentId, function(err, status) {
-			if (err) { logger.error(err); error(2, resp); }
-			else resp.end(JSON.stringify({ status: status }));
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				createComment(commentData.modelId, commentData.author, commentData.text, commentData.postedDate, commentData.parentId, function(err, status) {
+					if (err) { logger.error(err); error(2, resp); }
+					else resp.end(JSON.stringify({ status: status }));
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 	 
@@ -2274,9 +2544,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['limit', 'offset']);
 		
 		writeHeaders(resp);
-		getComments(getData.limit, getData.offset, function (err, users) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ comments: users })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getComments(getData.limit, getData.offset, function (err, users) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ comments: users })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 
@@ -2310,9 +2586,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['id']);
 		
 		writeHeaders(resp);
-		getComment(getData.id, function (err, comment) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify(comment)); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getComment(getData.id, function (err, comment) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify(comment)); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 
@@ -2340,9 +2622,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['id']);
 		
 		writeHeaders(resp);
-		getCommentModelId(getData.id, function (err, obj) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ modelId: obj.modelId })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getCommentModelId(getData.id, function (err, obj) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ modelId: obj.modelId })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 
@@ -2370,9 +2658,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['id']);
 		
 		writeHeaders(resp);
-		getCommentAuthor(getData.id, function (err, obj) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ author: obj.author })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getCommentAuthor(getData.id, function (err, obj) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ author: obj.author })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 
@@ -2400,9 +2694,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['id']);
 		
 		writeHeaders(resp);
-		getCommentParentId(getData.id, function (err, obj) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ parentId: obj.parentId })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getCommentParentId(getData.id, function (err, obj) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ parentId: obj.parentId })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 
@@ -2430,9 +2730,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['id']);
 		
 		writeHeaders(resp);
-		getCommentSlug(getData.id, function (err, obj) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ slug: obj.slug })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getCommentSlug(getData.id, function (err, obj) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ slug: obj.slug })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 
@@ -2460,9 +2766,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['id']);
 		
 		writeHeaders(resp);
-		getCommentPostedDate(getData.id, function (err, obj) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ postedDate: obj.postedDate })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getCommentPostedDate(getData.id, function (err, obj) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ postedDate: obj.postedDate })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 
@@ -2490,9 +2802,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['id']);
 		
 		writeHeaders(resp);
-		getCommentText(getData.id, function (err, obj) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ text: obj.text })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getCommentText(getData.id, function (err, obj) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ text: obj.text })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 		
@@ -2524,9 +2842,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var objData = parseRequest(req, ['id', 'text']);
 		
 		writeHeaders(resp);
-		updateCommentText(objData.id, objData.text, function(err, status) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				updateCommentText(objData.id, objData.text, function(err, status) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 	 
@@ -2563,9 +2887,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['id']);
 		
 		writeHeaders(resp);
-		deleteComment(getData.id, function (err, user) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				deleteComment(getData.id, function (err, user) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 
@@ -2600,9 +2930,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['userId']);
 		
 		writeHeaders(resp);
-		getUserComments(getData.userId, function (err, objects) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({comments: objects})); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getUserComments(getData.userId, function (err, objects) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({comments: objects})); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 
@@ -2645,9 +2981,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['modelId','limit', 'offset']);
 
 		writeHeaders(resp);
-		getModelComments(getData.modelId, getData.limit, getData.offset, function (err, objects) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({comments: objects})); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getModelComments(getData.modelId, getData.limit, getData.offset, function (err, objects) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({comments: objects})); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 		
@@ -2685,9 +3027,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var userData = parseRequest(req, ['content']);
 		
 		writeHeaders(resp);
-		createFile(userData.content, function(err, id) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: 'ok', id: id }));
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				createFile(userData.content, function(err, id) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: 'ok', id: id }));
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 	 
@@ -2724,9 +3072,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['limit', 'offset']);
 		
 		writeHeaders(resp);
-		getFiles(getData.limit, getData.offset, function (err, files) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ files: files })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getFiles(getData.limit, getData.offset, function (err, files) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ files: files })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
  	
@@ -2761,9 +3115,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['id']);
 		
 		writeHeaders(resp);
-		getFile(getData.id, function (err, comment) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify(comment)); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getFile(getData.id, function (err, comment) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify(comment)); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 
@@ -2791,9 +3151,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['id']);
 		
 		writeHeaders(resp);
-		getFileContent(getData.id, function (err, obj) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ content: obj.content })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				getFileContent(getData.id, function (err, obj) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ content: obj.content })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 			
@@ -2825,9 +3191,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var objData = parseRequest(req, ['id', 'content']);
 		
 		writeHeaders(resp);
-		updateFileContent(objData.id, objData.content, function(err, status) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				updateFileContent(objData.id, objData.content, function(err, status) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 	 
@@ -2864,9 +3236,15 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 		var getData = parseRequest(req, ['id']);
 		
 		writeHeaders(resp);
-		deleteFile(getData.id, function (err, user) {
-			if (err) error(2, resp);
-			else resp.end(JSON.stringify({ status: status })); 
+		hasPermissionUser(false, req.user, getData.userId, function(permOk) {
+			if (permOk) {
+				deleteFile(getData.id, function (err, user) {
+					if (err) error(2, resp);
+					else resp.end(JSON.stringify({ status: status })); 
+				});
+			} else {
+				error(3, resp);
+			}
 		});
 	}
 
