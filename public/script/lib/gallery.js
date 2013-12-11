@@ -5,8 +5,8 @@ window.sessionStorage.setItem("noOfItems", 0);
 //create a new model and redirect to edit
 function NewModel() {
 	var curDate = new Date();
-	newFile("file", function (fid) {
-		newFile("thumbnail", function (tid) {
+	newFile('', function (fid) {
+		newFile(getImageText(), function (tid) {
 			$.ajax({
 				url : 'api/models',
 				type : 'POST',
@@ -27,12 +27,12 @@ function NewModel() {
 	});
 }
 
-function newFile(field, cb) {
+function newFile(content, cb) {
 	$.ajax({
 		url : 'api/files',
 		type : 'POST',
 		data : {
-			content : getImageText()
+			content : content
 		},
 		success : function (html) {
 			var fileID = JSON.parse(html).id;

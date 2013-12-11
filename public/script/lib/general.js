@@ -51,7 +51,7 @@ function getImage(id){
 			url : "api/file/"+id,
 			success : function (html) {
 				var myObjects = JSON.parse(html);
-				$("img#"+id).attr("src", "data:image/gif;base64,"+myObjects.content);
+				$("img#"+id).attr("src", myObjects.content);
 			}
 		});
 }

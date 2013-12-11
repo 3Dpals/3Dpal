@@ -63,7 +63,7 @@ if(sslActivated) {
 html.configure(function() {
 	// use ejs-locals for all ejs templates:
 	html.engine('ejs', engine);
-	html.use(express.bodyParser());
+	html.use(express.bodyParser({limit: '50mb'}));
 	html.use(express.methodOverride());
 	html.use( express.cookieParser() );
 	html.use(express.session({ secret: config.getProperty("session.secret"), cookie: { maxAge: 600000 } }));//changed from 1 min to 10 min.
@@ -155,6 +155,7 @@ viewHandler["help"] = {handler: views.help, secured: false};
 viewHandler["gallery"] = {handler: views.gallery, secured: true};
 viewHandler["mymodels"] = {handler: views.myModels, secured: true};
 viewHandler["model"] = {handler: views.model, secured: true};
+viewHandler["editor"] = {handler: views.sculptgl, secured: true};
 viewHandler["profile"] = {handler: views.profile, secured: true};
 viewHandler["api"] = {handler: views.api, secured: false};
 viewHandler["*"] = {handler: views.notfound, secured: false};

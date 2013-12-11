@@ -9,7 +9,7 @@
 module.exports = function(mongoose) {
 	var Schema = mongoose.Schema;
 	var FileSchema = new Schema({
-		content: { type: String, required: true},	// Content of the file
+		content: { type: String, required: false},	// Content of the file
 	});
 
 	this.model = mongoose.model('File', FileSchema);

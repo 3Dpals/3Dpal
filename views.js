@@ -117,6 +117,14 @@ function viewModel(req, res) {
 	res.render('model', {title: "Model", username: (req.user? req.user.username: ''), userId: (req.user? req.user.id: '')});
 }
 
+/*
+ * VIEW SculptGL
+ */
+function viewSculptGL(req, res) {
+	logger.info("<View> Viewing SculptGL Editor ("+req.url+")");
+	res.render('sculptgl', {title: "SculptGL Editor", username: (req.user? req.user.username: ''), userId: (req.user? req.user.id: '')});
+}
+
 exports.index = viewIndex;
 exports.signin = viewSignin;
 exports.login = viewLogin;
@@ -128,3 +136,4 @@ exports.gallery = viewGallery;
 exports.myModels = viewMyModels;
 exports.profile = viewProfile;
 exports.model = viewModel;
+exports.sculptgl = viewSculptGL;

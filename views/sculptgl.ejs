@@ -5,16 +5,29 @@
   <meta name='description' content='SculptGL is a small sculpting application powered by JavaScript and webGL.'>
   <meta name='author' content='stéphane GINIER'>
   <title>3Dpal + SculptGL - A WebGL Sculpting App</title>
-  <link rel='stylesheet' href='css/style.css' type='text/css' />
+  <link rel='stylesheet' href='sculptgl/css/style.css' type='text/css' />
   <script src='sculptgl/lib/jquery-2.0.3.min.js'></script>
   <script src='sculptgl/lib/jquery.mousewheel.js'></script>
   <script>
-  'use strict';
-  $(document).ready(function ()
-  {
-    var sculptgl = new SculptGL();
-    sculptgl.start();
-  });
+	'use strict';
+	$(document).ready(function ()
+	{
+		var modelId = GetURLParameter('id');
+		var sculptgl = new SculptGL();
+		sculptgl.start(modelId);
+	});
+  
+	//get URL parameter
+	function GetURLParameter(sParam) {
+		var sPageURL = window.location.search.substring(1);
+		var sURLVariables = sPageURL.split('&');
+		for (var i = 0; i < sURLVariables.length; i++) {
+			var sParameterName = sURLVariables[i].split('=');
+			if (sParameterName[0] == sParam) {
+				return sParameterName[1];
+			}
+		}
+	};
   </script>
 </head>
 <!--

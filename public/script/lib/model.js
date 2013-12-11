@@ -46,6 +46,7 @@ function getModelProperties() {
 					$("#EditProperties").show();
 				}
 				if (accessLevel>=2){
+					$("#EditFile").attr('href', 'editor?id='+id);
 					$("#EditFile").show();
 				}
 				

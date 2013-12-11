@@ -2802,11 +2802,11 @@ module.exports = function(mongoose, modelUser, modelModel, modelComment, modelFi
 	 * ====
 	 * Update the content of the File corresponding to the given ID
 	 * Parameters:
-	 *	- id (String): 			ID
-	 *	- name (String): 		Content to change
+	 *	- id (String): 					ID
+	 *	- content (String): 			Content to change
 	 *	- cb (Function(err, User[])):	Callback
 	 */ 
-	function updateFileContent(id, name, cb) {
+	function updateFileContent(id, content, cb) {
 			modelFile.findByIdAndUpdate(id, {content: content}, { upsert: true, multi: false }, function (err, numberAffected, raw) {
 					if (err) { logger.error(err); return cb(err, raw); }
 					else { return cb(err, 'ok'); }
