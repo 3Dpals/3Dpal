@@ -14,7 +14,7 @@ module.exports = function(mongoose) {
 	var UserSchema = new Schema({
 		username: { type: String, required: true },								// Unique username
 		password: { type: String, required: false, select: false },				// Protected password
-		email: { type: String, required: true },								// Email (also use to retrieve Gravatar's pic)
+		email: { type: String, required: true, unique: true },					// Email (also use to retrieve Gravatar's pic)
 		writeModels: [{ type: Schema.Types.ObjectId, ref: 'Model' }],			// Models the User got personally the right to edit
 		readModels: [{ type: Schema.Types.ObjectId, ref: 'Model' }],			// Models the User got personally the right to read
 		openId: { type: String, required: false},								// OpenID
