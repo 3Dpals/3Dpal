@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang='en'>
+<head>
+  <meta charset='utf-8' />
+  <meta name='description' content='SculptGL is a small sculpting application powered by JavaScript and webGL.'>
+  <meta name='author' content='stéphane GINIER'>
+  <title>3Dpal + SculptGL - A WebGL Sculpting App</title>
+  <link rel='stylesheet' href='css/style.css' type='text/css' />
+  <script src='sculptgl/lib/jquery-2.0.3.min.js'></script>
+  <script src='sculptgl/lib/jquery.mousewheel.js'></script>
+  <script>
+  'use strict';
+  $(document).ready(function ()
+  {
+    var sculptgl = new SculptGL();
+    sculptgl.start();
+  });
+  </script>
+</head>
+<!--
+ ____             _       _    ____ _     
+/ ___|  ___ _   _| |_ __ | |_ / ___| |    
+\___ \ / __| | | | | '_ \| __| |  _| |    
+ ___) | (__| |_| | | |_) | |_| |_| | |___ 
+|____/ \___|\__,_|_| .__/ \__|\____|_____|
+                   |_|
+A tiny sculpting application. This is basically a port in JavaScript/WebGL 
+from a previous C++/OpenGL application that I made.
+
+Stéphane GINIER
+-->
+<body oncontextmenu='return false;'>
+  <input type='file' id='fileopen' style='display: none'/>
+  <input type='file' id='backgroundopen' style='display: none'/>
+  <canvas id='canvas'></canvas>
+
+  <!-- wacom tablet plugin -->
+  <object id="tablet-plugin" type="application/x-wacomtabletplugin"></object>
+
+  <!-- 3rd party libraries -->
+  <script src='sculptgl/lib/dat.gui.min.js'></script>
+  <script src='sculptgl/lib/filesaver.min.js'></script>
+  <script src='sculptgl/lib/gl-matrix-min.js'></script>
+  <script src='sculptgl/lib/poly2tri.min.js'></script>
+
+  <!-- 3D and math stuffs -->
+  <script src='sculptgl/math3d/camera.js'></script>
+  <script src='sculptgl/math3d/geometry.js'></script>
+  <script src='sculptgl/math3d/picking.js'></script>
+  <script src='sculptgl/math3d/grid.js'></script>
+
+  <!-- mesh related stuffs -->
+  <script src='sculptgl/object/mesh.js'></script>
+  <script src='sculptgl/object/aabb.js'></script>
+  <script src='sculptgl/object/triangle.js'></script>
+  <script src='sculptgl/object/vertex.js'></script>
+  <script src='sculptgl/object/octree.js'></script>
+  <script src='sculptgl/object/render.js'></script>
+  <script src='sculptgl/object/states.js'></script>
+  <script src='sculptgl/object/background.js'></script>
+
+  <!-- sculpting and topology stuffs -->
+  <script src='sculptgl/editor/sculpt.js'></script>
+  <script src='sculptgl/editor/topology.js'></script>
+  <script src='sculptgl/editor/subdivision.js'></script>
+  <script src='sculptgl/editor/decimation.js'></script>
+  <script src='sculptgl/editor/adaptive.js'></script>
+  <script src='sculptgl/editor/cut.js'></script>
+
+  <!-- misc -->
+  <script src='sculptgl/misc/import.js'></script>
+  <script src='sculptgl/misc/export.js'></script>
+  <script src='sculptgl/misc/utils.js'></script>
+
+  <!-- misc -->
+  <script src='sculptgl/gui/gui.js'></script>
+
+  <!-- main -->
+  <script src='sculptgl/sculptgl.js'></script>
+</body>
+</html>
