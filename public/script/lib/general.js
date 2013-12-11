@@ -46,9 +46,10 @@ function padStr(i) {
 }
 
 //image replace
-function getImage(id){
+function getImage(id, modelid){
 	$.ajax({
 			url : "api/file/"+id,
+			data : {modelId : modelid },
 			success : function (html) {
 				var myObjects = JSON.parse(html);
 				$("img#"+id).attr("src", myObjects.content);
